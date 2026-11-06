@@ -34,7 +34,7 @@ type DragHandle =
   | null;
 
 const ASPECT_RATIOS = [
-  { label: "Free", value: null },
+  { label: "Libre", value: null },
   { label: "9:16", value: 9 / 16 },
   { label: "16:9", value: 16 / 9 },
   { label: "1:1", value: 1 },
@@ -360,7 +360,7 @@ export const CropModeView: React.FC<CropModeViewProps> = ({
       <div className="flex items-center justify-between p-3 bg-background border-b border-border">
         <div className="flex items-center gap-3">
           <span className="text-xs font-medium text-text-primary">
-            Crop Video
+            Recadrer la vidéo
           </span>
           <div className="flex items-center gap-1">
             {ASPECT_RATIOS.map((ratio) => (
@@ -380,7 +380,7 @@ export const CropModeView: React.FC<CropModeViewProps> = ({
             ))}
           </div>
           <IconButton
-            label="Reset crop"
+            label="Réinitialiser le recadrage"
             icon={<Maximize2 size={14} aria-hidden />}
             variant="ghost"
             size="sm"
@@ -392,7 +392,7 @@ export const CropModeView: React.FC<CropModeViewProps> = ({
 
         <div className="flex items-center gap-2">
           <Button
-            label="Cancel"
+            label="Annuler"
             icon={<X size={14} aria-hidden />}
             variant="secondary"
             size="sm"
@@ -400,7 +400,7 @@ export const CropModeView: React.FC<CropModeViewProps> = ({
             className="px-3 py-1.5 text-xs bg-background-tertiary hover:bg-background-secondary text-text-primary rounded transition-colors flex items-center gap-1.5"
           />
           <Button
-            label="Apply"
+            label="Appliquer"
             icon={<Check size={14} aria-hidden />}
             variant="primary"
             size="sm"
@@ -418,7 +418,7 @@ export const CropModeView: React.FC<CropModeViewProps> = ({
       <div className="flex-1 flex items-center justify-center p-4 overflow-hidden relative">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-background-secondary">
-            <div className="text-text-muted text-sm">Loading video...</div>
+            <div className="text-text-muted text-sm">Chargement de la vidéo…</div>
           </div>
         )}
 

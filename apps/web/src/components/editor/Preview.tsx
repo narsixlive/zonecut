@@ -107,6 +107,7 @@ import { snapCanvasPosition } from "./preview/canvas-snapping";
 import { captureNativeVideoFrame } from "./preview/video-frame";
 import { resolvePlaybackLoop, resolvePlaybackStart } from "../../utils/playback-loop";
 import { ProcessingOverlay } from "./ProcessingOverlay";
+import { STUDIO_REEL_SAFE_ZONE } from "../../zonescene/studio-scope";
 import { editingFrameDurationMs } from "./editing-frame-rate";
 import {
   getPersonSegmentationEngine,
@@ -1000,7 +1001,7 @@ export const Preview: React.FC = () => {
   const [showQualityMenu, setShowQualityMenu] = useState(false);
   const [showAspectMenu, setShowAspectMenu] = useState(false);
   const [showCompositionGrid, setShowCompositionGrid] = useState(false);
-  const [showSafeMargins, setShowSafeMargins] = useState(false);
+  const [showSafeMargins, setShowSafeMargins] = useState(true);
   const [canvasSnappingEnabled, setCanvasSnappingEnabled] = useState(true);
 
   const ZOOM_OPTIONS = [
@@ -6203,6 +6204,9 @@ export const Preview: React.FC = () => {
   useEffect(() => {
     const handler = () => {
       processedAudioBufferCacheRef.current.clear();
+      // The ref is refreshed by an effect after the next render; the store already holds the
+      // edit, so read it now or the reschedule plays the previous effect settings.
+      timelineTracksRef.current = useProjectStore.getState().project.timeline.tracks;
       if (audioGraphRef.current) {
         audioGraphRef.current.seekTo(getMasterClock().currentTime);
       }
@@ -7647,7 +7651,7 @@ export const Preview: React.FC = () => {
       ref={containerRef}
       data-tour="preview"
       tabIndex={0}
-      aria-label="Preview canvas"
+      aria-label="Zone de prévisualisation"
       onKeyDown={handlePreviewKeyDown}
       onPointerDownCapture={(event) => {
         const target = event.target as HTMLElement;
@@ -7660,9 +7664,9 @@ export const Preview: React.FC = () => {
       {/* ── Panel bar header (mockup: 'Player') ───────────────── */}
       {!isMaximized && !isFullscreen && (
         <div className="flex items-center px-3.5 py-2 border-b border-border bg-bg-1 gap-2.5 min-h-[38px] shrink-0">
-          <Text type="label" color="primary" weight="semibold" className="text-[13px] tracking-tight text-fg m-0">Player</Text>
+          <Text type="label" color="primary" weight="semibold" className="text-[13px] tracking-tight text-fg m-0">Lecteur</Text>
           <div className="ml-auto flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-accent" title="Live preview" />
+            <span className="w-1.5 h-1.5 rounded-full bg-accent" title="Prévisualisation en direct" />
           </div>
         </div>
       )}
@@ -7722,7 +7726,7 @@ export const Preview: React.FC = () => {
 
           {showCompositionGrid && !cropMode ? (
             <div
-              aria-label="Composition grid"
+              aria-label="Grille de composition"
               className="pointer-events-none absolute inset-0 z-20"
             >
               {[1, 2].map((line) => (
@@ -7742,14 +7746,31 @@ export const Preview: React.FC = () => {
 
           {showSafeMargins && !cropMode ? (
             <div
-              aria-label="Title and action safe margins"
+              aria-label="Marges de sécurité titre et action"
               className="pointer-events-none absolute inset-0 z-20"
             >
+              {settings.width * 16 === settings.height * 9 ? (
+                <>
+                  <span
+                    className="absolute border-2 border-red-500/70"
+                    style={STUDIO_REEL_SAFE_ZONE}
+                  />
+                  <span
+                    className="absolute whitespace-nowrap rounded-br bg-black/55 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/80"
+                    style={{ left: STUDIO_REEL_SAFE_ZONE.left, top: STUDIO_REEL_SAFE_ZONE.top }}
+                  >
+                    Zone visible Reels / TikTok
+                  </span>
+                </>
+              ) : (
+              <>
               <span className="absolute inset-[5%] border border-dashed border-white/60 shadow-[0_0_1px_rgba(0,0,0,0.9)]" />
               <span className="absolute inset-[10%] border border-white/75 shadow-[0_0_1px_rgba(0,0,0,0.9)]" />
               <span className="absolute left-[10%] top-[10%] rounded-br bg-black/55 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/80">
-                Title safe
+                Sécurité titre
               </span>
+              </>
+              )}
             </div>
           ) : null}
 
@@ -7820,14 +7841,14 @@ export const Preview: React.FC = () => {
               <div
                 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-primary/80 rounded-full flex items-center justify-center cursor-move pointer-events-auto hover:bg-primary transition-colors"
                 onMouseDown={handleClipMouseDown}
-                title="Drag to move"
+                title="Glisser pour déplacer"
               >
                 <Move size={14} className="text-white" />
               </div>
 
               {/* Aspect ratio lock toggle */}
               <Button
-                label={lockAspectRatio ? "Unlock aspect ratio" : "Lock aspect ratio"}
+                label={lockAspectRatio ? "Déverrouiller le format" : "Verrouiller le format"}
                 variant="ghost"
                 className={`absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] rounded pointer-events-auto transition-colors ${
                   lockAspectRatio
@@ -7836,7 +7857,7 @@ export const Preview: React.FC = () => {
                 }`}
                 onClick={() => setLockAspectRatio(!lockAspectRatio)}
               >
-                {lockAspectRatio ? "🔒 Locked" : "🔓 Free"}
+                {lockAspectRatio ? "🔒 Verrouillé" : "🔓 Libre"}
               </Button>
 
               {/* Corner resize handles */}
@@ -7895,14 +7916,14 @@ export const Preview: React.FC = () => {
               <div
                 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-cyan-500/80 rounded-full flex items-center justify-center cursor-move pointer-events-auto hover:bg-cyan-500 transition-colors"
                 onMouseDown={handleTextClipMouseDown}
-                title="Drag to move text"
+                title="Glisser pour déplacer le texte"
               >
                 <Move size={14} className="text-white" />
               </div>
 
               {/* Aspect ratio lock toggle */}
               <Button
-                label={lockAspectRatio ? "Unlock aspect ratio" : "Lock aspect ratio"}
+                label={lockAspectRatio ? "Déverrouiller le format" : "Verrouiller le format"}
                 variant="ghost"
                 className={`absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] rounded pointer-events-auto transition-colors ${
                   lockAspectRatio
@@ -7911,7 +7932,7 @@ export const Preview: React.FC = () => {
                 }`}
                 onClick={() => setLockAspectRatio(!lockAspectRatio)}
               >
-                {lockAspectRatio ? "🔒 Locked" : "🔓 Free"}
+                {lockAspectRatio ? "🔒 Verrouillé" : "🔓 Libre"}
               </Button>
 
               {/* Corner resize handles */}
@@ -7971,14 +7992,14 @@ export const Preview: React.FC = () => {
               <div
                 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-green-500/80 rounded-full flex items-center justify-center cursor-move pointer-events-auto hover:bg-green-500 transition-colors"
                 onMouseDown={handleShapeClipMouseDown}
-                title="Drag to move shape"
+                title="Glisser pour déplacer la forme"
               >
                 <Move size={14} className="text-white" />
               </div>
 
               {/* Aspect ratio lock toggle */}
               <Button
-                label={lockAspectRatio ? "Unlock aspect ratio" : "Lock aspect ratio"}
+                label={lockAspectRatio ? "Déverrouiller le format" : "Verrouiller le format"}
                 variant="ghost"
                 className={`absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] rounded pointer-events-auto transition-colors ${
                   lockAspectRatio
@@ -7987,7 +8008,7 @@ export const Preview: React.FC = () => {
                 }`}
                 onClick={() => setLockAspectRatio(!lockAspectRatio)}
               >
-                {lockAspectRatio ? "🔒 Locked" : "🔓 Free"}
+                {lockAspectRatio ? "🔒 Verrouillé" : "🔓 Libre"}
               </Button>
 
               {/* Corner resize handles */}
@@ -8042,7 +8063,7 @@ export const Preview: React.FC = () => {
               {/* Selection border - yellow/orange for subtitles */}
               <div className="absolute inset-0 border-2 border-yellow-500 rounded-lg pointer-events-none animate-pulse" />
               <div className="absolute -top-6 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-yellow-500 rounded text-[10px] font-medium text-black whitespace-nowrap">
-                Subtitle Selected - Edit in Inspector
+                Sous-titre sélectionné - modifier dans l’inspecteur
               </div>
             </div>
           )}
@@ -8071,7 +8092,7 @@ export const Preview: React.FC = () => {
                     aria-hidden="true"
                     className="absolute -top-6 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-black/70 rounded text-[10px] text-white whitespace-nowrap"
                   >
-                    Click to select
+                    Cliquer pour sélectionner
                   </div>
                 </div>
               );
@@ -8110,7 +8131,7 @@ export const Preview: React.FC = () => {
 
         <div data-preview-playback className="flex items-center gap-4 mx-auto">
           <IconButton
-            label="Skip back 5s"
+            label="Reculer de 5 s"
             icon={<SkipBack size={18} />}
             variant="ghost"
             size="sm"
@@ -8118,7 +8139,7 @@ export const Preview: React.FC = () => {
             className="w-8 h-8 grid place-items-center rounded-md text-fg-2 hover:bg-hover hover:text-fg transition-colors"
           />
           <IconButton
-            label={playbackLockedReason ?? (isPlaying ? "Pause" : "Play")}
+            label={playbackLockedReason ?? (isPlaying ? "Pause" : "Lecture")}
             icon={
               isPlaying ? (
                 <Pause size={18} fill="currentColor" />
@@ -8141,7 +8162,7 @@ export const Preview: React.FC = () => {
             }`}
           />
           <IconButton
-            label="Skip forward 5s"
+            label="Avancer de 5 s"
             icon={<SkipForward size={18} />}
             variant="ghost"
             size="sm"
@@ -8152,8 +8173,8 @@ export const Preview: React.FC = () => {
 
         <div data-preview-tools className="flex gap-1.5 items-center">
           <IconButton
-            label={loopEnabled ? "Disable preview loop" : "Enable preview loop"}
-            title={`Loop ${formatFrameTimecode(previewLoopRange?.start ?? 0, settings.frameRate)} to ${formatFrameTimecode(previewLoopRange?.end ?? 0, settings.frameRate)} • I: mark start • O: mark end • Shift+L: toggle`}
+            label={loopEnabled ? "Désactiver la boucle" : "Activer la boucle"}
+            title={`Boucle ${formatFrameTimecode(previewLoopRange?.start ?? 0, settings.frameRate)} à ${formatFrameTimecode(previewLoopRange?.end ?? 0, settings.frameRate)} • I : marquer le début • O : marquer la fin • Maj+L : activer/désactiver`}
             icon={<Repeat size={16} />}
             aria-pressed={loopEnabled}
             variant="ghost"
@@ -8163,7 +8184,7 @@ export const Preview: React.FC = () => {
             className={`w-[34px] h-[34px] grid place-items-center rounded-[7px] transition-colors ${loopEnabled ? "bg-accent/15 text-accent" : "bg-bg-2 text-fg-2 hover:bg-bg-3 hover:text-fg"}`}
           />
           <IconButton
-            label={isMuted ? "Unmute" : "Mute"}
+            label={isMuted ? "Réactiver le son" : "Couper le son"}
             icon={isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
             variant="ghost"
             size="sm"
@@ -8178,7 +8199,7 @@ export const Preview: React.FC = () => {
           {/* Aspect ratio (project canvas size) */}
           <div className="relative">
             <Button
-              label="Aspect ratio"
+              label="Format"
               variant="ghost"
               onClick={() => setShowAspectMenu(!showAspectMenu)}
               className="flex items-center gap-1.5 rounded-[7px] bg-bg-2 px-[11px] py-[7px] text-[12px] font-medium text-fg-2 hover:bg-bg-3 hover:text-fg transition-colors"
@@ -8202,7 +8223,7 @@ export const Preview: React.FC = () => {
                     return (
                       <Button
                         key={opt.label}
-                        label={`${opt.label} ${opt.width} by ${opt.height}`}
+                        label={`${opt.label} ${opt.width} sur ${opt.height}`}
                         variant="ghost"
                         onClick={() => {
                           void updateSettings({
@@ -8230,7 +8251,7 @@ export const Preview: React.FC = () => {
           {/* Playback Quality (render resolution) */}
           <div className="relative">
             <Button
-              label="Playback quality"
+              label="Qualité de lecture"
               variant="ghost"
               onClick={() => setShowQualityMenu(!showQualityMenu)}
               className="rounded-[7px] bg-bg-2 px-[11px] py-[7px] text-[12px] font-medium text-fg-2 hover:bg-bg-3 hover:text-fg transition-colors"
@@ -8271,7 +8292,7 @@ export const Preview: React.FC = () => {
           {/* Zoom Control */}
           <div className="relative">
             <Button
-              label="Preview Zoom"
+              label="Zoom de l’aperçu"
               variant="ghost"
               onClick={() => setShowZoomMenu(!showZoomMenu)}
               className="flex items-center gap-1.5 rounded-[7px] bg-bg-2 px-[11px] py-[7px] text-[12px] font-medium text-fg-2 hover:bg-bg-3 hover:text-fg transition-colors"
@@ -8312,7 +8333,7 @@ export const Preview: React.FC = () => {
           </div>
 
           <IconButton
-            label="Canvas snapping"
+            label="Magnétisme du canevas"
             icon={<Magnet size={16} />}
             variant="ghost"
             size="sm"
@@ -8328,7 +8349,7 @@ export const Preview: React.FC = () => {
             }`}
           />
           <IconButton
-            label="Composition grid"
+            label="Grille de composition"
             icon={<Move size={16} />}
             variant="ghost"
             size="sm"
@@ -8341,7 +8362,7 @@ export const Preview: React.FC = () => {
             }`}
           />
           <IconButton
-            label="Title and action safe margins"
+            label="Marges de sécurité titre et action"
             icon={<Proportions size={16} />}
             variant="ghost"
             size="sm"
@@ -8355,7 +8376,7 @@ export const Preview: React.FC = () => {
           />
 
           <IconButton
-            label={isFullscreen ? "Exit Full Screen" : "Full Screen"}
+            label={isFullscreen ? "Quitter le plein écran" : "Plein écran"}
             icon={<Monitor size={16} />}
             variant="ghost"
             size="sm"
@@ -8367,7 +8388,7 @@ export const Preview: React.FC = () => {
             }`}
           />
           <IconButton
-            label={isMaximized ? "Restore Size" : "Maximize Preview"}
+            label={isMaximized ? "Taille normale" : "Agrandir l’aperçu"}
             icon={isMaximized ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
             variant="ghost"
             size="sm"

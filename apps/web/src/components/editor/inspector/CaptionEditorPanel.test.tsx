@@ -94,7 +94,7 @@ describe("CaptionEditorPanel", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Make all 1 single-line" }),
+      screen.getByRole("button", { name: "Passer les 1 sous-titres sur une ligne" }),
     );
 
     await waitFor(() => {
@@ -124,9 +124,9 @@ describe("CaptionEditorPanel", () => {
       ...base.timeline, tracks: [...base.timeline.tracks, { ...base.timeline.tracks[0], id: "locked-track", locked: true }],
     } });
     render(<CaptionEditorPanel maxWordsPerLine={5} onMaxWordsPerLineChange={() => undefined} />);
-    fireEvent.change(screen.getByRole("textbox", { name: "Find caption text" }), { target: { value: "edição" } });
-    fireEvent.change(screen.getByRole("textbox", { name: "Replace caption text with" }), { target: { value: "montagem" } });
-    fireEvent.click(screen.getByRole("button", { name: "Replace in all captions" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Rechercher dans les sous-titres" }), { target: { value: "edição" } });
+    fireEvent.change(screen.getByRole("textbox", { name: "Remplacer le texte du sous-titre par" }), { target: { value: "montagem" } });
+    fireEvent.click(screen.getByRole("button", { name: "Remplacer dans tous les sous-titres" }));
     expect(useProjectStore.getState().getTextClip(first.id)).toMatchObject({ text: "A montagem\nno navegador", style: first.style, startTime: first.startTime, duration: first.duration });
     expect(useProjectStore.getState().getTextClip(second.id)?.text).toBe("montagem simples");
     expect(useProjectStore.getState().getTextClip(locked.id)?.text).toBe("edição bloqueada");
@@ -140,25 +140,25 @@ describe("CaptionEditorPanel", () => {
     const second = { ...caption(), id: "second", startTime: 18, text: "Edit second" };
     useProjectStore.getState().loadProject({ ...project(first), textClips: [first, second] });
     render(<CaptionEditorPanel maxWordsPerLine={5} onMaxWordsPerLineChange={() => undefined} />);
-    fireEvent.change(screen.getByRole("textbox", { name: "Caption 2 text" }), { target: { value: "Edit second draft" } });
-    fireEvent.click(screen.getByRole("button", { name: "Select caption 1" }));
-    fireEvent.change(screen.getByRole("textbox", { name: "Find caption text" }), { target: { value: "Edit" } });
-    fireEvent.change(screen.getByRole("textbox", { name: "Replace caption text with" }), { target: { value: "Review" } });
-    fireEvent.click(screen.getByRole("button", { name: "Replace in selected captions" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Texte du sous-titre 2" }), { target: { value: "Edit second draft" } });
+    fireEvent.click(screen.getByRole("button", { name: "Sélectionner le sous-titre 1" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Rechercher dans les sous-titres" }), { target: { value: "Edit" } });
+    fireEvent.change(screen.getByRole("textbox", { name: "Remplacer le texte du sous-titre par" }), { target: { value: "Review" } });
+    fireEvent.click(screen.getByRole("button", { name: "Remplacer dans les sous-titres sélectionnés" }));
     expect(useProjectStore.getState().getTextClip(first.id)?.text).toBe("Review first");
     expect(useProjectStore.getState().getTextClip(second.id)?.text).toBe("Edit second");
-    fireEvent.click(screen.getByRole("button", { name: "Clear search" }));
-    expect(screen.getByRole("textbox", { name: "Caption 2 text" })).toHaveValue("Edit second draft");
+    fireEvent.click(screen.getByRole("button", { name: "Effacer la recherche" }));
+    expect(screen.getByRole("textbox", { name: "Texte du sous-titre 2" })).toHaveValue("Edit second draft");
   });
 
   it("keeps the caption DOM bounded while search reaches later cues", () => {
     const clips = Array.from({ length: 150 }, (_, index) => ({ ...caption(), id: `caption-${index}`, startTime: index, text: index === 149 ? "Find this late cue" : `Caption ${index}` }));
     useProjectStore.getState().loadProject({ ...project(clips[0]), textClips: clips });
     render(<CaptionEditorPanel maxWordsPerLine={5} onMaxWordsPerLineChange={() => undefined} />);
-    expect(screen.getAllByRole("textbox", { name: /^Caption \d+ text$/ })).toHaveLength(50);
-    fireEvent.change(screen.getByRole("textbox", { name: "Find caption text" }), { target: { value: "late cue" } });
-    expect(screen.getByRole("textbox", { name: "Caption 150 text" })).toHaveValue("Find this late cue");
-    fireEvent.click(screen.getByRole("button", { name: "Go to caption 150" }));
+    expect(screen.getAllByRole("textbox", { name: /^Texte du sous-titre \d+$/ })).toHaveLength(50);
+    fireEvent.change(screen.getByRole("textbox", { name: "Rechercher dans les sous-titres" }), { target: { value: "late cue" } });
+    expect(screen.getByRole("textbox", { name: "Texte du sous-titre 150" })).toHaveValue("Find this late cue");
+    fireEvent.click(screen.getByRole("button", { name: "Aller au sous-titre 150" }));
     expect(useTimelineStore.getState().playheadPosition).toBe(149);
   });
 
@@ -175,7 +175,7 @@ describe("CaptionEditorPanel", () => {
     }] }, timeline: { ...base.timeline, tracks: [videoTrack, ...base.timeline.tracks] } });
     const originalTracks = useProjectStore.getState().project.timeline.tracks;
     render(<CaptionEditorPanel maxWordsPerLine={5} onMaxWordsPerLineChange={() => undefined} />);
-    fireEvent.click(screen.getByRole("button", { name: "Bring caption tracks to front" }));
+    fireEvent.click(screen.getByRole("button", { name: "Passer les sous-titres devant" }));
     await waitFor(() => expect(useProjectStore.getState().project.timeline.tracks[0].id).toBe(TRACK_ID));
     expect(originalTracks.map((track) => track.id)).toEqual(["video-track", TRACK_ID]);
     expect(useProjectStore.getState().getTextClip(text.id)).toEqual(text);

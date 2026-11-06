@@ -110,7 +110,7 @@ describe("TrackHeader audio controls", () => {
 
     expect(screen.getByText("Dialogue")).toHaveClass("cursor-grab");
 
-    fireEvent.click(screen.getByRole("button", { name: "Solo Dialogue" }));
+    fireEvent.click(screen.getByRole("button", { name: "Solo de Dialogue" }));
 
     await waitFor(() => {
       expect(useProjectStore.getState().project.timeline.tracks[0]?.solo).toBe(true);
@@ -121,7 +121,7 @@ describe("TrackHeader audio controls", () => {
   it("uses explicit mute state and accessible track-specific labels", async () => {
     const view = renderHeader(useProjectStore.getState().project.timeline.tracks[1]);
 
-    fireEvent.click(screen.getByRole("button", { name: "Mute Music" }));
+    fireEvent.click(screen.getByRole("button", { name: "Couper le son de Music" }));
     await waitFor(() => {
       expect(useProjectStore.getState().project.timeline.tracks[1]?.muted).toBe(true);
     });
@@ -136,7 +136,7 @@ describe("TrackHeader audio controls", () => {
         onDragEnd={noop}
       />,
     );
-    expect(screen.getByRole("button", { name: "Unmute Music" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Réactiver le son de Music" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
@@ -149,9 +149,9 @@ describe("TrackHeader audio controls", () => {
       return header(track);
     }
     render(<LiveHeader />);
-    expect(screen.queryByRole("button", { name: "Solo Dialogue" })).toBeNull();
-    for (const [label, stateKey] of [["Mute track", "muted"], ["Solo track", "solo"]] as const) {
-      fireEvent.keyDown(screen.getByRole("button", { name: "Options for Dialogue" }), { key: "Enter" });
+    expect(screen.queryByRole("button", { name: "Solo de Dialogue" })).toBeNull();
+    for (const [label, stateKey] of [["Couper le son de la piste", "muted"], ["Activer le solo de la piste", "solo"]] as const) {
+      fireEvent.keyDown(screen.getByRole("button", { name: "Options pour Dialogue" }), { key: "Enter" });
       fireEvent.click(await screen.findByRole("menuitem", { name: label }));
       await waitFor(() => {
         expect(useProjectStore.getState().project.timeline.tracks[0][stateKey]).toBe(true);

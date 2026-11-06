@@ -8,9 +8,10 @@
 const isDev = import.meta.env.DEV;
 
 /** OpenReel cloud services */
+// ZoneScene studio: no OpenReel cloud (no media or template leaves the machine). Empty = disabled.
 export const OPENREEL_CLOUD_URL = isDev
   ? "http://localhost:8787"
-  : "https://api.openreel.video";
+  : (import.meta.env.VITE_OPENREEL_CLOUD_URL ?? "");
 
 /**
  * Third-party API base URLs.

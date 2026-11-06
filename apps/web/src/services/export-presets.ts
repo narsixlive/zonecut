@@ -92,11 +92,11 @@ const SOCIAL_MEDIA_PRESETS: PlatformExportPreset[] = [
   {
     id: "youtube-shorts",
     name: "YouTube Shorts",
-    description: "Vertical format for YouTube Shorts (60s max)",
+    description: "Vertical, jusqu’à 3 min",
     platform: "YouTube",
     category: "social",
     aspectRatio: "9:16",
-    maxDuration: 60,
+    maxDuration: 180,
     settings: {
       format: "mp4",
       codec: "h264",
@@ -119,11 +119,11 @@ const SOCIAL_MEDIA_PRESETS: PlatformExportPreset[] = [
   {
     id: "tiktok",
     name: "TikTok",
-    description: "Optimized for TikTok (3min max)",
+    description: "Vertical, jusqu’à 10 min",
     platform: "TikTok",
     category: "social",
     aspectRatio: "9:16",
-    maxDuration: 180,
+    maxDuration: 600,
     maxFileSize: 287 * 1024 * 1024,
     recommended: true,
     settings: {
@@ -148,11 +148,11 @@ const SOCIAL_MEDIA_PRESETS: PlatformExportPreset[] = [
   {
     id: "instagram-reels",
     name: "Instagram Reels",
-    description: "Vertical format for Reels (90s max)",
+    description: "Vertical, jusqu’à 3 min",
     platform: "Instagram",
     category: "social",
     aspectRatio: "9:16",
-    maxDuration: 90,
+    maxDuration: 180,
     settings: {
       format: "mp4",
       codec: "h264",
@@ -202,11 +202,11 @@ const SOCIAL_MEDIA_PRESETS: PlatformExportPreset[] = [
   {
     id: "instagram-story",
     name: "Instagram Story",
-    description: "Vertical format for Stories (15s per clip)",
+    description: "Vertical, 60 s par story",
     platform: "Instagram",
     category: "social",
     aspectRatio: "9:16",
-    maxDuration: 15,
+    maxDuration: 60,
     settings: {
       format: "mp4",
       codec: "h264",

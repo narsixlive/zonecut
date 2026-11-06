@@ -40,6 +40,16 @@ export interface EditorEffectPreviewDef {
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
+// Display-only French direction words used inside transition descriptions.
+const DIRECTION_FR: Record<string, string> = {
+  left: "gauche",
+  right: "droite",
+  up: "haut",
+  down: "bas",
+  horizontal: "horizontale",
+  vertical: "verticale",
+};
+
 export const EDITOR_EFFECT_PREVIEWS: EditorEffectPreviewDef[] = [
   {
     type: "brightness",
@@ -408,6 +418,13 @@ const TRANSITION_CATEGORIES: TransitionCategory[] = [
   "Stylized",
 ];
 
+const TRANSITION_CATEGORY_LABELS_FR: Record<TransitionCategory, string> = {
+  Dissolves: "Fondus",
+  Wipes: "Balayages",
+  Movement: "Mouvement",
+  Stylized: "Stylisé",
+};
+
 const transitionCategory = (type: TransitionType): TransitionCategory => {
   if (type === "crossfade" || type === "dipToBlack" || type === "dipToWhite") {
     return "Dissolves";
@@ -458,8 +475,8 @@ const renderThumb = (
 const TRANSITIONS: TransitionDef[] = [
   {
     type: "crossfade",
-    label: "Crossfade",
-    description: "Smooth opacity blend",
+    label: "Fondu enchaîné",
+    description: "Mélange d’opacité fluide",
     renderPreview: (p, thumb) => (
       <>
         {renderThumb(thumb, { opacity: 1 - p }, "oklch(0.55 0.14 295)")}
@@ -469,8 +486,8 @@ const TRANSITIONS: TransitionDef[] = [
   },
   {
     type: "dipToBlack",
-    label: "Dip to Black",
-    description: "Fade through black",
+    label: "Fondu au noir",
+    description: "Transition par un passage au noir",
     renderPreview: (p, thumb) => (
       <>
         {renderThumb(thumb, { opacity: p < 0.5 ? 1 - p * 2 : 0 }, "oklch(0.55 0.14 295)")}
@@ -484,8 +501,8 @@ const TRANSITIONS: TransitionDef[] = [
   },
   {
     type: "dipToWhite",
-    label: "Dip to White",
-    description: "Fade through white",
+    label: "Fondu au blanc",
+    description: "Transition par un passage au blanc",
     renderPreview: (p, thumb) => (
       <>
         {renderThumb(thumb, { opacity: p < 0.5 ? 1 - p * 2 : 0 }, "oklch(0.55 0.14 295)")}
@@ -499,8 +516,8 @@ const TRANSITIONS: TransitionDef[] = [
   },
   {
     type: "wipe",
-    label: "Wipe",
-    description: "Hard edge sweeps across",
+    label: "Balayage",
+    description: "Un bord net balaie l’écran",
     renderPreview: (p, thumb) => (
       <>
         {renderThumb(thumb, { clipPath: `inset(0 ${p * 100}% 0 0)` }, "oklch(0.55 0.14 295)")}
@@ -509,15 +526,15 @@ const TRANSITIONS: TransitionDef[] = [
     ),
   },
   ...([
-    { id: "wipe-left", label: "Wipe Left", direction: "left" },
-    { id: "wipe-right", label: "Wipe Right", direction: "right" },
-    { id: "wipe-up", label: "Wipe Up", direction: "up" },
-    { id: "wipe-down", label: "Wipe Down", direction: "down" },
+    { id: "wipe-left", label: "Balayage gauche", direction: "left" },
+    { id: "wipe-right", label: "Balayage droite", direction: "right" },
+    { id: "wipe-up", label: "Balayage haut", direction: "up" },
+    { id: "wipe-down", label: "Balayage bas", direction: "down" },
   ] as const).map<TransitionDef>(({ id, label, direction }) => ({
     id,
     type: "wipe",
     label,
-    description: `Directional ${direction} reveal`,
+    description: `Révélation directionnelle ${DIRECTION_FR[direction]}`,
     params: { direction, softness: 0 },
     renderPreview: (p, thumb) => {
       const incomingClip =
@@ -542,8 +559,8 @@ const TRANSITIONS: TransitionDef[] = [
   })),
   {
     type: "slide",
-    label: "Slide",
-    description: "New clip slides in",
+    label: "Glissement",
+    description: "Le nouveau clip glisse à l’écran",
     renderPreview: (p, thumb) => (
       <>
         {renderThumb(thumb, { transform: `translateX(${-p * 100}%)` }, "oklch(0.55 0.14 295)")}
@@ -552,15 +569,15 @@ const TRANSITIONS: TransitionDef[] = [
     ),
   },
   ...([
-    { id: "slide-left", label: "Slide Left", direction: "left" },
-    { id: "slide-right", label: "Slide Right", direction: "right" },
-    { id: "slide-up", label: "Slide Up", direction: "up" },
-    { id: "slide-down", label: "Slide Down", direction: "down" },
+    { id: "slide-left", label: "Glissement gauche", direction: "left" },
+    { id: "slide-right", label: "Glissement droite", direction: "right" },
+    { id: "slide-up", label: "Glissement haut", direction: "up" },
+    { id: "slide-down", label: "Glissement bas", direction: "down" },
   ] as const).map<TransitionDef>(({ id, label, direction }) => ({
     id,
     type: "slide",
     label,
-    description: `Slide the next clip ${direction}`,
+    description: `Le clip suivant glisse vers le ${DIRECTION_FR[direction]}`,
     params: { direction },
     renderPreview: (p, thumb) => {
       const transform =
@@ -585,8 +602,8 @@ const TRANSITIONS: TransitionDef[] = [
   })),
   {
     type: "push",
-    label: "Push",
-    description: "Outgoing clip is shoved off",
+    label: "Poussée",
+    description: "Le clip sortant est poussé hors du cadre",
     renderPreview: (p, thumb) => (
       <>
         {renderThumb(thumb, { transform: `translateX(${-p * 100}%)` }, "oklch(0.55 0.14 295)")}
@@ -597,7 +614,7 @@ const TRANSITIONS: TransitionDef[] = [
   {
     type: "zoom",
     label: "Zoom",
-    description: "Scale up and dissolve",
+    description: "Agrandissement et fondu",
     renderPreview: (p, thumb) => (
       <>
         {renderThumb(
@@ -615,8 +632,8 @@ const TRANSITIONS: TransitionDef[] = [
   },
   {
     type: "circleReveal",
-    label: "Circle Reveal",
-    description: "Iris reveal from the center",
+    label: "Révélation circulaire",
+    description: "Révélation en iris depuis le centre",
     renderPreview: (p, thumb) => (
       <>
         {renderThumb(thumb, {}, "oklch(0.55 0.14 295)")}
@@ -626,8 +643,8 @@ const TRANSITIONS: TransitionDef[] = [
   },
   {
     type: "blur",
-    label: "Blur Dissolve",
-    description: "Blur out and into the next clip",
+    label: "Fondu flouté",
+    description: "Flou de sortie puis d’entrée vers le clip suivant",
     renderPreview: (p, thumb) => {
       const b = Math.sin(p * Math.PI) * 6;
       return (
@@ -640,8 +657,8 @@ const TRANSITIONS: TransitionDef[] = [
   },
   {
     type: "whipPan",
-    label: "Whip Pan",
-    description: "Fast motion-blurred pan",
+    label: "Panoramique fouetté",
+    description: "Panoramique rapide avec flou de mouvement",
     renderPreview: (p, thumb) => {
       const b = Math.sin(p * Math.PI) * 8;
       return (
@@ -662,8 +679,8 @@ const TRANSITIONS: TransitionDef[] = [
   },
   {
     type: "radialWipe",
-    label: "Radial Wipe",
-    description: "Clock-style angular sweep",
+    label: "Balayage radial",
+    description: "Balayage angulaire façon horloge",
     renderPreview: (p, thumb) => (
       <>
         {renderThumb(thumb, {}, "oklch(0.55 0.14 295)")}
@@ -680,8 +697,8 @@ const TRANSITIONS: TransitionDef[] = [
   },
   {
     type: "pixelate",
-    label: "Pixelate",
-    description: "Break the cut into a chunky pixel mosaic",
+    label: "Pixellisation",
+    description: "Décompose la coupe en une mosaïque de gros pixels",
     params: { maxPixelSize: 48 },
     renderPreview: (p, thumb) => {
       const block = 2 + Math.round(Math.sin(p * Math.PI) * 12);
@@ -703,8 +720,8 @@ const TRANSITIONS: TransitionDef[] = [
   },
   {
     type: "glitch",
-    label: "Glitch Cut",
-    description: "Digital slice displacement at the cut",
+    label: "Coupe glitch",
+    description: "Décalage numérique en tranches à la coupe",
     params: { intensity: 0.08, slices: 12 },
     renderPreview: (p, thumb) => {
       const amount = Math.sin(p * Math.PI) * 12;
@@ -735,8 +752,8 @@ const TRANSITIONS: TransitionDef[] = [
   },
   {
     type: "blinds",
-    label: "Venetian Blinds",
-    description: "Reveal the next shot through repeating slats",
+    label: "Stores vénitiens",
+    description: "Révèle le plan suivant à travers des lattes répétées",
     params: { count: 8, direction: "vertical" },
     renderPreview: (p, thumb) => {
       const open = Math.max(0.5, p * 12);
@@ -755,8 +772,8 @@ const TRANSITIONS: TransitionDef[] = [
   },
   {
     type: "diamondReveal",
-    label: "Diamond Reveal",
-    description: "Geometric iris expanding from the center",
+    label: "Révélation losange",
+    description: "Iris géométrique qui s’étend depuis le centre",
     renderPreview: (p, thumb) => (
       <>
         {renderThumb(thumb, {}, "oklch(0.55 0.14 295)")}
@@ -771,13 +788,13 @@ const TRANSITIONS: TransitionDef[] = [
     ),
   },
   ...([
-    { id: "spin-clockwise", label: "Spin Clockwise", rotations: 1 },
-    { id: "spin-counter", label: "Spin Counterclockwise", rotations: -1 },
+    { id: "spin-clockwise", label: "Rotation horaire", rotations: 1 },
+    { id: "spin-counter", label: "Rotation antihoraire", rotations: -1 },
   ] as const).map<TransitionDef>(({ id, label, rotations }) => ({
     id,
     type: "spin",
     label,
-    description: "Rotating scale transition with a smooth handoff",
+    description: "Transition rotative avec un passage de relais fluide",
     params: { rotations },
     renderPreview: (p, thumb) => (
       <>
@@ -801,13 +818,13 @@ const TRANSITIONS: TransitionDef[] = [
     ),
   })),
   ...([
-    { id: "flip-horizontal", label: "Flip Horizontal", axis: "horizontal" },
-    { id: "flip-vertical", label: "Flip Vertical", axis: "vertical" },
+    { id: "flip-horizontal", label: "Retournement horizontal", axis: "horizontal" },
+    { id: "flip-vertical", label: "Retournement vertical", axis: "vertical" },
   ] as const).map<TransitionDef>(({ id, label, axis }) => ({
     id,
     type: "flip",
     label,
-    description: `Card-style ${axis} flip between shots`,
+    description: `Retournement façon carte à plat entre les plans (${DIRECTION_FR[axis]})`,
     params: { axis },
     renderPreview: (p, thumb) => {
       const firstHalf = p < 0.5;
@@ -822,13 +839,13 @@ const TRANSITIONS: TransitionDef[] = [
     },
   })),
   ...([
-    { id: "split-horizontal", label: "Split Horizontal", orientation: "horizontal" },
-    { id: "split-vertical", label: "Split Vertical", orientation: "vertical" },
+    { id: "split-horizontal", label: "Scission horizontale", orientation: "horizontal" },
+    { id: "split-vertical", label: "Scission verticale", orientation: "vertical" },
   ] as const).map<TransitionDef>(({ id, label, orientation }) => ({
     id,
     type: "splitReveal",
     label,
-    description: `Reveal the next shot outward from the ${orientation === "horizontal" ? "center line" : "middle"}`,
+    description: `Révèle le plan suivant depuis ${orientation === "horizontal" ? "la ligne centrale" : "le milieu"}`,
     params: { orientation },
     renderPreview: (p, thumb) => (
       <>
@@ -849,8 +866,8 @@ const TRANSITIONS: TransitionDef[] = [
   {
     id: "flash-cut",
     type: "flash",
-    label: "Flash Cut",
-    description: "High-energy white flash through the edit",
+    label: "Coupe flash",
+    description: "Flash blanc énergique au montage",
     params: { intensity: 1 },
     renderPreview: (p, thumb) => (
       <>
@@ -867,7 +884,7 @@ const TRANSITIONS: TransitionDef[] = [
     {
       id: "film-burn",
       label: "Film Burn",
-      description: "Warm analog light leak through the edit",
+      description: "Fuite de lumière analogique chaude au montage",
       intensity: 1,
       warmth: 0.75,
       gradient:
@@ -875,8 +892,8 @@ const TRANSITIONS: TransitionDef[] = [
     },
     {
       id: "film-burn-red",
-      label: "Red Film Burn",
-      description: "Dense red-orange flare for dramatic cuts",
+      label: "Film Burn rouge",
+      description: "Flare rouge-orangé dense pour des coupes dramatiques",
       intensity: 1.3,
       warmth: 1,
       gradient:
@@ -884,8 +901,8 @@ const TRANSITIONS: TransitionDef[] = [
     },
     {
       id: "light-leak-cool",
-      label: "Cool Light Leak",
-      description: "Blue-white optical flare through the edit",
+      label: "Fuite de lumière froide",
+      description: "Flare optique bleu-blanc au montage",
       intensity: 0.9,
       warmth: 0,
       gradient:
@@ -919,8 +936,8 @@ const TRANSITIONS: TransitionDef[] = [
   ),
   {
     type: "mosaic",
-    label: "Mosaic Reveal",
-    description: "Tiles assemble the next shot in a shuffled pattern",
+    label: "Révélation mosaïque",
+    description: "Des tuiles assemblent le plan suivant selon un motif mélangé",
     params: { tiles: 8, randomness: 0.85 },
     renderPreview: (p, thumb) => {
       const tileSize = 12;
@@ -945,8 +962,8 @@ const TRANSITIONS: TransitionDef[] = [
   },
   {
     type: "ripple",
-    label: "Ripple",
-    description: "A fluid wave distorts both shots through the cut",
+    label: "Ondulation",
+    description: "Une vague fluide déforme les deux plans à la coupe",
     params: { amplitude: 0.04, waves: 3 },
     renderPreview: (p, thumb) => {
       const wave = Math.sin(p * Math.PI) * 6;
@@ -967,13 +984,13 @@ const TRANSITIONS: TransitionDef[] = [
     },
   },
   ...([
-    { id: "page-turn-left", label: "Page Turn Left", direction: "left" },
-    { id: "page-turn-right", label: "Page Turn Right", direction: "right" },
+    { id: "page-turn-left", label: "Page tournée gauche", direction: "left" },
+    { id: "page-turn-right", label: "Page tournée droite", direction: "right" },
   ] as const).map<TransitionDef>(({ id, label, direction }) => ({
     id,
     type: "pageTurn",
     label,
-    description: `Fold the outgoing shot toward the ${direction}`,
+    description: `Replie le plan sortant vers la ${DIRECTION_FR[direction]}`,
     params: { direction, shadow: 0.55 },
     renderPreview: (p, thumb) => (
       <>
@@ -992,8 +1009,8 @@ const TRANSITIONS: TransitionDef[] = [
   })),
   {
     type: "colorSplit",
-    label: "Color Split",
-    description: "Prismatic channel ghosts collide at the edit",
+    label: "Scission chromatique",
+    description: "Des fantômes de canaux prismatiques se percutent à la coupe",
     params: { maxOffset: 18, angle: 0 },
     renderPreview: (p, thumb) => {
       const offset = Math.sin(p * Math.PI) * 7;
@@ -1016,20 +1033,20 @@ const TRANSITIONS: TransitionDef[] = [
   ...([
     {
       id: "crossfade-linear",
-      label: "Linear Dissolve",
-      description: "Constant-speed opacity blend",
+      label: "Fondu linéaire",
+      description: "Mélange d’opacité à vitesse constante",
       curve: "linear",
     },
     {
       id: "crossfade-ease-in",
-      label: "Slow In Dissolve",
-      description: "Blend accelerates into the cut",
+      label: "Fondu accéléré",
+      description: "Le mélange accélère jusqu’à la coupe",
       curve: "ease-in",
     },
     {
       id: "crossfade-ease-out",
-      label: "Slow Out Dissolve",
-      description: "Blend settles gently after the cut",
+      label: "Fondu décéléré",
+      description: "Le mélange se stabilise en douceur après la coupe",
       curve: "ease-out",
     },
   ] as const).map<TransitionDef>(({ id, label, description, curve }) => ({
@@ -1056,19 +1073,19 @@ const TRANSITIONS: TransitionDef[] = [
   ...([
     {
       id: "wipe-soft-left",
-      label: "Soft Wipe Left",
+      label: "Balayage doux gauche",
       direction: "left",
       softness: 0.45,
     },
     {
       id: "wipe-soft-right",
-      label: "Soft Wipe Right",
+      label: "Balayage doux droite",
       direction: "right",
       softness: 0.45,
     },
     {
       id: "wipe-diagonal",
-      label: "Diagonal Wipe",
+      label: "Balayage diagonal",
       direction: "diagonal",
       softness: 0,
     },
@@ -1078,8 +1095,8 @@ const TRANSITIONS: TransitionDef[] = [
     label,
     description:
       direction === "diagonal"
-        ? "Angular reveal from the corner"
-        : "Feathered directional reveal",
+        ? "Révélation angulaire depuis le coin"
+        : "Révélation directionnelle adoucie",
     params: { direction, softness },
     renderPreview: (p, thumb) => {
       const clipPath =
@@ -1104,15 +1121,15 @@ const TRANSITIONS: TransitionDef[] = [
     },
   })),
   ...([
-    { id: "push-left", label: "Push Left", direction: "left" },
-    { id: "push-right", label: "Push Right", direction: "right" },
-    { id: "push-up", label: "Push Up", direction: "up" },
-    { id: "push-down", label: "Push Down", direction: "down" },
+    { id: "push-left", label: "Poussée gauche", direction: "left" },
+    { id: "push-right", label: "Poussée droite", direction: "right" },
+    { id: "push-up", label: "Poussée haut", direction: "up" },
+    { id: "push-down", label: "Poussée bas", direction: "down" },
   ] as const).map<TransitionDef>(({ id, label, direction }) => ({
     id,
     type: "push",
     label,
-    description: `Both clips travel ${direction}`,
+    description: `Les deux clips se déplacent vers le ${DIRECTION_FR[direction]}`,
     params: { direction },
     renderPreview: (p, thumb) => {
       const outgoingTransform =
@@ -1150,24 +1167,24 @@ const TRANSITIONS: TransitionDef[] = [
   ...([
     {
       id: "zoom-top-left",
-      label: "Zoom Top Left",
+      label: "Zoom haut gauche",
       center: { x: 0.15, y: 0.15 },
     },
     {
       id: "zoom-bottom-right",
-      label: "Zoom Bottom Right",
+      label: "Zoom bas droite",
       center: { x: 0.85, y: 0.85 },
     },
     {
       id: "zoom-punch",
-      label: "Punch Zoom",
+      label: "Zoom percutant",
       center: { x: 0.5, y: 0.5 },
     },
   ] as const).map<TransitionDef>(({ id, label, center }) => ({
     id,
     type: "zoom",
     label,
-    description: "Focused scale-and-dissolve transition",
+    description: "Transition ciblée d’agrandissement et de fondu",
     params: { scale: id === "zoom-punch" ? 3 : 2, center },
     renderPreview: (p, thumb) => (
       <>
@@ -1189,15 +1206,15 @@ const TRANSITIONS: TransitionDef[] = [
     ),
   })),
   ...([
-    { id: "whip-left", label: "Whip Left", direction: "left" },
-    { id: "whip-right", label: "Whip Right", direction: "right" },
-    { id: "whip-up", label: "Whip Up", direction: "up" },
-    { id: "whip-down", label: "Whip Down", direction: "down" },
+    { id: "whip-left", label: "Fouet gauche", direction: "left" },
+    { id: "whip-right", label: "Fouet droite", direction: "right" },
+    { id: "whip-up", label: "Fouet haut", direction: "up" },
+    { id: "whip-down", label: "Fouet bas", direction: "down" },
   ] as const).map<TransitionDef>(({ id, label, direction }) => ({
     id,
     type: "whipPan",
     label,
-    description: `Motion-blurred whip ${direction}`,
+    description: `Fouet avec flou de mouvement vers le ${DIRECTION_FR[direction]}`,
     params: { direction },
     renderPreview: (p, thumb) => {
       const axis = direction === "left" || direction === "right" ? "X" : "Y";
@@ -1376,7 +1393,7 @@ const TransitionCard: React.FC<{
 
   return (
     <ClickableCard
-      label={`${def.label}. Drag onto a clip edge, or double-click to apply to the selected cut.`}
+      label={`${def.label}. Glisse sur une coupe, ou double-clique pour l’appliquer à la coupe sélectionnée.`}
       draggable
       onDragStart={handleDragStart}
       onDoubleClick={onApply}
@@ -1620,8 +1637,8 @@ export const TransitionsPanel: React.FC = () => {
       const selectedCount = selectedIds.size;
       if (selectedCount === 0) {
         toast.warning(
-          "No clip selected",
-          "Select a clip or two adjacent clips, then double-click the transition.",
+          "Aucun clip sélectionné",
+          "Sélectionne un clip ou deux clips adjacents, puis double-clique sur la transition.",
         );
         return;
       }
@@ -1668,8 +1685,8 @@ export const TransitionsPanel: React.FC = () => {
 
       if (!clipA) {
         toast.warning(
-          "No compatible cut",
-          "The selected clips must be adjacent on the same timeline track.",
+          "Coupe incompatible",
+          "Les clips sélectionnés doivent être adjacents sur la même piste de la timeline.",
         );
         return;
       }
@@ -1687,19 +1704,19 @@ export const TransitionsPanel: React.FC = () => {
         : bridge.createClipEdgeTransition(clipA, "out", def.type, 1, params);
       if (!result.success || !result.transitionId) {
         toast.error(
-          "Transition failed",
-          result.error ?? "Could not create this transition at the selected cut.",
+          "Échec de la transition",
+          result.error ?? "Impossible de créer cette transition à la coupe sélectionnée.",
         );
         return;
       }
       const transition = bridge.getTransition(result.transitionId);
       if (!transition || !(await addClipTransition(transition))) {
-        toast.error("Transition failed", "Could not save the transition.");
+        toast.error("Échec de la transition", "Impossible d’enregistrer la transition.");
         return;
       }
       toast.success(
-        "Transition applied",
-        `${def.label} added to the selected cut.`,
+        "Transition appliquée",
+        `${def.label} ajoutée à la coupe sélectionnée.`,
       );
     },
     [addClipTransition, getSelectedClipIds, project],
@@ -1709,12 +1726,12 @@ export const TransitionsPanel: React.FC = () => {
     <div className="flex flex-col h-full min-h-0">
       <div className="px-3 pt-3 pb-2 shrink-0">
         <ToolcraftTextInputControl
-          label="Search transitions"
+          label="Rechercher des transitions"
           isLabelHidden
           type="text"
           value={query}
           onChange={setQuery}
-          placeholder="Search transitions"
+          placeholder="Rechercher des transitions"
           startIcon={<Search size={13} aria-hidden />}
           size="sm"
           width="100%"
@@ -1722,7 +1739,7 @@ export const TransitionsPanel: React.FC = () => {
         <div
           className="mt-2 flex gap-1 overflow-x-auto pb-0.5"
           role="group"
-          aria-label="Transition categories"
+          aria-label="Catégories de transitions"
         >
           {(["All", ...TRANSITION_CATEGORIES] as const).map((category) => {
             const count =
@@ -1744,7 +1761,7 @@ export const TransitionsPanel: React.FC = () => {
                     : "border-border bg-bg-2 text-fg-3 hover:border-primary/50 hover:text-fg"
                 }`}
               >
-                {category} {count}
+                {category === "All" ? "Tout" : TRANSITION_CATEGORY_LABELS_FR[category]} {count}
               </button>
             );
           })}
@@ -1764,7 +1781,7 @@ export const TransitionsPanel: React.FC = () => {
               <section key={category}>
                 <div className="mb-1.5 flex items-center justify-between">
                   <Text type="supporting" color="secondary" weight="bold" className="text-[9.5px] uppercase">
-                    {category}
+                    {TRANSITION_CATEGORY_LABELS_FR[category]}
                   </Text>
                   <Text type="supporting" color="secondary" className="font-mono text-[9px]">
                     {items.length}
@@ -1785,7 +1802,7 @@ export const TransitionsPanel: React.FC = () => {
           })}
           {filtered.length === 0 && (
             <Text type="supporting" color="secondary" display="block" justify="center" className="text-[10.5px] py-6">
-              No transitions match "{query}".
+              Aucune transition ne correspond à "{query}".
             </Text>
           )}
         </div>

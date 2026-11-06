@@ -84,7 +84,7 @@ describe("CaptionBatchSelectButton", () => {
     render(<CaptionBatchSelectButton />);
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Select all captions (2)" }),
+      screen.getByRole("button", { name: "Sélectionner tous les sous-titres (2)" }),
     );
 
     expect(useUIStore.getState().selectedItems).toEqual([

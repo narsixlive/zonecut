@@ -162,7 +162,7 @@ const buildRecommendationSampleBuffer = (
   const sampleRanges = getRecommendationSampleRanges(audioBuffer.duration);
 
   if (sampleRanges.length === 0) {
-    throw new Error("Clip audio range is empty");
+    throw new Error("La plage audio du clip est vide");
   }
 
   if (
@@ -170,7 +170,7 @@ const buildRecommendationSampleBuffer = (
     sampleRanges[0].start <= 0 &&
     sampleRanges[0].end >= audioBuffer.duration
   ) {
-    onProgress?.({ progress: 0.4, message: "Analyzing clip audio" });
+    onProgress?.({ progress: 0.4, message: "Analyse du son du clip" });
     return {
       sampleBuffer: audioBuffer,
       sampleCount: 1,
@@ -241,8 +241,8 @@ export const buildRecommendationProfile = (
     progress: 1,
     message:
       sampleCount > 1
-        ? `Analyzed ${sampleCount} clip samples`
-        : "Analyzed clip audio",
+        ? `${sampleCount} extraits du clip analysés`
+        : "Son du clip analysé",
   });
 
   return {
@@ -350,7 +350,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
 
         if (!updateResult.success) {
           throw new Error(
-            updateResult.error ?? "Failed to update noise reduction",
+            updateResult.error ?? "Échec de la mise à jour de la réduction de bruit",
           );
         }
 
@@ -364,7 +364,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
       const applyResult = bridge.applyNoiseReduction(audioTargetClipId, nextConfig);
 
       if (!applyResult.success || !applyResult.effectId) {
-        throw new Error(applyResult.error ?? "Failed to apply noise reduction");
+        throw new Error(applyResult.error ?? "Échec de l’application de la réduction de bruit");
       }
 
       setEffectId(applyResult.effectId);
@@ -385,7 +385,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
           setErrorMessage(
             error instanceof Error
               ? error.message
-              : "Failed to apply noise reduction",
+              : "Échec de l’application de la réduction de bruit",
           );
           return;
         }
@@ -438,7 +438,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
         .find((candidate) => candidate.id === audioTargetClipId);
 
       if (!clip) {
-        throw new Error("Clip not found");
+        throw new Error("Clip introuvable");
       }
 
       const mediaItem = project.mediaLibrary.items.find(
@@ -446,13 +446,13 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
       );
 
       if (!mediaItem?.blob) {
-        throw new Error("No audio data available for this clip");
+        throw new Error("Aucune donnée audio disponible pour ce clip");
       }
 
       let audioContext: AudioContext | null = null;
 
       try {
-        updateAnalysisProgress({ progress: 0.03, message: "Preparing clip analysis" });
+        updateAnalysisProgress({ progress: 0.03, message: "Préparation de l’analyse du clip" });
         audioContext = new AudioContext();
         const audioBuffer = await loadAudioBuffer(
           audioContext,
@@ -464,7 +464,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
         );
 
         if (!audioBuffer) {
-          throw new Error("Failed to decode audio for analysis");
+          throw new Error("Échec du décodage audio pour analyse");
         }
 
         const clipStart = Math.max(0, clip.inPoint || 0);
@@ -474,7 +474,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
         );
 
         if (clipEnd <= clipStart) {
-          throw new Error("Clip audio range is empty");
+          throw new Error("La plage audio du clip est vide");
         }
 
         const analysisContext = new OfflineAudioContext(
@@ -490,7 +490,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
           analysisContext,
         );
 
-        updateAnalysisProgress({ progress: 0.84, message: "Analyzing noise signature" });
+        updateAnalysisProgress({ progress: 0.84, message: "Analyse de la signature du bruit" });
         const recommendationProfile = buildRecommendationProfile(
           audioTargetClipId,
           clipBuffer,
@@ -503,14 +503,14 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
           },
         );
 
-        updateAnalysisProgress({ progress: 0.93, message: "Learning custom cleanup profile" });
+        updateAnalysisProgress({ progress: 0.93, message: "Apprentissage du profil de nettoyage personnalisé" });
 
         const analyzedProfile = await autoLearnNoiseProfile(
           clipBuffer,
           analysisContext,
         );
 
-        updateAnalysisProgress({ progress: 1, message: "Recommendation ready" });
+        updateAnalysisProgress({ progress: 1, message: "Recommandation prête" });
 
         if (!analyzedProfile) {
           return {
@@ -567,7 +567,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
         setActivePresetId(presetId);
         setConfig(nextConfig);
         const nextEffectId = applyNoiseReductionConfig(nextConfig);
-        let message = `${getNoiseReductionPreset(presetId).label} applied to this clip.`;
+        let message = `${getNoiseReductionPreset(presetId).label} appliqué à ce clip.`;
 
         try {
           const { learnedProfile } = await analyzeNoiseForClip();
@@ -586,9 +586,9 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
           };
           setConfig(profiledConfig);
           applyNoiseReductionConfig(profiledConfig, nextEffectId);
-          message = `${getNoiseReductionPreset(presetId).label} learned and applied to this clip.`;
+          message = `${getNoiseReductionPreset(presetId).label} appris et appliqué à ce clip.`;
         } catch {
-          message = `${getNoiseReductionPreset(presetId).label} applied to this clip.`;
+          message = `${getNoiseReductionPreset(presetId).label} appliqué à ce clip.`;
         }
 
         setAnalysisProgress(null);
@@ -602,7 +602,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
         setErrorMessage(
           error instanceof Error
             ? error.message
-            : "Failed to apply noise reduction preset",
+            : "Échec de l’application du préréglage de réduction de bruit",
         );
       }
     },
@@ -626,7 +626,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
     setErrorMessage(null);
     setRecommendation(null);
     setAppliedMessage(null);
-    setAnalysisProgress({ progress: 0.02, message: "Preparing clip analysis" });
+    setAnalysisProgress({ progress: 0.02, message: "Préparation de l’analyse du clip" });
 
     try {
       const { recommendationProfile, learnedProfile } = await analyzeNoiseForClip();
@@ -652,7 +652,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Failed to analyze this clip",
+          : "Échec de l’analyse de ce clip",
       );
       setAnalysisProgress(null);
 
@@ -677,7 +677,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
       applyNoiseReductionConfig(recommendation.config);
       setRecommendation(null);
       setAppliedMessage(
-        `${getNoiseReductionPreset(recommendation.presetId).label} applied to this clip.`,
+        `${getNoiseReductionPreset(recommendation.presetId).label} appliqué à ce clip.`,
       );
       setLearningState("success");
       setTimeout(() => {
@@ -688,7 +688,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Failed to apply recommended cleanup",
+          : "Échec de l’application du nettoyage recommandé",
       );
     }
   }, [applyNoiseReductionConfig, recommendation]);
@@ -702,37 +702,37 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
     switch (learningState) {
       case "learning":
         return {
-          label: "Analyzing...",
+          label: "Analyse...",
           icon: <Wand2 size={12} aria-hidden />,
           isLoading: true,
         };
       case "applying":
         return {
-          label: "Applying cleanup...",
+          label: "Application du nettoyage...",
           icon: <Wand2 size={12} aria-hidden />,
           isLoading: true,
         };
       case "ready":
         return {
-          label: "Recommendation Ready",
+          label: "Recommandation disponible",
           icon: <Check size={12} aria-hidden />,
           isLoading: false,
         };
       case "success":
         return {
-          label: "Cleanup Applied",
+          label: "Nettoyage appliqué",
           icon: <Check size={12} aria-hidden />,
           isLoading: false,
         };
       case "error":
         return {
-          label: "Analysis Failed",
+          label: "Échec de l’analyse",
           icon: <AlertCircle size={12} aria-hidden />,
           isLoading: false,
         };
       default:
         return {
-          label: "Analyze & Recommend",
+          label: "Analyser et recommander",
           icon: <Wand2 size={12} aria-hidden />,
           isLoading: false,
         };
@@ -749,7 +749,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
     >
       <div className="flex items-center gap-2 p-2 bg-bg-2">
         <ClickableCard
-          label={`${isOpen ? "Collapse" : "Expand"} noise reduction`}
+          label={`${isOpen ? "Réduire" : "Déplier"} la réduction de bruit`}
           onClick={() => setIsOpen(!isOpen)}
           padding={0}
           variant="transparent"
@@ -770,12 +770,12 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
               weight="bold"
               className="text-[10px]"
             >
-              Noise Reduction
+              Réduction de bruit
             </Text>
           </div>
         </ClickableCard>
         <MockToggle
-          ariaLabel="Enable noise reduction"
+          ariaLabel="Activer la réduction de bruit"
           checked={enabled}
           onChange={handleToggle}
         />
@@ -788,8 +788,8 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
             color="secondary"
             className="text-[9px] leading-relaxed"
           >
-            Reduce white noise, wind, hum, room tone, and background music while
-            keeping speech or the wanted audio in front.
+            Réduit le bruit blanc, le vent, le ronflement, le bruit de pièce et la
+            musique de fond, tout en gardant la voix ou l’audio voulu au premier plan.
           </Text>
 
           <div className="grid grid-cols-2 gap-2">
@@ -799,7 +799,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
               return (
                 <ClickableCard
                   key={preset.id}
-                  label={`Use ${preset.label} noise reduction`}
+                  label={`Utiliser la réduction de bruit ${preset.label}`}
                   onClick={() => handleApplyPreset(preset.id)}
                   isDisabled={isBusy}
                   padding={2}
@@ -835,7 +835,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
           >
             <div className="flex items-center justify-between gap-2">
               <Text type="supporting" color="secondary" className="text-[9px]">
-                Current mode: {activePreset.label}
+                Mode actuel : {activePreset.label}
               </Text>
               <Text
                 type="supporting"
@@ -845,7 +845,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
                     : "bg-bg-2 text-fg-3"
                 }`}
               >
-                {enabled ? "Applied" : "Off"}
+                {enabled ? "Appliqué" : "Désactivé"}
               </Text>
             </div>
             <Text type="supporting" color="secondary" className="mt-1 text-[9px]">
@@ -875,7 +875,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
                   weight="bold"
                   className="text-[10px]"
                 >
-                  Recommendation ready
+                  Recommandation prête
                 </Text>
               </div>
               <Text
@@ -883,16 +883,16 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
                 color="secondary"
                 className="text-[9px] leading-relaxed"
               >
-                Detected noise best matches {recommendationPreset.label.toLowerCase()}.
+                Le bruit détecté correspond le mieux à {recommendationPreset.label.toLowerCase()}.
                 {recommendation.hasLearnedProfile
-                  ? ` Apply ${Math.round(recommendation.config.reduction * 100)}% cleanup at ${recommendation.config.threshold.toFixed(0)} dB to save this profile on the clip.`
-                  : ` Apply ${Math.round(recommendation.config.reduction * 100)}% cleanup at ${recommendation.config.threshold.toFixed(0)} dB. A custom profile could not be isolated, so this recommendation uses the best preset match for the clip.`}
+                  ? ` Applique un nettoyage de ${Math.round(recommendation.config.reduction * 100)}% à ${recommendation.config.threshold.toFixed(0)} dB pour enregistrer ce profil sur le clip.`
+                  : ` Applique un nettoyage de ${Math.round(recommendation.config.reduction * 100)}% à ${recommendation.config.threshold.toFixed(0)} dB. Un profil personnalisé n’a pas pu être isolé, cette recommandation utilise donc le préréglage le plus proche pour ce clip.`}
               </Text>
               <Button
                 label={
                   learningState === "applying"
-                    ? "Applying..."
-                    : "Apply Recommended Cleanup"
+                    ? "Application..."
+                    : "Appliquer le nettoyage recommandé"
                 }
                 variant="primary"
                 size="sm"
@@ -910,18 +910,18 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
             className="space-y-2 border border-border/70 bg-bg-1/60"
           >
             <Text type="supporting" color="primary" weight="bold" className="text-[9px]">
-              A/B Preview
+              Aperçu A/B
             </Text>
             <div className="grid grid-cols-2 gap-2">
               <Button
-                label="Hear Original"
+                label="Écouter l’original"
                 variant={previewingOriginal ? "primary" : "secondary"}
                 size="sm"
                 onClick={() => handleSetPreviewMode("original")}
                 isDisabled={!effectId}
               />
               <Button
-                label="Hear Cleaned"
+                label="Écouter le résultat"
                 variant={!previewingOriginal ? "primary" : "secondary"}
                 size="sm"
                 onClick={() => handleSetPreviewMode("cleaned")}
@@ -933,12 +933,12 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
               color="secondary"
               className="text-[9px] leading-relaxed"
             >
-              Preview only. Export still uses the cleaned audio effect chain.
+              Aperçu seulement. L’export utilise toujours la chaîne d’effets audio nettoyée.
             </Text>
           </Card>
 
           <PropertySlider
-            label="Threshold"
+            label="Seuil"
             value={config.threshold}
             onChange={(value: number) => handleConfigChange("threshold", value)}
             min={-80}
@@ -947,7 +947,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
           />
 
           <PropertySlider
-            label="Reduction"
+            label="Réduction"
             value={config.reduction * 100}
             onChange={(value: number) =>
               handleConfigChange("reduction", value / 100)
@@ -958,7 +958,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
           />
 
           <PropertySlider
-            label="Attack"
+            label="Attaque"
             value={config.attack ?? 10}
             onChange={(value: number) => handleConfigChange("attack", value)}
             min={0}
@@ -967,7 +967,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
           />
 
           <PropertySlider
-            label="Release"
+            label="Relâchement"
             value={config.release ?? 100}
             onChange={(value: number) => handleConfigChange("release", value)}
             min={0}
@@ -992,7 +992,7 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
                 {analysisProgress.message}
               </Text>
               <ProgressBar
-                label="Noise analysis progress"
+                label="Progression de l’analyse du bruit"
                 isLabelHidden
                 value={Math.round(analysisProgress.progress * 100)}
                 max={100}
@@ -1017,9 +1017,9 @@ export const NoiseReductionSection: React.FC<NoiseReductionSectionProps> = ({
               color="secondary"
               className="block text-[9px] text-center"
             >
-              Learned noise profile is active on this clip.
+              Un profil de bruit appris est actif sur ce clip.
               <br />
-              Auto-tuned with {activePreset.label.toLowerCase()} and reused for export cleanup.
+              Ajusté automatiquement avec {activePreset.label.toLowerCase()} et réutilisé pour le nettoyage à l’export.
             </Text>
           )}
         </div>

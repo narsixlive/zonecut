@@ -106,3 +106,9 @@ xcuserdata/
 .codex-audit/
 .codex/
 **/local.properties
+
+# ZoneScene studio: vendored at build time by apps/web/scripts/build-studio.mjs
+apps/web/public/ffmpeg/
+apps/web/public/ort/
+apps/web/public/models/
+apps/web/studio-dist.tar.gz

@@ -17,6 +17,11 @@ describe("generated caption placement", () => {
     expect(getVisibleTrackRenderOrder(state.project.timeline.tracks).map(({ track }) => track.id)).toEqual([sourceId, caption.id]);
     expect(state.getAllTextClips()[0].transform.position).toEqual({ x: .5, y: .85 });
   });
+  it("keeps bottom captions inside the reel safe zone on vertical projects", async () => {
+    useProjectStore.getState().loadProject(createEmptyProject("Reel", { width: 1080, height: 1920 }));
+    await useProjectStore.getState().addSubtitle({ id: "cue", text: "Reel caption", startTime: 0, endTime: 2 });
+    expect(useProjectStore.getState().getAllTextClips()[0].transform.position.y * 1920).toBeLessThan(1480);
+  });
   it("honors top and center subtitle placement and does not edit locked caption tracks", async () => {
     await useProjectStore.getState().addTrack("video", 0, { mode: "standard", role: "captions", name: "Captions" });
     const lockedId = useProjectStore.getState().project.timeline.tracks[0].id;

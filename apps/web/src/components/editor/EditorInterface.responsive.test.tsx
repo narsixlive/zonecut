@@ -10,6 +10,7 @@ vi.mock("../../hooks/useEditorInitialization", () => ({
 vi.mock("../../hooks/useKeyboardShortcuts", () => ({
   useKeyboardShortcuts: () => ({ showShortcutsOverlay: false, setShowShortcutsOverlay: vi.fn() }),
 }));
+vi.mock("../../zonescene/studio-scope", () => ({ STUDIO_AI_CHAT_ENABLED: true, STUDIO_FULL: false }));
 vi.mock("./Toolbar", () => ({ Toolbar: () => <header>Toolbar</header> }));
 vi.mock("./EditorActionRail", () => ({ EditorActionRail: () => <nav>Tools</nav> }));
 vi.mock("./AssetsPanel", () => ({ AssetsPanel: () => <input aria-label="Media search" /> }));
@@ -52,7 +53,7 @@ describe("compact editing workspace", () => {
     const timeline = view.getByLabelText("Timeline state") as HTMLInputElement;
     media.value = "family"; title.value = "My video"; timeline.value = "scroll 500";
     expect(view.container.querySelector("#editor-panel-timeline")).not.toHaveAttribute("hidden");
-    for (const panel of ["Media", "Edit", "Timeline"]) {
+    for (const panel of ["Médias", "Réglages", "Timeline"]) {
       fireEvent.click(view.getByRole("button", { name: panel }));
       expect(view.getByLabelText("Video preview")).toBe(canvas);
       expect(view.getByRole("button", { name: panel })).toHaveAttribute("aria-pressed", "true");
@@ -61,9 +62,9 @@ describe("compact editing workspace", () => {
     expect(media.value).toBe("family"); expect(title.value).toBe("My video");
     expect(timeline.value).toBe("scroll 500");
     resize(820);
-    expect(view.getByRole("navigation", { name: "Editor workspace" })).toBeInTheDocument();
+    expect(view.getByRole("navigation", { name: "Espace de travail" })).toBeInTheDocument();
     resize(1600);
-    expect(view.queryByRole("navigation", { name: "Editor workspace" })).toBeNull();
+    expect(view.queryByRole("navigation", { name: "Espace de travail" })).toBeNull();
     expect(view.container.querySelector("#editor-panel-inspector")).not.toHaveAttribute("hidden");
     expect(view.getByLabelText("Video preview")).toBe(canvas);
     resize(390);
@@ -72,11 +73,11 @@ describe("compact editing workspace", () => {
 
   it("preserves AI drafts after switching panels and returns to timeline when AI closes", async () => {
     const view = render(<EditorInterface />);
-    fireEvent.click(view.getByRole("button", { name: "AI" }));
+    fireEvent.click(view.getByRole("button", { name: "IA" }));
     const input = await view.findByLabelText("AI message") as HTMLInputElement;
     input.value = "Make this shorter";
     fireEvent.click(view.getByRole("button", { name: "Timeline" }));
-    fireEvent.click(view.getByRole("button", { name: "AI" }));
+    fireEvent.click(view.getByRole("button", { name: "IA" }));
     expect(view.getByLabelText("AI message")).toBe(input);
     expect(input.value).toBe("Make this shorter");
     fireEvent.click(view.getByRole("button", { name: "Close AI" }));

@@ -29,7 +29,8 @@ function desktopHtmlPlugin() {
 }
 
 export default defineConfig({
-  base: isDesktop ? "./" : "/",
+  // VITE_BASE=/studio/ when built for ZoneScene (scripts/build-studio.mjs).
+  base: isDesktop ? "./" : (process.env.VITE_BASE ?? "/"),
   plugins: [react(), desktopHtmlPlugin(), stripFfmpegPlugin(isDesktop), pruneFontsPlugin(isDesktop)],
   assetsInclude: ["**/*.wasm"],
   resolve: {

@@ -22,7 +22,7 @@ export const AnimateTab: React.FC<AnimateTabProps> = ({
 }) => {
   return (
     <>
-      <InspectorSection title="Keyframes" sectionId="keyframes">
+      <InspectorSection title="Images clés" sectionId="keyframes">
         <KeyframesSection clipId={clipId} />
       </InspectorSection>
       {(clipType === "video" ||
@@ -82,7 +82,7 @@ export const AnimateTab: React.FC<AnimateTabProps> = ({
       )}
       {showTextSection && (
         <InspectorSection
-          title="Text Animation"
+          title="Animation du texte"
           sectionId="text-animation"
           defaultOpen={false}
         >

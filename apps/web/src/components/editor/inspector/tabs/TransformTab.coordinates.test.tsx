@@ -37,10 +37,10 @@ describe("TransformTab canvas coordinates", () => {
     expect(screen.getByRole("textbox", { name: "Position Y" })).toHaveValue(
       "540",
     );
-    expect(screen.getByRole("textbox", { name: "Anchor Point X" })).toHaveValue(
+    expect(screen.getByRole("textbox", { name: "Point d'ancrage X" })).toHaveValue(
       "50%",
     );
-    expect(screen.getByText("Canvas pixels")).toBeInTheDocument();
+    expect(screen.getByText("Pixels du canevas")).toBeInTheDocument();
 
     fireEvent.change(screen.getByRole("textbox", { name: "Position X" }), {
       target: { value: "1200" },
@@ -49,7 +49,7 @@ describe("TransformTab canvas coordinates", () => {
       position: { x: 0.625, y: 0.5 },
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Nudge right 1 pixel" }));
+    fireEvent.click(screen.getByRole("button", { name: "Déplacer d'1 pixel à droite" }));
     expect(onChange).toHaveBeenLastCalledWith({
       position: { x: 0.5 + 1 / 1920, y: 0.5 },
     });
@@ -80,10 +80,10 @@ describe("TransformTab canvas coordinates", () => {
     expect(screen.getByRole("textbox", { name: "Position Y" })).toHaveValue(
       "-40",
     );
-    expect(screen.getByText("Offset pixels")).toBeInTheDocument();
+    expect(screen.getByText("Pixels de décalage")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Expand Alignment section" }));
-    fireEvent.click(screen.getByRole("button", { name: "Center on Canvas" }));
+    fireEvent.click(screen.getByRole("button", { name: "Expand Alignement section" }));
+    fireEvent.click(screen.getByRole("button", { name: "Centrer sur le canevas" }));
     expect(onChange).toHaveBeenLastCalledWith({
       position: { x: 0, y: 0 },
     });

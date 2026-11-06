@@ -26,12 +26,12 @@ export function TimelineRangeActions({ duration, frameRate }: { duration: number
       state.setLoopRange(range.start < end ? range.start : 0, end);
     }
   };
-  return <div className="flex h-11 w-full min-w-0 items-center justify-center gap-1" aria-label="Preview range controls">
-    <button type="button" disabled={disabled} aria-label="Mark In point" title="Mark In at playhead (I)" onClick={() => mark("in")}
-      className="h-11 min-w-0 flex-1 px-1 text-[10px] font-medium text-fg-2 hover:bg-bg-2 focus-visible:outline-accent disabled:opacity-40">In <kbd className="font-mono text-fg-muted">I</kbd></button>
-    <button type="button" disabled={disabled} aria-label="Mark Out point" title="Mark Out at playhead (O)" onClick={() => mark("out")}
-      className="h-11 min-w-0 flex-1 px-1 text-[10px] font-medium text-fg-2 hover:bg-bg-2 focus-visible:outline-accent disabled:opacity-40">Out <kbd className="font-mono text-fg-muted">O</kbd></button>
-    <button type="button" disabled={!marked || locked || exporting} aria-label="Clear preview range" title="Clear In and Out points" onClick={() => useTimelineStore.getState().clearLoopRange()}
+  return <div className="flex h-11 w-full min-w-0 items-center justify-center gap-1" aria-label="Contrôles de plage de prévisualisation">
+    <button type="button" disabled={disabled} aria-label="Marquer le point d'entrée" title="Marquer l'entrée à la tête de lecture (I)" onClick={() => mark("in")}
+      className="h-11 min-w-0 flex-1 px-1 text-[10px] font-medium text-fg-2 hover:bg-bg-2 focus-visible:outline-accent disabled:opacity-40">Entrée <kbd className="font-mono text-fg-muted">I</kbd></button>
+    <button type="button" disabled={disabled} aria-label="Marquer le point de sortie" title="Marquer la sortie à la tête de lecture (O)" onClick={() => mark("out")}
+      className="h-11 min-w-0 flex-1 px-1 text-[10px] font-medium text-fg-2 hover:bg-bg-2 focus-visible:outline-accent disabled:opacity-40">Sortie <kbd className="font-mono text-fg-muted">O</kbd></button>
+    <button type="button" disabled={!marked || locked || exporting} aria-label="Effacer la plage de prévisualisation" title="Effacer les points d'entrée et de sortie" onClick={() => useTimelineStore.getState().clearLoopRange()}
       className="grid h-11 w-7 place-items-center text-fg-3 hover:bg-bg-2 focus-visible:outline-accent disabled:opacity-40"><X size={12} aria-hidden /></button>
   </div>;
 }
@@ -58,11 +58,11 @@ export function TimelineRange({ duration, frameRate, pixelsPerSecond }: { durati
   return <>
     <div aria-hidden data-timeline-range className={`absolute inset-y-0 pointer-events-none border-y ${enabled ? "bg-accent/20 border-accent/50" : "bg-accent/10 border-accent/25"}`}
       style={{ left: rangeStart * pixelsPerSecond, width: (rangeEnd - rangeStart) * pixelsPerSecond }} />
-    {(["in", "out"] as const).map((edge) => <button key={edge} type="button" role="slider" aria-label={edge === "in" ? "Range In point" : "Range Out point"}
+    {(["in", "out"] as const).map((edge) => <button key={edge} type="button" role="slider" aria-label={edge === "in" ? "Point d'entrée de la plage" : "Point de sortie de la plage"}
       aria-valuemin={edge === "in" ? 0 : rangeStart + frame} aria-valuemax={edge === "in" ? rangeEnd - frame : duration}
       aria-valuenow={edge === "in" ? rangeStart : rangeEnd} aria-valuetext={formatFrameTimecode(edge === "in" ? rangeStart : rangeEnd, frameRate)}
       aria-disabled={disabled} disabled={disabled}
-      title={`${edge === "in" ? "In" : "Out"}: ${formatFrameTimecode(edge === "in" ? rangeStart : rangeEnd, frameRate)} · Drag or use arrow keys`}
+      title={`${edge === "in" ? "Entrée" : "Sortie"} : ${formatFrameTimecode(edge === "in" ? rangeStart : rangeEnd, frameRate)} · Glisser ou utiliser les flèches`}
       className={`absolute inset-y-0 z-20 w-6 border-x border-accent/60 bg-accent/80 text-[10px] font-bold text-white touch-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-white ${edge === "in" ? "rounded-l" : "rounded-r -translate-x-full"}`}
       style={{ left: (edge === "in" ? rangeStart : rangeEnd) * pixelsPerSecond }}
       onMouseDown={(event) => { event.stopPropagation(); }}

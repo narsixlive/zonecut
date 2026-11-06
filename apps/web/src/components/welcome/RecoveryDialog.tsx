@@ -18,17 +18,17 @@ interface RecoveryDialogProps {
 function formatTimeAgo(timestamp: number): string {
   const seconds = Math.floor((Date.now() - timestamp) / 1000);
 
-  if (seconds < 60) return "just now";
+  if (seconds < 60) return "à l'instant";
   if (seconds < 3600) {
     const mins = Math.floor(seconds / 60);
-    return `${mins} ${mins === 1 ? "minute" : "minutes"} ago`;
+    return `il y a ${mins} ${mins === 1 ? "minute" : "minutes"}`;
   }
   if (seconds < 86400) {
     const hours = Math.floor(seconds / 3600);
-    return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+    return `il y a ${hours} ${hours === 1 ? "heure" : "heures"}`;
   }
   const days = Math.floor(seconds / 86400);
-  return `${days} ${days === 1 ? "day" : "days"} ago`;
+  return `il y a ${days} ${days === 1 ? "jour" : "jours"}`;
 }
 
 function formatDate(timestamp: number): string {
@@ -75,8 +75,8 @@ export const RecoveryDialog: React.FC<RecoveryDialogProps> = ({
       <Layout
         header={
           <DialogHeader
-            title="Recover Your Work"
-            subtitle="We found an unsaved project"
+            title="Récupère ton travail"
+            subtitle="On a trouvé un projet non enregistré"
             onOpenChange={(open) => !open && onDismiss()}
             startContent={<RotateCcw className="w-5 h-5 text-primary" aria-hidden />}
           />
@@ -84,7 +84,7 @@ export const RecoveryDialog: React.FC<RecoveryDialogProps> = ({
         content={
           <LayoutContent>
           <ClickableCard
-            label={`Recover ${mostRecent.projectName}`}
+            label={`Récupérer ${mostRecent.projectName}`}
             isDisabled={selectedSave === mostRecent.id}
             onClick={() => handleRecover(mostRecent.id)}
             padding={4}
@@ -99,7 +99,7 @@ export const RecoveryDialog: React.FC<RecoveryDialogProps> = ({
             </div>
             <div className="flex items-center gap-2 text-sm text-text-muted">
               <Clock className="w-4 h-4 shrink-0" />
-              <Text type="supporting" color="secondary" className="text-sm">Last saved {formatTimeAgo(mostRecent.timestamp)}</Text>
+              <Text type="supporting" color="secondary" className="text-sm">Dernier enregistrement {formatTimeAgo(mostRecent.timestamp)}</Text>
               <span className="text-text-muted/50">•</span>
               <Text type="supporting" color="secondary" className="text-text-muted/70 truncate">
                 {formatDate(mostRecent.timestamp)}
@@ -111,7 +111,7 @@ export const RecoveryDialog: React.FC<RecoveryDialogProps> = ({
             <div className="mt-4 pt-4 border-t border-border">
               <div className="flex items-center justify-between">
                 <Button
-                  label={`${olderSaves.length} older ${olderSaves.length === 1 ? "save" : "saves"} available`}
+                  label={`${olderSaves.length} ${olderSaves.length === 1 ? "sauvegarde" : "sauvegardes"} plus ancienne${olderSaves.length === 1 ? "" : "s"} disponible${olderSaves.length === 1 ? "" : "s"}`}
                   variant="ghost"
                   size="sm"
                   icon={
@@ -125,7 +125,7 @@ export const RecoveryDialog: React.FC<RecoveryDialogProps> = ({
                 />
                 {onClearAll && (
                   <IconButton
-                    label="Clear all saved projects"
+                    label="Effacer tous les projets enregistrés"
                     onClick={handleClearAll}
                     isDisabled={isClearing}
                     icon={<Trash2 className="w-4 h-4" aria-hidden />}
@@ -141,7 +141,7 @@ export const RecoveryDialog: React.FC<RecoveryDialogProps> = ({
                 {olderSaves.map((save) => (
                   <ClickableCard
                     key={save.id}
-                    label={`Recover ${save.projectName}`}
+                    label={`Récupérer ${save.projectName}`}
                     onClick={() => handleRecover(save.id)}
                     isDisabled={selectedSave === save.id}
                     padding={3}
@@ -173,13 +173,13 @@ export const RecoveryDialog: React.FC<RecoveryDialogProps> = ({
           <LayoutFooter>
             <div className="flex w-full gap-2">
               <Button
-                label="Start Fresh"
+                label="Repartir à zéro"
                 variant="secondary"
                 onClick={onDismiss}
                 className="flex-1"
               />
               <Button
-                label={selectedSave === mostRecent.id ? "Recovering..." : "Recover Project"}
+                label={selectedSave === mostRecent.id ? "Récupération..." : "Récupérer le projet"}
                 variant="primary"
                 onClick={() => handleRecover(mostRecent.id)}
                 isDisabled={selectedSave === mostRecent.id}

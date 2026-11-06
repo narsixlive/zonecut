@@ -165,7 +165,7 @@ export const SpeedSection: React.FC<SpeedSectionProps> = ({ clip }) => {
       <div className="space-y-2">
         <div className="flex gap-2">
           <ToolcraftTextInputControl
-            label="Custom Speed"
+            label="Vitesse personnalisée"
             value={customSpeed}
             onChange={setCustomSpeed}
             onBlur={handleCustomSpeed}
@@ -182,7 +182,7 @@ export const SpeedSection: React.FC<SpeedSectionProps> = ({ clip }) => {
           </Text>
         </div>
         <Text type="supporting" color="secondary" className="text-xs">
-          Range: 0.1× (slowest) to 100× (fastest)
+          Plage : 0,1× (le plus lent) à 100× (le plus rapide)
         </Text>
       </div>
 
@@ -193,18 +193,18 @@ export const SpeedSection: React.FC<SpeedSectionProps> = ({ clip }) => {
           className="flex items-center justify-between border border-border"
         >
           <Text type="supporting" color="secondary" className="text-xs">
-            Apply speed to audio
+            Appliquer la vitesse à l'audio
           </Text>
           <MockToggle
             checked={affectAudio}
             onChange={setAffectAudio}
-            ariaLabel="Apply speed to audio"
+            ariaLabel="Appliquer la vitesse à l'audio"
           />
         </Card>
       )}
 
       <Button
-        label={isReversed ? "Reversed" : "Reverse Clip"}
+        label={isReversed ? "Inversé" : "Inverser le clip"}
         icon={<RotateCcw size={14} />}
         variant={isReversed ? "primary" : "secondary"}
         size="sm"
@@ -218,11 +218,11 @@ export const SpeedSection: React.FC<SpeedSectionProps> = ({ clip }) => {
             <div className="flex items-center gap-2">
               <Sparkles size={14} className="text-primary" />
               <Text type="supporting" color="secondary" className="text-xs">
-                Smooth Slow Motion
+                Ralenti fluide
               </Text>
             </div>
             <MockToggle
-              ariaLabel="Smooth Slow Motion"
+              ariaLabel="Ralenti fluide"
               checked={clip.smoothSlowMo ?? false}
               onChange={(checked) => {
                 const tracks = project.timeline.tracks.map((track) => {
@@ -246,14 +246,14 @@ export const SpeedSection: React.FC<SpeedSectionProps> = ({ clip }) => {
           {clip.smoothSlowMo && (
             <div className="space-y-1">
               <Selector
-                label="Quality"
+                label="Qualité"
                 size="sm"
                 width="100%"
                 value={clip.interpolationQuality ?? "medium"}
                 options={[
-                  { label: "Low (faster)", value: "low" },
-                  { label: "Medium", value: "medium" },
-                  { label: "High (slower)", value: "high" },
+                  { label: "Basse (plus rapide)", value: "low" },
+                  { label: "Moyenne", value: "medium" },
+                  { label: "Haute (plus lente)", value: "high" },
                 ]}
                 onChange={(value) => {
                   const tracks = project.timeline.tracks.map((track) => {
@@ -277,7 +277,7 @@ export const SpeedSection: React.FC<SpeedSectionProps> = ({ clip }) => {
                 }}
               />
               <Text type="supporting" color="secondary" className="text-[10px]">
-                Uses optical flow to generate smooth in-between frames
+                Utilise le flux optique pour générer des images intermédiaires fluides
               </Text>
             </div>
           )}
@@ -287,11 +287,11 @@ export const SpeedSection: React.FC<SpeedSectionProps> = ({ clip }) => {
       {(currentSpeed !== 1 || isReversed) && (
         <Card variant="muted" padding={3} className="border border-border">
           <Text type="supporting" color="secondary" className="mb-1 block text-xs">
-            Current Settings
+            Réglages actuels
           </Text>
           <Text type="body" color="primary" className="block text-sm">
-            Speed: {currentSpeed}× {isReversed && "• Reversed"}
-            {clip.smoothSlowMo && " • Smooth"}
+            Vitesse : {currentSpeed}× {isReversed && "• Inversé"}
+            {clip.smoothSlowMo && " • Fluide"}
           </Text>
         </Card>
       )}

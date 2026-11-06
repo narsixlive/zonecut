@@ -32,7 +32,7 @@ export const CropSection: React.FC<CropSectionProps> = ({ clip }) => {
   return (
     <div className="space-y-3">
       <Button
-        label={isCropped ? "Adjust Crop" : "Crop Video"}
+        label={isCropped ? "Ajuster le recadrage" : "Recadrer la vidéo"}
         icon={<Crop size={14} />}
         variant="primary"
         size="sm"
@@ -45,7 +45,7 @@ export const CropSection: React.FC<CropSectionProps> = ({ clip }) => {
           <Card variant="muted" padding={2} className="space-y-0.5 border border-border">
             <div className="flex justify-between">
               <Text type="supporting" color="secondary" className="text-[9px]">
-                Crop Region:
+                Zone de recadrage :
               </Text>
               <Text type="supporting" color="secondary" className="text-[9px]">
                 {Math.round(crop.width * 100)}% × {Math.round(crop.height * 100)}%
@@ -53,7 +53,7 @@ export const CropSection: React.FC<CropSectionProps> = ({ clip }) => {
             </div>
             <div className="flex justify-between">
               <Text type="supporting" color="secondary" className="text-[9px]">
-                Position:
+                Position :
               </Text>
               <Text type="supporting" color="secondary" className="text-[9px]">
                 ({Math.round(crop.x * 100)}%, {Math.round(crop.y * 100)}%)
@@ -61,7 +61,7 @@ export const CropSection: React.FC<CropSectionProps> = ({ clip }) => {
             </div>
           </Card>
           <Button
-            label="Reset Crop"
+            label="Réinitialiser le recadrage"
             icon={<RotateCcw size={12} />}
             variant="secondary"
             size="sm"

@@ -27,8 +27,8 @@ describe("RecoveryDialog", () => {
       <RecoveryDialog saves={saves} onRecover={mockOnRecover} onDismiss={mockOnDismiss} />
     );
 
-    expect(screen.getByText("Recover Your Work")).toBeInTheDocument();
-    expect(screen.getByText("We found an unsaved project")).toBeInTheDocument();
+    expect(screen.getByText("Récupère ton travail")).toBeInTheDocument();
+    expect(screen.getByText("On a trouvé un projet non enregistré")).toBeInTheDocument();
     expect(screen.getByText("My Video")).toBeInTheDocument();
   });
 
@@ -38,7 +38,7 @@ describe("RecoveryDialog", () => {
       <RecoveryDialog saves={saves} onRecover={mockOnRecover} onDismiss={mockOnDismiss} />
     );
 
-    fireEvent.click(screen.getByText("Recover Project"));
+    fireEvent.click(screen.getByText("Récupérer le projet"));
     expect(mockOnRecover).toHaveBeenCalledWith("save-abc");
   });
 
@@ -48,7 +48,7 @@ describe("RecoveryDialog", () => {
       <RecoveryDialog saves={saves} onRecover={mockOnRecover} onDismiss={mockOnDismiss} />
     );
 
-    fireEvent.click(screen.getByText("Start Fresh"));
+    fireEvent.click(screen.getByText("Repartir à zéro"));
     expect(mockOnDismiss).toHaveBeenCalled();
   });
 
@@ -82,7 +82,7 @@ describe("RecoveryDialog", () => {
       <RecoveryDialog saves={saves} onRecover={mockOnRecover} onDismiss={mockOnDismiss} />
     );
 
-    expect(screen.getByText("1 older save available")).toBeInTheDocument();
+    expect(screen.getByText("1 sauvegarde plus ancienne disponible")).toBeInTheDocument();
   });
 
   it("expands older saves when toggle is clicked", () => {
@@ -94,7 +94,7 @@ describe("RecoveryDialog", () => {
       <RecoveryDialog saves={saves} onRecover={mockOnRecover} onDismiss={mockOnDismiss} />
     );
 
-    fireEvent.click(screen.getByText("1 older save available"));
+    fireEvent.click(screen.getByText("1 sauvegarde plus ancienne disponible"));
     expect(screen.getByText("Older Save")).toBeInTheDocument();
   });
 
@@ -107,7 +107,7 @@ describe("RecoveryDialog", () => {
       <RecoveryDialog saves={saves} onRecover={mockOnRecover} onDismiss={mockOnDismiss} />
     );
 
-    fireEvent.click(screen.getByText("1 older save available"));
+    fireEvent.click(screen.getByText("1 sauvegarde plus ancienne disponible"));
     fireEvent.click(screen.getByText("Older Save"));
 
     expect(mockOnRecover).toHaveBeenCalledWith("save-2");
@@ -119,7 +119,7 @@ describe("RecoveryDialog", () => {
       <RecoveryDialog saves={saves} onRecover={mockOnRecover} onDismiss={mockOnDismiss} />
     );
 
-    expect(screen.getByText(/just now/)).toBeInTheDocument();
+    expect(screen.getByText(/à l'instant/)).toBeInTheDocument();
   });
 
   it("displays minutes ago for older saves", () => {
@@ -128,7 +128,7 @@ describe("RecoveryDialog", () => {
       <RecoveryDialog saves={saves} onRecover={mockOnRecover} onDismiss={mockOnDismiss} />
     );
 
-    expect(screen.getByText(/5 minutes ago/)).toBeInTheDocument();
+    expect(screen.getByText(/il y a 5 minutes/)).toBeInTheDocument();
   });
 
   it("disables recover button while recovering", () => {
@@ -137,7 +137,7 @@ describe("RecoveryDialog", () => {
       <RecoveryDialog saves={saves} onRecover={mockOnRecover} onDismiss={mockOnDismiss} />
     );
 
-    fireEvent.click(screen.getByText("Recover Project"));
-    expect(screen.getByText("Recovering...")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Récupérer le projet"));
+    expect(screen.getByText("Récupération...")).toBeInTheDocument();
   });
 });

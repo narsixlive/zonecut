@@ -15,7 +15,7 @@ export function useProjectFonts(project: Pick<Project, "textClips" | "timeline" 
     Promise.all(requests.map((font) => ensureFontFamily(font.family, font.weight, font.sample))).then(() => {
       if (active) setRevision((value) => value + 1);
     }).catch((error: unknown) => {
-      if (active) toast.warning("Font unavailable", error instanceof Error ? error.message : "Choose another font or check your connection.");
+      if (active) toast.warning("Police indisponible", error instanceof Error ? error.message : "Choisis une autre police ou vérifie ta connexion.");
     });
     return () => { active = false; };
   }, [fonts]);

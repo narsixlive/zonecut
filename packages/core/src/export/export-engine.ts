@@ -1,3 +1,4 @@
+import { PeakLimiter } from "../audio/peak-limiter";
 import type { Project } from "../types/project";
 import type {
   VideoExportSettings,
@@ -31,6 +32,10 @@ import {
   getMediaItemCapabilities,
   trackHasAudioItems,
 } from "../timeline/timeline-items";
+
+function channelsOf(buffer: AudioBuffer): Float32Array[] {
+  return Array.from({ length: buffer.numberOfChannels }, (_, c) => buffer.getChannelData(c));
+}
 
 export class ExportEngine {
   private static readonly AUDIO_EXPORT_CHUNK_DURATION_SECONDS = 15;
@@ -496,6 +501,7 @@ export class ExportEngine {
           "rendering",
         );
       }
+      new PeakLimiter(audioBuffer.sampleRate).process(channelsOf(audioBuffer));
 
       yield this.createProgress("encoding", 0.5, 1, 0, 0);
 
@@ -1008,6 +1014,7 @@ export class ExportEngine {
     }
 
     const chunkDuration = ExportEngine.AUDIO_EXPORT_CHUNK_DURATION_SECONDS;
+    let limiter: PeakLimiter | undefined; // one per export: its release carries across chunks
 
     for (
       let startTime = 0;
@@ -1037,6 +1044,8 @@ export class ExportEngine {
         continue;
       }
 
+      limiter ??= new PeakLimiter(audioBuffer.sampleRate);
+      limiter.process(channelsOf(audioBuffer));
       await backend.addAudioBuffer(audioBuffer);
 
       // Yield between chunks so the browser can reclaim the previous buffer

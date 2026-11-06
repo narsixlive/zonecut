@@ -1,8 +1,4 @@
-import {
-  BeatDetectionProcessor,
-  getBeatDetectionProcessor,
-  initWasmBeatDetection,
-} from "../wasm/beat-detection";
+import { FFT } from "./fft";
 
 export interface Beat {
   readonly time: number;
@@ -21,8 +17,11 @@ export interface BeatAnalysisResult {
 export interface BeatDetectionConfig {
   readonly minBpm: number;
   readonly maxBpm: number;
+  /** Kept for API compatibility; the comb-filter tempo search does not use it. */
   readonly sensitivity: number;
+  /** FFT size of the spectral-flux onset envelope. */
   readonly windowSize: number;
+  /** Hop between analysis frames, in samples at ANALYSIS_RATE. */
   readonly hopSize: number;
 }
 
@@ -30,52 +29,73 @@ export const DEFAULT_BEAT_DETECTION_CONFIG: BeatDetectionConfig = {
   minBpm: 60,
   maxBpm: 200,
   sensitivity: 0.5,
-  windowSize: 2048,
-  hopSize: 512,
+  windowSize: 1024,
+  hopSize: 256,
 };
 
+/** Audio is mixed to mono and resampled to this rate before analysis. */
+const ANALYSIS_RATE = 22050;
+/** Spectral flux ignores bins above this frequency (cymbal hiss adds noise, not timing). */
+const MAX_FLUX_HZ = 8000;
+const MIN_BAND_HZ = 30;
+const FLUX_BANDS = 40;
+/** Coarse tempo candidates refined at 0.02 BPM before picking the best. */
+const COARSE_SEEDS = 5;
+/**
+ * Double the tempo when the doubled grid keeps this share of the grid's mean onset strength,
+ * i.e. the in-between points reach ~50 % of the beats (0.75 = (1 + 0.5) / 2).
+ * Measured on 13 of the owner's masters: right doublings 0.76–0.98, but hip-hop with strong
+ * 8ths also reaches 0.77–0.83 (Cercle Noir 86.2 → 172.4), so the ratio cannot separate them.
+ * ponytail: octave errors stay possible; the UI needs a « ×2 / ÷2 » control next to the BPM.
+ */
+const DOUBLE_TEMPO_RATIO = 0.75;
+/** Never double into this range: none of the owner's tracks sits above 180 (Alien 99 → 198). */
+const MAX_DOUBLED_BPM = 180;
+
+/**
+ * Tempo + beat grid detection that holds on dense, mastered music.
+ *
+ * Onsets: half-wave-rectified log-spectral flux (an attack is energy appearing in some bands,
+ * which a compressed master still shows even when its RMS is flat).
+ * Tempo: comb filter over the onset envelope. Each (bpm, phase) grid is scored by
+ * envelope-on-the-beat minus envelope-half-a-beat-later. The contrast term is what rejects
+ * half and double tempo: at half tempo the « off » points land on real beats (snares), at
+ * double tempo the « on » points include weak off-beats.
+ * Same method as Content Creator's reelmaker (librosa onset_strength + comb filter),
+ * extended with a coarse-to-fine search because the tempo range is unknown here.
+ */
 export class BeatDetectionEngine {
   private config: BeatDetectionConfig;
   private audioContext: AudioContext | OfflineAudioContext | null = null;
-  private wasmProcessor: BeatDetectionProcessor;
-  private wasmInitialized: boolean = false;
 
   constructor(config: Partial<BeatDetectionConfig> = {}) {
     this.config = { ...DEFAULT_BEAT_DETECTION_CONFIG, ...config };
-    this.wasmProcessor = getBeatDetectionProcessor();
-    this.initWasm();
-  }
-
-  private async initWasm(): Promise<void> {
-    if (this.wasmInitialized) return;
-    try {
-      await initWasmBeatDetection();
-      await this.wasmProcessor.ensureWasm();
-      this.wasmInitialized = true;
-    } catch {
-      this.wasmInitialized = false;
-    }
   }
 
   async analyzeAudioBuffer(
     audioBuffer: AudioBuffer,
   ): Promise<BeatAnalysisResult> {
-    const channelData = audioBuffer.getChannelData(0);
-    const sampleRate = audioBuffer.sampleRate;
     const duration = audioBuffer.duration;
+    const samples = mixToAnalysisRate(audioBuffer);
+    const envelope = onsetEnvelope(
+      samples,
+      this.config.windowSize,
+      this.config.hopSize,
+    );
+    const fps = ANALYSIS_RATE / this.config.hopSize;
 
-    const onsets = this.detectOnsets(channelData, sampleRate);
-    const { bpm, confidence } = this.calculateBpm(onsets, duration);
-    const beats = this.generateBeats(bpm, duration, onsets);
-    const downbeats = this.detectDownbeats(beats);
+    if (envelope.length < fps * 2) {
+      return { bpm: 120, confidence: 0, beats: [], duration, downbeats: [] };
+    }
 
-    return {
-      bpm,
-      confidence,
-      beats,
-      duration,
-      downbeats,
-    };
+    const { bpm, phaseFrames, confidence } = this.findTempo(envelope, fps);
+    // Frame t covers samples [t·hop, t·hop + window); an attack shows up in the flux once it
+    // reaches the middle of the Hann window, so frame times run half a window early.
+    const latency = this.config.windowSize / 2 / ANALYSIS_RATE;
+    const beats = buildBeats(envelope, fps, bpm, phaseFrames, duration, latency);
+    const downbeats = pickDownbeats(beats);
+
+    return { bpm, confidence, beats, duration, downbeats };
   }
 
   async analyzeFromBlob(blob: Blob): Promise<BeatAnalysisResult> {
@@ -94,234 +114,53 @@ export class BeatDetectionEngine {
     return this.analyzeFromBlob(blob);
   }
 
-  /**
-   * Detects onset events (significant energy increases) in audio using RMS energy analysis.
-   * Algorithm: Extract RMS energy in windows, smooth for stability, apply adaptive threshold,
-   * find peaks (local maxima with sufficient rise), enforce minimum spacing between detections.
-   *
-   * This is more robust than spectral methods for real-world audio with variable dynamics.
-   */
-  private detectOnsets(samples: Float32Array, sampleRate: number): number[] {
-    const { windowSize, hopSize, sensitivity } = this.config;
-    const onsets: number[] = [];
-
-    const numFrames = Math.floor((samples.length - windowSize) / hopSize);
-    const energiesF32 = new Float32Array(numFrames);
-
-    this.wasmProcessor.computeRMSEnergies(samples, windowSize, hopSize, energiesF32);
-
-    const smoothedF32 = new Float32Array(numFrames);
-    this.wasmProcessor.smoothArray(energiesF32, smoothedF32, 5);
-
-    const smoothedEnergies = Array.from(smoothedF32);
-    // Step 3: Compute dynamic threshold based on local statistics and sensitivity
-    const threshold = this.calculateAdaptiveThreshold(
-      smoothedEnergies,
-      sensitivity,
-    );
-
-    // Step 4: Detect peaks (onsets) with multiple constraints
-    let lastOnsetFrame = -10;
-    // Minimum 100ms between onsets to avoid detecting echoes/reverb as separate onsets
-    const minFramesBetweenOnsets = Math.floor((sampleRate / hopSize) * 0.1);
-
-    for (let i = 1; i < smoothedEnergies.length - 1; i++) {
-      const current = smoothedEnergies[i];
-      const prev = smoothedEnergies[i - 1];
-      const localThreshold = threshold[i];
-
-      // Must be local maximum in time
-      const isLocalMax =
-        current > smoothedEnergies[i - 1] && current >= smoothedEnergies[i + 1];
-      // Must exceed adaptive threshold at this point
-      const isAboveThreshold = current > localThreshold;
-      // Must show sufficient energy rise (indicates attack phase, not just high sustained energy)
-      const hasRise = current - prev > localThreshold * 0.3;
-      // Enforce minimum spacing between detections (prevents duplicate detections)
-      const notTooClose = i - lastOnsetFrame >= minFramesBetweenOnsets;
-
-      if (isLocalMax && isAboveThreshold && hasRise && notTooClose) {
-        const timeInSeconds = (i * hopSize) / sampleRate;
-        onsets.push(timeInSeconds);
-        lastOnsetFrame = i;
-      }
-    }
-
-    return onsets;
-  }
-
-  /**
-   * Computes per-frame dynamic thresholds using local statistics.
-   * Combines median (robust to outliers) and mean (captures overall level).
-   * Sensitivity parameter: 0 (strict, few false positives) to 1 (loose, more detections).
-   * Local context window accounts for audio dynamics (e.g., quiet intro vs loud chorus).
-   */
-  private calculateAdaptiveThreshold(
-    energies: number[],
-    sensitivity: number,
-  ): number[] {
-    const medianWindowSize = 50;
-    const thresholds: number[] = [];
-
-    for (let i = 0; i < energies.length; i++) {
-      const start = Math.max(0, i - medianWindowSize);
-      const end = Math.min(energies.length, i + medianWindowSize);
-      const windowArr = new Float32Array(energies.slice(start, end));
-
-      const median = this.wasmProcessor.calculateMedian(windowArr);
-      const mean = this.wasmProcessor.calculateMean(windowArr);
-
-      const threshold = median + (mean - median) * (1 - sensitivity);
-      thresholds.push(threshold * (1.5 - sensitivity * 0.5));
-    }
-
-    return thresholds;
-  }
-
-  private calculateBpm(
-    onsets: number[],
-    duration: number,
-  ): { bpm: number; confidence: number } {
-    if (onsets.length < 4) {
-      return { bpm: 120, confidence: 0 };
-    }
-
-    const intervals: number[] = [];
-    for (let i = 1; i < onsets.length; i++) {
-      intervals.push(onsets[i] - onsets[i - 1]);
-    }
-
+  private findTempo(
+    envelope: Float32Array,
+    fps: number,
+  ): { bpm: number; phaseFrames: number; confidence: number } {
     const { minBpm, maxBpm } = this.config;
-    const minInterval = 60 / maxBpm;
-    const maxInterval = 60 / minBpm;
 
-    const validIntervals = intervals.filter(
-      (i) => i >= minInterval && i <= maxInterval,
-    );
-
-    if (validIntervals.length < 3) {
-      return { bpm: 120, confidence: 0 };
-    }
-
-    const bpmCandidates = new Map<number, number>();
-    const bpmResolution = 1;
-
-    for (const interval of validIntervals) {
-      const bpm = Math.round(60 / interval / bpmResolution) * bpmResolution;
-      if (bpm >= minBpm && bpm <= maxBpm) {
-        bpmCandidates.set(bpm, (bpmCandidates.get(bpm) || 0) + 1);
+    const grid = (bpm: number) => ({ bpm, ...combScore(envelope, (60 / bpm) * fps) });
+    const refine = (bpm: number) => {
+      let best = grid(bpm);
+      for (let b = Math.max(minBpm, bpm - 0.5); b <= Math.min(maxBpm, bpm + 0.5); b += 0.02) {
+        const r = grid(b);
+        if (r.mean > best.mean) best = r;
       }
+      return best;
+    };
 
-      const doubleBpm =
-        Math.round(120 / interval / bpmResolution) * bpmResolution;
-      if (doubleBpm >= minBpm && doubleBpm <= maxBpm) {
-        bpmCandidates.set(doubleBpm, (bpmCandidates.get(doubleBpm) || 0) + 0.5);
-      }
-
-      const halfBpm = Math.round(30 / interval / bpmResolution) * bpmResolution;
-      if (halfBpm >= minBpm && halfBpm <= maxBpm) {
-        bpmCandidates.set(halfBpm, (bpmCandidates.get(halfBpm) || 0) + 0.3);
-      }
+    // A 0.5 BPM coarse step can land beside a sharp peak, so refine the few best coarse
+    // candidates instead of trusting the single best one.
+    const coarse: { bpm: number; mean: number }[] = [];
+    for (let bpm = minBpm; bpm <= maxBpm + 1e-9; bpm += 0.5) coarse.push(grid(bpm));
+    coarse.sort((a, b) => b.mean - a.mean);
+    const seeds: number[] = [];
+    for (const c of coarse) {
+      if (seeds.every((s) => Math.abs(s - c.bpm) > 2)) seeds.push(c.bpm);
+      if (seeds.length === COARSE_SEEDS) break;
     }
 
-    let bestBpm = 120;
-    let bestScore = 0;
+    // On-beat mean favours slow grids that land only on the strongest beats, so this finds an
+    // integer multiple of the beat period…
+    let best = seeds.map(refine).reduce((a, b) => (b.mean > a.mean ? b : a));
 
-    for (const [bpm, score] of bpmCandidates) {
-      if (score > bestScore) {
-        bestScore = score;
-        bestBpm = bpm;
-      }
+    // …then double while the in-between points are about as loud as the grid points: those are
+    // real beats (snares, four-on-the-floor kicks), not off-beat hats.
+    while (best.bpm * 2 <= Math.min(maxBpm, MAX_DOUBLED_BPM)) {
+      const doubled = refine(best.bpm * 2);
+      if (doubled.mean < DOUBLE_TEMPO_RATIO * best.mean) break;
+      best = doubled;
     }
 
-    const expectedBeats = (duration * bestBpm) / 60;
-    const actualBeats = onsets.length;
-    const confidence = Math.min(
-      1,
-      Math.max(0, 1 - Math.abs(expectedBeats - actualBeats) / expectedBeats),
-    );
-
-    return { bpm: bestBpm, confidence };
-  }
-
-  private generateBeats(
-    bpm: number,
-    duration: number,
-    onsets: number[],
-  ): Beat[] {
-    const beatInterval = 60 / bpm;
-    const beats: Beat[] = [];
-
-    let firstBeatTime = 0;
-    if (onsets.length > 0) {
-      const firstOnset = onsets[0];
-      const offsetBeats = Math.round(firstOnset / beatInterval);
-      firstBeatTime = firstOnset - offsetBeats * beatInterval;
-      while (firstBeatTime < 0) firstBeatTime += beatInterval;
-    }
-
-    let beatIndex = 0;
-    for (let time = firstBeatTime; time < duration; time += beatInterval) {
-      const nearestOnset = this.findNearestOnset(
-        time,
-        onsets,
-        beatInterval * 0.3,
-      );
-      const strength = nearestOnset !== null ? 1 : 0.5;
-
-      beats.push({
-        time: nearestOnset !== null ? nearestOnset : time,
-        strength,
-        index: beatIndex,
-      });
-
-      beatIndex++;
-    }
-
-    return beats;
-  }
-
-  private findNearestOnset(
-    time: number,
-    onsets: number[],
-    tolerance: number,
-  ): number | null {
-    let nearest: number | null = null;
-    let minDist = tolerance;
-
-    for (const onset of onsets) {
-      const dist = Math.abs(onset - time);
-      if (dist < minDist) {
-        minDist = dist;
-        nearest = onset;
-      }
-    }
-
-    return nearest;
-  }
-
-  private detectDownbeats(beats: Beat[]): number[] {
-    if (beats.length < 4) {
-      return beats.filter((_, i) => i % 4 === 0).map((b) => b.time);
-    }
-
-    const downbeats: number[] = [];
-    const strongBeats = beats.filter((b) => b.strength > 0.7);
-
-    if (strongBeats.length > 0) {
-      const firstStrong = strongBeats[0];
-      const firstIndex = beats.findIndex((b) => b.time === firstStrong.time);
-
-      for (let i = firstIndex; i < beats.length; i += 4) {
-        downbeats.push(beats[i].time);
-      }
-    } else {
-      for (let i = 0; i < beats.length; i += 4) {
-        downbeats.push(beats[i].time);
-      }
-    }
-
-    return downbeats;
+    const overall = mean(envelope);
+    const confidence =
+      best.mean > 0 ? Math.min(1, Math.max(0, (best.mean - overall) / best.mean)) : 0;
+    return {
+      bpm: Math.round(best.bpm * 100) / 100,
+      phaseFrames: best.phaseFrames,
+      confidence,
+    };
   }
 
   generateBeatMarkersAtInterval(
@@ -378,6 +217,186 @@ export class BeatDetectionEngine {
       this.audioContext = null;
     }
   }
+}
+
+/** Mono mix of every channel, linearly resampled to ANALYSIS_RATE. */
+function mixToAnalysisRate(buffer: AudioBuffer): Float32Array {
+  const channels = Math.max(1, buffer.numberOfChannels || 1);
+  const source = buffer.getChannelData(0);
+  const mono = new Float32Array(source.length);
+  for (let c = 0; c < channels; c++) {
+    const data = c === 0 ? source : buffer.getChannelData(c);
+    for (let i = 0; i < mono.length; i++) mono[i] += data[i] / channels;
+  }
+
+  const ratio = buffer.sampleRate / ANALYSIS_RATE;
+  if (Math.abs(ratio - 1) < 1e-6) return mono;
+
+  // ponytail: linear resampling without a low-pass; aliasing only blurs high bands, which the
+  // flux caps at MAX_FLUX_HZ anyway. Use OfflineAudioContext resampling if accuracy ever suffers.
+  const out = new Float32Array(Math.floor(mono.length / ratio));
+  for (let i = 0; i < out.length; i++) {
+    const x = i * ratio;
+    const j = Math.floor(x);
+    const f = x - j;
+    out[i] = mono[j] * (1 - f) + (mono[j + 1] ?? mono[j]) * f;
+  }
+  return out;
+}
+
+/**
+ * Half-wave-rectified log spectral flux over log-spaced bands, one value per hop, normalised
+ * to max 1. Bands (≈ mel scale) give a kick, which lives in a few low bins, as much weight as a
+ * clap or hat spread over hundreds of high bins.
+ */
+function onsetEnvelope(
+  samples: Float32Array,
+  windowSize: number,
+  hopSize: number,
+): Float32Array {
+  const frames = Math.max(0, Math.floor((samples.length - windowSize) / hopSize) + 1);
+  const envelope = new Float32Array(frames);
+  if (frames === 0) return envelope;
+
+  const fft = new FFT(windowSize);
+  const bandOfBin = logBands(windowSize);
+  const bands = Math.max(...bandOfBin) + 1;
+  const binsPerBand = new Float32Array(bands);
+  for (const b of bandOfBin) if (b >= 0) binsPerBand[b]++;
+
+  const window = new Float32Array(windowSize);
+  for (let i = 0; i < windowSize; i++) {
+    window[i] = 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / windowSize);
+  }
+
+  const frame = new Float32Array(windowSize);
+  let previous = new Float32Array(bands);
+  let current = new Float32Array(bands);
+
+  for (let t = 0; t < frames; t++) {
+    const start = t * hopSize;
+    for (let i = 0; i < windowSize; i++) frame[i] = samples[start + i] * window[i];
+    const { real, imag } = fft.forward(frame);
+
+    current.fill(0);
+    for (let k = 0; k < bandOfBin.length; k++) {
+      const b = bandOfBin[k];
+      if (b >= 0) current[b] += Math.hypot(real[k], imag[k]);
+    }
+    let flux = 0;
+    for (let b = 0; b < bands; b++) {
+      current[b] = Math.log1p(1000 * (current[b] / binsPerBand[b]));
+      if (t > 0) flux += Math.max(0, current[b] - previous[b]);
+    }
+    envelope[t] = flux;
+    [previous, current] = [current, previous];
+  }
+
+  let max = 0;
+  for (const v of envelope) max = Math.max(max, v);
+  if (max > 0) for (let i = 0; i < frames; i++) envelope[i] /= max;
+  return envelope;
+}
+
+/** FFT bin → log-spaced band index (MIN_BAND_HZ..MAX_FLUX_HZ), -1 outside. */
+function logBands(windowSize: number): Int16Array {
+  const bins = windowSize / 2;
+  const map = new Int16Array(bins).fill(-1);
+  const lo = Math.log(MIN_BAND_HZ);
+  const span = Math.log(MAX_FLUX_HZ) - lo;
+  let last = -1;
+  let next = 0;
+  for (let k = 1; k < bins; k++) {
+    const hz = (k * ANALYSIS_RATE) / windowSize;
+    if (hz < MIN_BAND_HZ || hz > MAX_FLUX_HZ) continue;
+    const ideal = Math.floor(((Math.log(hz) - lo) / span) * FLUX_BANDS);
+    // Low bands narrower than one bin collapse: each such bin gets its own band, numbered densely.
+    if (ideal !== last) {
+      last = ideal;
+      map[k] = next++;
+    } else {
+      map[k] = next - 1;
+    }
+  }
+  return map;
+}
+
+function mean(values: Float32Array): number {
+  let sum = 0;
+  for (const v of values) sum += v;
+  return values.length > 0 ? sum / values.length : 0;
+}
+
+/** Best phase of a beat grid with the given period, scored by the mean envelope on the grid. */
+function combScore(
+  envelope: Float32Array,
+  periodFrames: number,
+): { phaseFrames: number; mean: number } {
+  let best = { phaseFrames: 0, mean: -Infinity };
+  const n = envelope.length;
+
+  for (let phase = 0; phase < periodFrames; phase++) {
+    let sum = 0;
+    let count = 0;
+    for (let x = phase; x < n - 0.5; x += periodFrames) {
+      sum += envelope[Math.round(x)];
+      count++;
+    }
+    if (count > 0 && sum / count > best.mean) best = { phaseFrames: phase, mean: sum / count };
+  }
+  return best;
+}
+
+function buildBeats(
+  envelope: Float32Array,
+  fps: number,
+  bpm: number,
+  phaseFrames: number,
+  duration: number,
+  latency: number,
+): Beat[] {
+  const period = 60 / bpm;
+  const firstFrameTime = phaseFrames / fps;
+  const raw: number[] = [];
+  for (let time = firstFrameTime; time + latency < duration; time += period) {
+    const f = Math.round(time * fps);
+    let peak = 0;
+    for (let d = -2; d <= 2; d++) peak = Math.max(peak, envelope[f + d] ?? 0);
+    raw.push(peak);
+  }
+  const firstTime = firstFrameTime + latency;
+
+  // Strength relative to the loud beats (95th percentile), so a quiet intro reads as weak.
+  const sorted = [...raw].sort((a, b) => a - b);
+  const reference = sorted[Math.floor(sorted.length * 0.95)] || 1;
+
+  return raw.map((peak, index) => ({
+    time: firstTime + index * period,
+    strength: Math.min(1, peak / reference),
+    index,
+  }));
+}
+
+/** Bar starts: the one of four beat phases whose beats carry the most onset energy. */
+function pickDownbeats(beats: Beat[]): number[] {
+  if (beats.length === 0) return [];
+  let bestPhase = 0;
+  let bestMean = -1;
+  for (let p = 0; p < 4; p++) {
+    let sum = 0;
+    let count = 0;
+    for (let i = p; i < beats.length; i += 4) {
+      sum += beats[i].strength;
+      count++;
+    }
+    if (count > 0 && sum / count > bestMean) {
+      bestMean = sum / count;
+      bestPhase = p;
+    }
+  }
+  const downbeats: number[] = [];
+  for (let i = bestPhase; i < beats.length; i += 4) downbeats.push(beats[i].time);
+  return downbeats;
 }
 
 let beatDetectionEngineInstance: BeatDetectionEngine | null = null;

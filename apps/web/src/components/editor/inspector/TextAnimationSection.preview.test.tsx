@@ -63,7 +63,7 @@ describe("TextAnimationSection previews", () => {
       screen.getAllByTestId("text-animation-preset-preview"),
     ).toHaveLength(24);
     fireEvent.click(
-      screen.getByRole("button", { name: "Preview and apply Rise" }),
+      screen.getByRole("button", { name: "Aperçu et application : Rise" }),
     );
 
     await waitFor(() => {
@@ -73,7 +73,7 @@ describe("TextAnimationSection previews", () => {
       ).toBe("rise");
     });
     expect(
-      screen.getByRole("button", { name: "Preview and apply Rise" }),
+      screen.getByRole("button", { name: "Aperçu et application : Rise" }),
     ).toHaveAttribute("aria-pressed", "true");
   });
 });

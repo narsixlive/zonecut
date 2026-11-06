@@ -126,7 +126,7 @@ describe("keyboard editing commands", () => {
     await waitFor(() => expect(store.endHistoryGroup).toHaveBeenCalledOnce());
     expect(vi.mocked(store.removeClip).mock.calls.map(([id]) => id)).toEqual(["a", "b"]);
     expect(store.deleteTextClip).not.toHaveBeenCalled();
-    expect(store.beginHistoryGroup).toHaveBeenCalledWith("Delete selection");
+    expect(store.beginHistoryGroup).toHaveBeenCalledWith("Supprimer la sélection");
     expect(ui.selectedItems.map((item) => item.id)).toEqual(["locked-caption"]);
     view.unmount();
   });
@@ -136,7 +136,7 @@ describe("keyboard editing commands", () => {
     const view = renderHook(useKeyboardShortcuts);
     press("Delete");
     await waitFor(() => expect(store.endHistoryGroup).toHaveBeenCalledOnce());
-    expect(mocks.error).toHaveBeenCalledWith("Delete selection failed", "Decode failed");
+    expect(mocks.error).toHaveBeenCalledWith("Supprimer la sélection : échec", "Decode failed");
     expect(ui.selectedItems).toHaveLength(3);
     view.unmount();
   });
@@ -173,7 +173,7 @@ describe("keyboard editing commands", () => {
     const view = renderHook(useKeyboardShortcuts);
     press("s", { metaKey: true });
     expect(mocks.save).toHaveBeenCalledWith(store.project);
-    await waitFor(() => expect(mocks.success).toHaveBeenCalledWith("Project saved", "My video"));
+    await waitFor(() => expect(mocks.success).toHaveBeenCalledWith("Projet enregistré", "My video"));
     press("e", { ctrlKey: true });
     expect(ui.openModal).toHaveBeenCalledWith("export");
     view.unmount();
@@ -192,7 +192,7 @@ describe("keyboard editing commands", () => {
     mocks.save.mockRejectedValueOnce(new Error("Disk full"));
     const view = renderHook(useKeyboardShortcuts);
     await act(async () => press("s", { ctrlKey: true }));
-    expect(mocks.error).toHaveBeenCalledWith("Could not save project", "Disk full");
+    expect(mocks.error).toHaveBeenCalledWith("Impossible d’enregistrer le projet", "Disk full");
     expect(mocks.success).not.toHaveBeenCalled();
     await act(async () => press("s", { ctrlKey: true }));
     expect(mocks.save).toHaveBeenCalledTimes(2);

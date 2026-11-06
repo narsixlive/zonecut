@@ -1,4 +1,5 @@
 import React, { useCallback, useRef, useState } from "react";
+import { STUDIO_ASSET_TABS, STUDIO_CLOUD_AI_ENABLED, STUDIO_RECORDING_ENABLED } from "../../zonescene/studio-scope";
 import {
   Image as ImageIcon, Film, Music, Plus, Upload, Trash2,
   Square, Circle, Triangle, Star, ArrowRight, Hexagon, FileCode, AlertTriangle,
@@ -67,13 +68,13 @@ const ASSETS_TABS: ReadonlyArray<{
 }> = [
   {
     value: "media",
-    label: "Media",
-    description: "Import footage, audio, and stills.",
+    label: "Médias",
+    description: "Importe tes vidéos, sons et images.",
   },
   {
     value: "text",
-    label: "Text",
-    description: "Add title presets and caption elements.",
+    label: "Texte",
+    description: "Ajoute des titres et des éléments de texte.",
   },
   {
     value: "graphics",
@@ -118,11 +119,11 @@ export const TEXT_STYLE_PRESETS: ReadonlyArray<{
   text: string;
   style: Partial<TextStyle>;
 }> = [
-  { name: "Heading", text: "Heading", style: { fontSize: 72, fontWeight: 700 } },
-  { name: "Subtitle", text: "Subtitle text", style: { fontSize: 36, fontWeight: 400 } },
+  { name: "Titre", text: "Titre", style: { fontSize: 72, fontWeight: 700 } },
+  { name: "Sous-titre", text: "Texte du sous-titre", style: { fontSize: 36, fontWeight: 400 } },
   {
-    name: "Lower Third",
-    text: "Name Here",
+    name: "Bandeau",
+    text: "Nom ici",
     style: {
       fontSize: 32,
       fontWeight: 600,
@@ -132,8 +133,8 @@ export const TEXT_STYLE_PRESETS: ReadonlyArray<{
     },
   },
   {
-    name: "Caption",
-    text: "Caption text here",
+    name: "Sous-titrage",
+    text: "Texte du sous-titrage",
     style: {
       fontSize: 24,
       fontWeight: 400,
@@ -145,8 +146,8 @@ export const TEXT_STYLE_PRESETS: ReadonlyArray<{
     },
   },
   {
-    name: "Hero",
-    text: "MAKE IT MOVE",
+    name: "Héro",
+    text: "FAIS-LE BOUGER",
     style: {
       fontSize: 112,
       fontWeight: 900,
@@ -156,8 +157,8 @@ export const TEXT_STYLE_PRESETS: ReadonlyArray<{
     },
   },
   {
-    name: "Quote",
-    text: "“Tell a better story.”",
+    name: "Citation",
+    text: "« Raconte une meilleure histoire. »",
     style: {
       fontSize: 54,
       fontWeight: 600,
@@ -169,8 +170,8 @@ export const TEXT_STYLE_PRESETS: ReadonlyArray<{
     },
   },
   {
-    name: "Outline",
-    text: "OUTLINE",
+    name: "Contour",
+    text: "CONTOUR",
     style: {
       fontSize: 80,
       fontWeight: 900,
@@ -181,7 +182,7 @@ export const TEXT_STYLE_PRESETS: ReadonlyArray<{
   },
   {
     name: "Badge",
-    text: "NEW RELEASE",
+    text: "NOUVELLE SORTIE",
     style: {
       fontSize: 28,
       fontWeight: 800,
@@ -291,8 +292,8 @@ const MediaThumbnail: React.FC<{
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return null;
     if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
   };
 
   const iconColor = item.type === "audio"
@@ -315,25 +316,25 @@ const MediaThumbnail: React.FC<{
     <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] flex items-center justify-center gap-2 animate-in fade-in duration-200">
       {item.kieaiError ? (
         <PanelIconButton
-          label="Retry generation"
+          label="Réessayer la génération"
           icon={<RefreshCw size={14} className="text-red-400" />}
           onClick={(e) => { e.stopPropagation(); onRetryKieAI?.(); }}
           className="p-2 bg-red-500/20 rounded-full hover:bg-red-500/40 backdrop-blur-sm transition-colors"
         />
       ) : item.isPending ? (
-        <div title="KieAI generation in progress…" className="p-2">
+        <div title="Génération KieAI en cours…" className="p-2">
           <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         </div>
       ) : item.isPlaceholder ? (
         <>
           <PanelIconButton
-            label="Replace asset"
+            label="Remplacer le fichier"
             icon={<RefreshCw size={14} className="text-yellow-500" />}
             onClick={(e) => { e.stopPropagation(); onReplace(); }}
             className="p-2 bg-yellow-500/20 rounded-full hover:bg-yellow-500/40 backdrop-blur-sm transition-colors"
           />
           <PanelIconButton
-            label="Delete"
+            label="Supprimer"
             icon={<Trash2 size={14} className="text-red-400" />}
             onClick={(e) => { e.stopPropagation(); onDelete(); }}
             className="p-2 bg-red-500/20 rounded-full hover:bg-red-500/40 backdrop-blur-sm transition-colors"
@@ -343,20 +344,20 @@ const MediaThumbnail: React.FC<{
         <>
           {item.type === "image" && onKieAI && (
             <PanelIconButton
-              label="Create with KieAI"
+              label="Créer avec KieAI"
               icon={<Sparkles size={14} className="text-primary" />}
               onClick={(e) => { e.stopPropagation(); onKieAI(); }}
               className="p-2 bg-primary/20 rounded-full hover:bg-primary/40 backdrop-blur-sm transition-colors"
             />
           )}
           <PanelIconButton
-            label="Add to timeline"
+            label="Ajouter à la timeline"
             icon={<Plus size={14} className="text-primary" />}
             onClick={(e) => { e.stopPropagation(); onAddToTimeline(); }}
             className="p-2 bg-primary/20 rounded-full hover:bg-primary/40 backdrop-blur-sm transition-colors"
           />
           <PanelIconButton
-            label="Delete"
+            label="Supprimer"
             icon={<Trash2 size={14} className="text-red-400" />}
             onClick={(e) => { e.stopPropagation(); onDelete(); }}
             className="p-2 bg-red-500/20 rounded-full hover:bg-red-500/40 backdrop-blur-sm transition-colors"
@@ -426,25 +427,25 @@ const MediaThumbnail: React.FC<{
           <div className="flex items-center gap-1 flex-shrink-0">
             {item.kieaiError ? (
               <PanelIconButton
-                label="Retry generation"
+                label="Réessayer la génération"
                 icon={<RefreshCw size={12} className="text-red-400" />}
                 onClick={(e) => { e.stopPropagation(); onRetryKieAI?.(); }}
                 className="p-1 bg-red-500/20 rounded hover:bg-red-500/40 transition-colors"
               />
             ) : item.isPending ? (
-              <div className="p-1" title="Generating…">
+              <div className="p-1" title="Génération en cours…">
                 <div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
               </div>
             ) : item.isPlaceholder ? (
               <>
                 <PanelIconButton
-                  label="Replace asset"
+                  label="Remplacer le fichier"
                   icon={<RefreshCw size={12} className="text-yellow-500" />}
                   onClick={(e) => { e.stopPropagation(); onReplace(); }}
                   className="p-1 bg-yellow-500/20 rounded hover:bg-yellow-500/40 transition-colors"
                 />
                 <PanelIconButton
-                  label="Delete"
+                  label="Supprimer"
                   icon={<Trash2 size={12} className="text-red-400" />}
                   onClick={(e) => { e.stopPropagation(); onDelete(); }}
                   className="p-1 bg-red-500/20 rounded hover:bg-red-500/40 transition-colors"
@@ -454,20 +455,20 @@ const MediaThumbnail: React.FC<{
               <>
                 {item.type === "image" && onKieAI && (
                   <PanelIconButton
-                    label="Create with KieAI"
+                    label="Créer avec KieAI"
                     icon={<Sparkles size={12} className="text-primary" />}
                     onClick={(e) => { e.stopPropagation(); onKieAI(); }}
                     className="p-1 bg-primary/20 rounded hover:bg-primary/40 transition-colors"
                   />
                 )}
                 <PanelIconButton
-                  label="Add to timeline"
+                  label="Ajouter à la timeline"
                   icon={<Plus size={12} className="text-primary" />}
                   onClick={(e) => { e.stopPropagation(); onAddToTimeline(); }}
                   className="p-1 bg-primary/20 rounded hover:bg-primary/40 transition-colors"
                 />
                 <PanelIconButton
-                  label="Delete"
+                  label="Supprimer"
                   icon={<Trash2 size={12} className="text-red-400" />}
                   onClick={(e) => { e.stopPropagation(); onDelete(); }}
                   className="p-1 bg-red-500/20 rounded hover:bg-red-500/40 transition-colors"
@@ -533,7 +534,7 @@ const MediaThumbnail: React.FC<{
         {item.kieaiError && (
           <div className="absolute top-1 left-1 px-1.5 py-0.5 bg-red-500 rounded text-[8px] text-white font-bold flex items-center gap-1">
             <AlertTriangle size={8} />
-            Failed
+            Échec
           </div>
         )}
 
@@ -541,7 +542,7 @@ const MediaThumbnail: React.FC<{
         {!item.kieaiError && item.isPending && (
           <div className="absolute top-1 left-1 px-1.5 py-0.5 bg-primary rounded text-[8px] text-primary-foreground font-bold flex items-center gap-1">
             <div className="h-2 w-2 animate-spin rounded-full border border-white border-t-transparent" />
-            AI
+            IA
           </div>
         )}
 
@@ -549,7 +550,7 @@ const MediaThumbnail: React.FC<{
         {!item.kieaiError && !item.isPending && item.isPlaceholder && (
           <div className="absolute top-1 left-1 px-1.5 py-0.5 bg-yellow-500 rounded text-[8px] text-black font-bold flex items-center gap-1">
             <AlertTriangle size={10} />
-            Missing
+            Manquant
           </div>
         )}
 
@@ -607,13 +608,13 @@ const EmptyState: React.FC<{ onImport: () => void }> = ({ onImport }) => (
       <Upload size={24} className="text-fg-muted" />
     </div>
     <Text type="body" color="secondary" weight="bold" display="block" className="mb-2 text-sm text-fg">
-      No media imported
+      Aucun média importé
     </Text>
     <Text type="supporting" color="secondary" display="block" className="mb-6 text-xs text-fg-3">
-      Drag files here or click to import
+      Glisse tes fichiers ici ou clique pour importer
     </Text>
     <Button
-      label="Import Media"
+      label="Importer des médias"
       variant="ghost"
       onClick={onImport}
       className="px-4 py-2 bg-bg-2 hover:bg-bg-3 border border-border text-fg-2 text-xs font-medium rounded-lg transition-all hover:border-accent/50"
@@ -623,7 +624,8 @@ const EmptyState: React.FC<{ onImport: () => void }> = ({ onImport }) => (
 
 const LoadingIndicator: React.FC<{ message: string }> = ({ message }) => (
   <div className="absolute inset-0 bg-bg-1/90 backdrop-blur-sm flex flex-col items-center justify-center z-50">
-    <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin mb-3" />
+    {/* Static on purpose: an animated spinner slowed thumbnail decoding 10× while importing (docs/ZONESCENE.md). */}
+    <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full mb-3" />
     <Text type="body" color="secondary" display="block" className="text-sm text-fg-2">{message}</Text>
   </div>
 );
@@ -637,7 +639,7 @@ export const AssetsPanel: React.FC = () => {
 
   const setActiveTab = useCallback((tab: AssetsTab) => {
     if (activeTab === "ai" && tab !== "ai" && ttsHasUnsaved) {
-      toast.warning("Unsaved audio discarded", "Save to media or download next time to keep it.");
+      toast.warning("Audio non sauvegardé supprimé", "Enregistre-le dans les médias ou télécharge-le la prochaine fois pour le garder.");
     }
     setActiveTabRaw(tab);
   }, [activeTab, ttsHasUnsaved]);
@@ -709,14 +711,14 @@ export const AssetsPanel: React.FC = () => {
         for (let i = 0; i < fileArray.length; i++) {
           const file = fileArray[i];
           setImportProgress(
-            `Importing ${file.name} (${i + 1}/${fileArray.length})...`,
+            `Importation de ${file.name} (${i + 1}/${fileArray.length})...`,
           );
 
           const result = await importMedia(file);
 
           // If it's a video with audio, extract audio to separate track
           if (result.success && file.type.startsWith("video/")) {
-            setImportProgress(`Extracting audio from ${file.name}...`);
+            setImportProgress(`Extraction de l'audio de ${file.name}...`);
             // Audio extraction is handled by the importMedia function
             // The audio track is created automatically when adding to timeline
           }
@@ -798,7 +800,7 @@ export const AssetsPanel: React.FC = () => {
         const file = (e.target as HTMLInputElement).files?.[0];
         if (file) {
           setIsImporting(true);
-          setImportProgress(`Replacing asset...`);
+          setImportProgress(`Remplacement du fichier...`);
           try {
             await replaceMediaAsset(itemId, file);
           } catch (error) {
@@ -816,7 +818,7 @@ export const AssetsPanel: React.FC = () => {
 
   const handleRelinkFromFolder = useCallback(async () => {
     if (!("showDirectoryPicker" in window)) {
-      toast.error("Folder picker not supported", "Please relink assets individually using the refresh button on each missing asset.");
+      toast.error("Sélecteur de dossier non supporté", "Relie les fichiers un par un avec le bouton d'actualisation sur chaque fichier manquant.");
       return;
     }
     let dirHandle: FileSystemDirectoryHandle;
@@ -853,7 +855,7 @@ export const AssetsPanel: React.FC = () => {
         : null;
       const entry = key ? fileMap.get(key) : null;
       if (entry) {
-        setImportProgress(`Relinking ${item.name}…`);
+        setImportProgress(`Reliaison de ${item.name}…`);
         try {
           // Save individual file handle for future auto-restore
           try { await saveFileHandle(entry.file.name, entry.file.size, entry.handle); } catch { /* best-effort */ }
@@ -868,9 +870,9 @@ export const AssetsPanel: React.FC = () => {
     setImportProgress("");
 
     if (linked > 0) {
-      toast.success(`Relinked ${linked} of ${placeholders.length} asset${placeholders.length !== 1 ? "s" : ""}`);
+      toast.success(`${linked} fichier${linked !== 1 ? "s" : ""} relié${linked !== 1 ? "s" : ""} sur ${placeholders.length}`);
     } else {
-      toast.error("No matches found", "None of the files in the selected folder matched the missing assets by filename.");
+      toast.error("Aucune correspondance trouvée", "Aucun fichier du dossier sélectionné ne correspond aux fichiers manquants par leur nom.");
     }
   }, [replaceMediaAsset]);
 
@@ -983,7 +985,7 @@ export const AssetsPanel: React.FC = () => {
     try {
       const blob = await loadMediaBlob(item.id);
       if (!blob) {
-        toast.error("Asset not found", "Cannot load the image data for this asset.");
+        toast.error("Fichier introuvable", "Impossible de charger les données de cette image.");
         return;
       }
       const mimeType = blob.type || (item.name.match(/\.png$/i) ? "image/png" : "image/jpeg");
@@ -991,7 +993,7 @@ export const AssetsPanel: React.FC = () => {
       setKieaiDialog({ file, previewUrl: item.thumbnailUrl });
     } catch (err) {
       console.error("[KieAI] Failed to load media blob:", err);
-      toast.error("Failed to open KieAI", err instanceof Error ? err.message : "Unknown error");
+      toast.error("Échec de l'ouverture de KieAI", err instanceof Error ? err.message : "Erreur inconnue");
     }
   }, []);
 
@@ -1008,11 +1010,11 @@ export const AssetsPanel: React.FC = () => {
         return (
           <div className="flex min-h-0 flex-1 flex-col">
             <div className="px-4 pt-[18px] shrink-0">
-              <div className="font-bold text-[18px] text-fg mb-[14px]">Media</div>
+              <div className="font-bold text-[18px] text-fg mb-[14px]">Médias</div>
               <div className="flex gap-2 mb-[18px]">
                 <button
                   type="button"
-                  aria-label="Import media"
+                  aria-label="Importer des médias"
                   onClick={triggerFileInput}
                   className="flex-1 flex items-center justify-center gap-[7px] bg-bg border border-border rounded-[9px] p-[10px] font-medium text-[13px] text-fg-2"
                 >
@@ -1029,11 +1031,11 @@ export const AssetsPanel: React.FC = () => {
                     <path d="M12 16V4M7 9l5-5 5 5" />
                     <path d="M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2" />
                   </svg>
-                  Import
+                  Importer
                 </button>
-                <button
+                {STUDIO_RECORDING_ENABLED && <button
                   type="button"
-                  aria-label="Record"
+                  aria-label="Enregistrer"
                   onClick={() => openModal("recorder")}
                   className="flex-1 flex items-center justify-center gap-[7px] bg-bg border border-border rounded-[9px] p-[10px] font-medium text-[13px] text-fg-2"
                 >
@@ -1048,11 +1050,11 @@ export const AssetsPanel: React.FC = () => {
                     <circle cx="12" cy="12" r="8" />
                     <circle cx="12" cy="12" r="3" fill="var(--fg-3)" stroke="none" />
                   </svg>
-                  Record
-                </button>
+                  Enregistrer
+                </button>}
                 <button
                   type="button"
-                  aria-label="Sort media"
+                  aria-label="Trier les médias"
                   onClick={() =>
                     setSortOrder((prev) =>
                       prev === "none" ? "asc" : prev === "asc" ? "desc" : "none",
@@ -1078,7 +1080,7 @@ export const AssetsPanel: React.FC = () => {
             {missingAssetsCount > 0 && (
               <div className="px-4 pb-3 space-y-2">
                 <PanelButton
-                  label="Show Only Missing Assets"
+                  label="Afficher seulement les fichiers manquants"
                   onClick={() => setShowOnlyMissing(!showOnlyMissing)}
                   className={`w-full px-3 py-2 rounded-lg border text-xs font-medium transition-all flex items-center justify-between ${
                     showOnlyMissing
@@ -1088,19 +1090,19 @@ export const AssetsPanel: React.FC = () => {
                 >
                   <div className="flex items-center gap-2">
                     <AlertTriangle size={14} />
-                    <span>Show Only Missing Assets</span>
+                    <span>Afficher seulement les fichiers manquants</span>
                   </div>
                   <div className="px-2 py-0.5 rounded-full bg-yellow-500 text-black text-[10px] font-bold">
                     {missingAssetsCount}
                   </div>
                 </PanelButton>
                 <PanelButton
-                  label="Relink from Folder"
+                  label="Relier depuis un dossier"
                   onClick={handleRelinkFromFolder}
                   className="w-full px-3 py-2 rounded-lg border border-yellow-500/40 bg-yellow-500/5 text-yellow-500 text-xs font-medium transition-all hover:bg-yellow-500/15 flex items-center gap-2"
                 >
                   <RefreshCw size={14} />
-                  <span>Relink from Folder…</span>
+                  <span>Relier depuis un dossier…</span>
                 </PanelButton>
               </div>
             )}
@@ -1114,7 +1116,7 @@ export const AssetsPanel: React.FC = () => {
               <div className="px-4 pb-[18px] relative">
                 {filteredItems.length > 0 && (
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-[13px] font-semibold text-fg-2">Project Media</span>
+                    <span className="text-[13px] font-semibold text-fg-2">Médias du projet</span>
                     <span className="text-[12px] font-medium text-fg-muted">{filteredItems.length}</span>
                   </div>
                 )}
@@ -1133,19 +1135,19 @@ export const AssetsPanel: React.FC = () => {
                         onReplace={() => handleReplaceAsset(item.id)}
                         onDragStart={(e) => handleItemDragStart(e, item)}
                         onAddToTimeline={() => handleAddToTimeline(item)}
-                        onKieAI={item.type === "image" && !item.isPending && !item.kieaiError ? () => handleOpenKieAI(item) : undefined}
+                        onKieAI={STUDIO_CLOUD_AI_ENABLED && item.type === "image" && !item.isPending && !item.kieaiError ? () => handleOpenKieAI(item) : undefined}
                         onRetryKieAI={item.kieaiError && item.kieaiTaskId ? () => handleRetryKieAI(item) : undefined}
                       />
                     ))}
                     <div className="flex flex-col">
                       <PanelButton
-                        label="Add media"
+                        label="Ajouter un média"
                         onClick={triggerFileInput}
                         className="h-[78px] bg-bg-2 rounded-lg border border-dashed border-border hover:border-accent/50 hover:bg-accent-soft relative flex items-center justify-center cursor-pointer transition-all overflow-hidden group"
                       >
                         <div className="flex flex-col items-center gap-1.5">
                           <Upload size={20} className="text-fg-muted group-hover:text-accent transition-colors" />
-                          <span className="text-[10px] text-fg-muted group-hover:text-accent transition-colors font-medium">Add media</span>
+                          <span className="text-[10px] text-fg-muted group-hover:text-accent transition-colors font-medium">Ajouter un média</span>
                         </div>
                       </PanelButton>
                     </div>
@@ -1160,7 +1162,7 @@ export const AssetsPanel: React.FC = () => {
                 {isDragOver && (
                   <div className="absolute inset-4 border-2 border-dashed border-accent rounded-xl flex items-center justify-center bg-accent-soft pointer-events-none z-50 backdrop-blur-sm">
                     <div className="text-accent text-sm font-bold bg-bg-1 px-4 py-2 rounded-full shadow-lg">
-                      Drop files to import
+                      Dépose les fichiers pour les importer
                     </div>
                   </div>
                 )}
@@ -1409,7 +1411,7 @@ export const AssetsPanel: React.FC = () => {
             <div className="min-h-0 flex-1 overflow-auto">
               <div className="min-w-0 px-4 py-4 space-y-3">
                 <PanelButton
-                  label="Add Title"
+                  label="Ajouter un titre"
                   onClick={async () => {
                     const created = await insertTimelineOverlay(
                       playheadPosition,
@@ -1420,7 +1422,7 @@ export const AssetsPanel: React.FC = () => {
                           .createTextClip(
                             trackId,
                             playheadPosition,
-                            "New Title",
+                            "Nouveau titre",
                             5,
                             DEFAULT_TITLE_STYLE,
                           ),
@@ -1436,7 +1438,7 @@ export const AssetsPanel: React.FC = () => {
                   className="flex min-h-[72px] w-full min-w-0 flex-col items-center justify-center rounded-lg border border-border bg-background-tertiary px-3 py-3 text-center transition-all hover:border-primary/50 hover:bg-primary/5"
                 >
                   <span className="block max-w-full truncate text-base font-bold leading-tight text-text-primary">
-                    Add Title
+                    Ajouter un titre
                   </span>
                   <Text
                     type="supporting"
@@ -1445,7 +1447,7 @@ export const AssetsPanel: React.FC = () => {
                     maxLines={1}
                     className="mt-1 max-w-full text-[11px] leading-tight"
                   >
-                    Click to add text to timeline
+                    Clique pour ajouter le texte à la timeline
                   </Text>
                 </PanelButton>
                 <div className="grid min-w-0 grid-cols-2 gap-2">
@@ -1530,7 +1532,7 @@ export const AssetsPanel: React.FC = () => {
     >
       {/* ── Vertical tool rail (icon + label, left) ───────────── */}
       <div className="flex flex-col items-center gap-1 px-0 py-[14px] border-r border-border bg-bg-1 overflow-y-auto scrollbar-none shrink-0 w-[92px]">
-        {ASSETS_TABS.map((tab) => {
+        {ASSETS_TABS.filter((tab) => STUDIO_ASSET_TABS.has(tab.value)).map((tab) => {
           const Icon = TAB_ICONS[tab.value];
           const isActive = activeTab === tab.value;
           return (
@@ -1559,13 +1561,13 @@ export const AssetsPanel: React.FC = () => {
       {/* ── Body: section content fills the remaining space ──── */}
       <div className="flex-1 flex flex-col min-w-0 h-full bg-bg-1 relative">
         {isImporting && (
-          <LoadingIndicator message={importProgress || "Importing media..."} />
+          <LoadingIndicator message={importProgress || "Importation des médias..."} />
         )}
 
         <input
           ref={fileInputRef}
           type="file"
-          aria-label="Import media"
+          aria-label="Importer des médias"
           accept="video/*,audio/*,image/*"
           multiple
           className="hidden"

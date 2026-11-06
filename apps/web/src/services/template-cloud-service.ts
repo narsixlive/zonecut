@@ -20,6 +20,7 @@ export class TemplateCloudService {
   }
 
   async listTemplates(): Promise<CloudTemplate[]> {
+    if (!this.apiUrl) return [];
     try {
       const response = await fetch(`${this.apiUrl}/templates`);
       if (!response.ok) {
@@ -109,6 +110,7 @@ export class TemplateCloudService {
   }
 
   async listScriptableTemplates(): Promise<ScriptableTemplate[]> {
+    if (!this.apiUrl) return [];
     try {
       const response = await fetch(`${this.apiUrl}/templates/scriptable`);
       if (!response.ok) {

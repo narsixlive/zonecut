@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:full": "vite --mode full --port 5300 --open",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "deploy": "wrangler pages deploy dist --project-name=openreel",

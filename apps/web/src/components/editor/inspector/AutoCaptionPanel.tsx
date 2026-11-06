@@ -25,26 +25,33 @@ import { audioBufferToWhisperSamples } from "../../../utils/whisper-audio";
 import {
   DEFAULT_WHISPER_MODEL,
   WHISPER_MODELS,
-  isWhisperModelKey,
+  WHISPER_MODELS_BASE_URL,
   type WhisperModelKey,
 } from "../../../workers/whisper-models";
 
 const CAPTION_STYLE_PRESETS = ["default", "modern", "bold", "cinematic", "minimal"] as const;
+const CAPTION_STYLE_LABELS: Record<(typeof CAPTION_STYLE_PRESETS)[number], string> = {
+  default: "Classique",
+  modern: "Moderne",
+  bold: "Gras",
+  cinematic: "Cinéma",
+  minimal: "Minimal",
+};
 const WHISPER_LANGUAGES = [
-  { code: "en", name: "English" },
-  { code: "fr", name: "French" },
-  { code: "de", name: "German" },
-  { code: "es", name: "Spanish" },
-  { code: "it", name: "Italian" },
-  { code: "pt", name: "Portuguese" },
+  { code: "en", name: "Anglais" },
+  { code: "fr", name: "Français" },
+  { code: "de", name: "Allemand" },
+  { code: "es", name: "Espagnol" },
+  { code: "it", name: "Italien" },
+  { code: "pt", name: "Portugais" },
   { code: "hi", name: "Hindi" },
-  { code: "ja", name: "Japanese" },
-  { code: "ko", name: "Korean" },
-  { code: "zh", name: "Chinese" },
-  { code: "ru", name: "Russian" },
-  { code: "tr", name: "Turkish" },
-  { code: "pl", name: "Polish" },
-  { code: "vi", name: "Vietnamese" },
+  { code: "ja", name: "Japonais" },
+  { code: "ko", name: "Coréen" },
+  { code: "zh", name: "Chinois" },
+  { code: "ru", name: "Russe" },
+  { code: "tr", name: "Turc" },
+  { code: "pl", name: "Polonais" },
+  { code: "vi", name: "Vietnamien" },
 ] as const;
 
 interface AutoCaptionPanelProps {
@@ -71,13 +78,10 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState("");
-  const [selectedLanguage, setSelectedLanguage] = useState("en");
+  const [selectedLanguage, setSelectedLanguage] = useState("fr");
   const [selectedStyle, setSelectedStyle] = useState<string>("default");
-  const [selectedModel, setSelectedModel] = useState<WhisperModelKey>(
+  const [selectedModel] = useState<WhisperModelKey>(
     DEFAULT_WHISPER_MODEL,
-  );
-  const [readyModels, setReadyModels] = useState<Set<WhisperModelKey>>(
-    () => new Set(),
   );
   const [modelBackends, setModelBackends] = useState<
     Partial<Record<WhisperModelKey, "webgpu" | "wasm">>
@@ -112,7 +116,7 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
       audio?: Float32Array,
     ): Promise<{ text?: string; chunks?: WorkerChunk[] }> => {
       const worker = workerRef.current;
-      if (!worker) return Promise.reject(new Error("Caption worker is not ready."));
+      if (!worker) return Promise.reject(new Error("Le module sous-titres n’est pas prêt."));
       const requestId = crypto.randomUUID();
       return new Promise((resolve, reject) => {
         const handleMessage = (event: MessageEvent<Record<string, unknown>>) => {
@@ -121,17 +125,16 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
           if (messageType === "model-progress") {
             setWorkerState("loading");
             const rawProgress = Number(event.data.progress ?? 0);
-            setProgress(rawProgress > 1 ? rawProgress / 100 : rawProgress);
-            const file = String(event.data.file ?? "caption model").split("/").pop();
-            setProgressMessage(`Downloading ${file || "caption model"}…`);
+            const ratio = rawProgress > 1 ? rawProgress / 100 : rawProgress;
+            setProgress(ratio);
+            setProgressMessage(`Téléchargement du module… ${Math.round(ratio * 100)} %`);
           } else if (messageType === "transcription-progress") {
             setWorkerState("ready");
             setProgress(Number(event.data.progress ?? 0));
-            setProgressMessage("Transcribing selected clip locally…");
+            setProgressMessage("Transcription du clip sur votre ordinateur…");
           } else if (messageType === "ready") {
             worker.removeEventListener("message", handleMessage);
             setWorkerState("ready");
-            setReadyModels((current) => new Set(current).add(selectedModel));
             const backend = event.data.backend;
             if (backend === "webgpu" || backend === "wasm") {
               setModelBackends((current) => ({
@@ -140,12 +143,11 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
               }));
             }
             setProgress(1);
-            setProgressMessage("Offline caption model is ready");
+            setProgressMessage("Module sous-titres prêt");
             resolve({});
           } else if (messageType === "result") {
             worker.removeEventListener("message", handleMessage);
             setWorkerState("ready");
-            setReadyModels((current) => new Set(current).add(selectedModel));
             const backend = event.data.backend;
             if (backend === "webgpu" || backend === "wasm") {
               setModelBackends((current) => ({
@@ -160,7 +162,7 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
             });
           } else if (messageType === "error") {
             worker.removeEventListener("message", handleMessage);
-            reject(new Error(String(event.data.message ?? "Local transcription failed.")));
+            reject(new Error(String(event.data.message ?? "La transcription a échoué.")));
           }
         };
         worker.addEventListener("message", handleMessage);
@@ -188,31 +190,34 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
     [selectedLanguage, selectedModel],
   );
 
-  const handleModelChange = useCallback(
-    (value: string) => {
-      if (!isWhisperModelKey(value)) return;
-      setSelectedModel(value);
-      setSegments([]);
-      setError(null);
-      setProgress(readyModels.has(value) ? 1 : 0);
-      setProgressMessage(readyModels.has(value) ? "Offline caption model is ready" : "");
-      setWorkerState(readyModels.has(value) ? "ready" : "idle");
-    },
-    [readyModels],
-  );
-
   const handlePrepareModel = useCallback(async () => {
     setError(null);
     setWorkerState("loading");
     setProgress(0);
-    setProgressMessage("Preparing offline caption model…");
+    setProgressMessage("Préparation du module sous-titres…");
     try {
       await runWorker("load");
     } catch (reason) {
       setWorkerState("idle");
-      setError(reason instanceof Error ? reason.message : "Model download failed.");
+      setError(reason instanceof Error ? reason.message : "Le téléchargement du module a échoué.");
     }
   }, [runWorker]);
+
+  // Already downloaded in an earlier session (transformers.js Cache API) → load it from the
+  // cache without asking again; the explicit button stays the consent step for the first download.
+  useEffect(() => {
+    if (workerState !== "idle" || typeof caches === "undefined") return;
+    // Full URL, not just the model id: a copy cached from another host would mean a new 300 MB download.
+    const weights = new URL(`${WHISPER_MODELS[selectedModel].id}/onnx/`, new URL(WHISPER_MODELS_BASE_URL, location.href)).href;
+    caches
+      .open("transformers-cache")
+      .then((cache) => cache.keys())
+      .then((requests) => {
+        if (requests.some((request) => request.url.startsWith(weights))) void handlePrepareModel();
+      })
+      .catch(() => undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per model, not on every state change
+  }, [selectedModel]);
 
   const handleTranscribe = useCallback(async () => {
     if (!clip || !mediaItem) return;
@@ -220,7 +225,7 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
     setSegments([]);
     setIsTranscribing(true);
     setProgress(0);
-    setProgressMessage("Extracting selected clip audio…");
+    setProgressMessage("Extraction du son du clip…");
 
     let audioContext: AudioContext | null = null;
     try {
@@ -228,7 +233,7 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
         mediaItem.blob ??
         (mediaItem.fileHandle ? await mediaItem.fileHandle.getFile() : null);
       if (!sourceBlob) {
-        throw new Error("Reconnect the source media before creating captions.");
+        throw new Error("Reconnectez le média source avant de créer les sous-titres.");
       }
       audioContext = new AudioContext();
       const audioBuffer = await loadAudioBuffer(audioContext, sourceBlob, {
@@ -238,7 +243,7 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
           setProgressMessage(next.message);
         },
       });
-      if (!audioBuffer) throw new Error("The selected clip audio could not be decoded.");
+      if (!audioBuffer) throw new Error("Impossible de lire le son de ce clip.");
 
       const sourceStart = Math.max(0, clip.inPoint ?? 0);
       const sourceEnd = Math.min(
@@ -250,9 +255,7 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
       const samples = audioBufferToWhisperSamples(audioBuffer, sourceStart, sourceEnd);
       setProgress(0.2);
       setProgressMessage(
-        workerState === "ready"
-          ? `Transcribing with ${WHISPER_MODELS[selectedModel].shortLabel}…`
-          : `Downloading ${WHISPER_MODELS[selectedModel].shortLabel}, then transcribing…`,
+        "Transcription en cours…",
       );
       const result = await runWorker("transcribe", samples);
       const sourceDuration = Math.max(0.1, sourceEnd - sourceStart);
@@ -288,12 +291,12 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
         });
       }
       if (nextSegments.length === 0) {
-        throw new Error("No speech was detected in the selected clip.");
+        throw new Error("Aucune parole détectée dans ce clip.");
       }
       setSegments(nextSegments);
-      setProgressMessage("Captions are ready to add");
+      setProgressMessage("Sous-titres prêts à ajouter");
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Local transcription failed.");
+      setError(reason instanceof Error ? reason.message : "La transcription a échoué.");
     } finally {
       await audioContext?.close().catch(() => undefined);
       setIsTranscribing(false);
@@ -331,44 +334,22 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
       }
     }
     setSegments([]);
-    setProgressMessage(`${addedCount} single-line caption clips added`);
+    setProgressMessage(`${addedCount} sous-titres ajoutés`);
   }, [addSubtitle, clip, maxWordsPerLine, segments, selectedModel, selectedStyle]);
 
   const modelStatus = useMemo(() => {
     const model = WHISPER_MODELS[selectedModel];
     if (workerState === "ready") {
       const backend = modelBackends[selectedModel];
-      return `Downloaded and cached${backend ? ` · ${backend === "webgpu" ? "GPU" : "CPU"}` : ""}`;
+      return backend ? "Prêt · sur votre ordinateur" : "Prêt";
     }
-    if (workerState === "loading") return progressMessage || "Downloading model…";
+    if (workerState === "loading") return progressMessage || "Téléchargement du module…";
     return `${model.downloadSize} · ${model.description}`;
   }, [modelBackends, progressMessage, selectedModel, workerState]);
 
   return (
     <div className="w-full min-w-0 space-y-3">
       <Card variant="muted" padding={3} className="space-y-2 border border-primary/30 bg-primary/5">
-        <div className="flex items-center justify-between gap-2">
-          <Text type="supporting" color="secondary" className="text-[10px]">
-            Model quality
-          </Text>
-          <Selector
-            label="Local caption model"
-            isLabelHidden
-            size="sm"
-            width={176}
-            value={selectedModel}
-            onChange={handleModelChange}
-            isDisabled={workerState === "loading" || isTranscribing}
-            options={(
-              Object.entries(WHISPER_MODELS) as Array<
-                [WhisperModelKey, (typeof WHISPER_MODELS)[WhisperModelKey]]
-              >
-            ).map(([value, model]) => ({
-              label: model.label,
-              value,
-            }))}
-          />
-        </div>
         <div className="flex items-start gap-2">
           {workerState === "ready" ? (
             <Check size={15} className="mt-0.5 text-primary" aria-hidden />
@@ -394,7 +375,7 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
         )}
         {workerState === "idle" && (
           <Button
-            label={`Download ${WHISPER_MODELS[selectedModel].shortLabel}`}
+            label={`Télécharger le module sous-titres (${WHISPER_MODELS[selectedModel].downloadSize})`}
             icon={<Download size={13} aria-hidden />}
             variant="secondary"
             size="sm"
@@ -403,7 +384,7 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
           />
         )}
         <Text type="supporting" color="secondary" className="block text-[9px] leading-relaxed">
-          Stored in this browser after the first download. Media never leaves your device.
+          Téléchargé une seule fois, puis gardé dans ce navigateur. Vos vidéos et votre son ne quittent jamais votre ordinateur.
         </Text>
       </Card>
 
@@ -411,10 +392,10 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5">
             <Languages size={14} className="text-fg-2" aria-hidden />
-            <Text type="supporting" color="secondary" className="text-[10px]">Language</Text>
+            <Text type="supporting" color="secondary" className="text-[10px]">Langue</Text>
           </div>
           <Selector
-            label="Caption language"
+            label="Langue des sous-titres"
             isLabelHidden
             size="sm"
             width={132}
@@ -428,9 +409,9 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
           />
         </div>
         <div className="flex items-center justify-between gap-2">
-          <Text type="supporting" color="secondary" className="text-[10px]">Caption style</Text>
+          <Text type="supporting" color="secondary" className="text-[10px]">Style</Text>
           <Selector
-            label="Caption style"
+            label="Style des sous-titres"
             isLabelHidden
             size="sm"
             width={132}
@@ -438,7 +419,7 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
             onChange={setSelectedStyle}
             isDisabled={isTranscribing}
             options={CAPTION_STYLE_PRESETS.map((preset) => ({
-              label: preset[0].toUpperCase() + preset.slice(1),
+              label: CAPTION_STYLE_LABELS[preset],
               value: preset,
             }))}
           />
@@ -472,7 +453,7 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
             ))}
           </div>
           <Button
-            label={`Add ${segments.length} as Editable Text`}
+            label={`Ajouter ${segments.length} sous-titres modifiables`}
             variant="primary"
             size="sm"
             onClick={handleAddToTimeline}
@@ -482,7 +463,7 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
       )}
 
       <Button
-        label={isTranscribing ? "Transcribing Locally…" : "Transcribe Selected Clip"}
+        label={isTranscribing ? "Transcription…" : "Créer les sous-titres du clip"}
         icon={
           isTranscribing ? (
             <Loader2 size={14} className="animate-spin" aria-hidden />
@@ -493,12 +474,12 @@ export const AutoCaptionPanel: React.FC<AutoCaptionPanelProps> = ({
         variant="primary"
         size="md"
         onClick={handleTranscribe}
-        isDisabled={!canTranscribe || isTranscribing}
+        isDisabled={!canTranscribe || isTranscribing || workerState !== "ready"}
         className="w-full justify-center"
       />
       {!canTranscribe && (
         <Text type="supporting" color="secondary" className="block text-center text-[9px]">
-          Select a connected video or audio clip first.
+          Sélectionnez d'abord un clip vidéo ou audio.
         </Text>
       )}
     </div>

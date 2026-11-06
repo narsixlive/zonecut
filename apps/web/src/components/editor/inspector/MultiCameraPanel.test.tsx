@@ -15,6 +15,17 @@ vi.mock("../../../utils/load-audio-buffer", () => ({ loadAudioBuffer: vi.fn() })
 vi.mock("../../../services/multicam-analysis-store", () => ({ saveMulticamArtifact: vi.fn().mockResolvedValue("artifact"), loadMulticamArtifact: vi.fn() }));
 vi.mock("@openreel/core", async (original) => ({ ...await original<typeof import("@openreel/core")>(), analyzeSileroVad: vi.fn() }));
 vi.mock("./multicam-workflow", async (original) => ({ ...await original<typeof import("./multicam-workflow")>(), analyzeMulticamSyncInWorker: vi.fn() }));
+// Upstream feature test: run it with the full (non-ZoneScene) scope so the hidden code stays covered.
+vi.mock("../../../zonescene/studio-scope", () => ({
+  STUDIO_FULL: false,
+  isStudioSectionHidden: () => false,
+  STUDIO_ASSET_TABS: { has: () => true },
+  STUDIO_RECORDING_ENABLED: true,
+  STUDIO_CLOUD_AI_ENABLED: true,
+  STUDIO_BACK_URL: "/",
+  STUDIO_BACK_LABEL: "Back",
+}));
+
 
 const clip = (id: string): Clip => ({
   id, mediaId: id, trackId: id, startTime: 2, duration: 8, inPoint: 1, outPoint: 9,

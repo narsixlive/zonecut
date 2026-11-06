@@ -150,7 +150,7 @@ export const TourPopover: React.FC<TourPopoverProps> = ({
         )}
 
         <IconButton
-          label="Skip tour"
+          label="Passer la visite"
           icon={<X size={14} />}
           variant="ghost"
           size="sm"
@@ -206,7 +206,7 @@ export const TourPopover: React.FC<TourPopoverProps> = ({
               <button
                 key={index}
                 type="button"
-                aria-label={`Go to step ${index + 1}`}
+                aria-label={`Aller à l’étape ${index + 1}`}
                 onClick={() => onGoToStep(index)}
                 className={`w-2 h-2 rounded-full transition-all ${
                   index === currentStep
@@ -221,31 +221,31 @@ export const TourPopover: React.FC<TourPopoverProps> = ({
         <div className="grid grid-cols-[88px_1fr_108px] items-center gap-3 px-4 py-3 border-t border-border bg-background-tertiary rounded-b-xl">
           <button
             type="button"
-            aria-label="Back"
+            aria-label="Retour"
             onClick={onPrev}
             disabled={isFirstStep}
             className="inline-flex h-9 min-w-[88px] items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-xs font-medium text-text-secondary transition-colors hover:bg-background-secondary hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-30"
           >
             <ChevronLeft size={14} className="shrink-0" aria-hidden />
-            <span>Back</span>
+            <span>Retour</span>
           </button>
 
           <button
             type="button"
-            aria-label="Skip tour"
+            aria-label="Passer la visite"
             onClick={onSkip}
             className="mx-auto inline-flex h-9 items-center justify-center whitespace-nowrap rounded-lg px-3 text-xs font-medium text-text-muted transition-colors hover:bg-background-secondary hover:text-text-secondary"
           >
-            Skip Tour
+            Passer
           </button>
 
           <button
             type="button"
-            aria-label={isLastStep ? "Get Started" : "Next"}
+            aria-label={isLastStep ? "C’est parti" : "Suivant"}
             onClick={onNext}
             className="inline-flex h-9 min-w-[108px] items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-primary px-4 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <span>{isLastStep ? "Get Started" : "Next"}</span>
+            <span>{isLastStep ? "C’est parti" : "Suivant"}</span>
             {!isLastStep && <ChevronRight size={14} className="shrink-0" aria-hidden />}
           </button>
         </div>

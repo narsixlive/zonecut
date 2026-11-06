@@ -11,22 +11,22 @@ afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); useTim
 describe("visible preview ranges", () => {
   it("marks, nudges and clears an In/Out range without modifying clips", () => {
     render(<><TimelineRangeActions duration={10} frameRate={24} /><TimelineRange duration={10} frameRate={24} pixelsPerSecond={50} /></>);
-    fireEvent.click(screen.getByRole("button", { name: "Mark In point" }));
+    fireEvent.click(screen.getByRole("button", { name: "Marquer le point d'entrée" }));
     expect(useTimelineStore.getState().loopStart).toBe(2);
-    const out = screen.getByRole("slider", { name: "Range Out point" });
+    const out = screen.getByRole("slider", { name: "Point de sortie de la plage" });
     fireEvent.keyDown(out, { key: "ArrowLeft", shiftKey: true });
     expect(useTimelineStore.getState().loopEnd).toBeCloseTo(10 - 10 / 24);
-    fireEvent.click(screen.getByRole("button", { name: "Clear preview range" }));
+    fireEvent.click(screen.getByRole("button", { name: "Effacer la plage de prévisualisation" }));
     expect(screen.queryByRole("slider")).not.toBeInTheDocument();
     expect(useTimelineStore.getState().loopEnabled).toBe(false);
   });
   it("clamps handles to one frame apart and blocks edits during export", () => {
     useTimelineStore.getState().setLoopRange(2, 3);
     const view = render(<TimelineRange duration={10} frameRate={30} pixelsPerSecond={50} />);
-    fireEvent.keyDown(screen.getByRole("slider", { name: "Range In point" }), { key: "End" });
+    fireEvent.keyDown(screen.getByRole("slider", { name: "Point d'entrée de la plage" }), { key: "End" });
     expect(useTimelineStore.getState().loopStart).toBeCloseTo(3 - 1 / 30);
     act(() => useUIStore.setState({ exportState: { ...useUIStore.getState().exportState, isExporting: true } }));
     view.rerender(<TimelineRange duration={10} frameRate={30} pixelsPerSecond={50} />);
-    expect(screen.getByRole("slider", { name: "Range Out point" })).toBeDisabled();
+    expect(screen.getByRole("slider", { name: "Point de sortie de la plage" })).toBeDisabled();
   });
 });

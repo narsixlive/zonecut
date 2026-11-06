@@ -4,13 +4,31 @@ import { MockSlider } from "./shell/InspectorControls";
 import { useProjectStore } from "../../../stores/project-store";
 import {
   getAvailableBlendModes,
-  getBlendModeName,
   type BlendMode,
 } from "@openreel/core";
 
 interface BlendingSectionProps {
   clipId: string;
 }
+
+// Display-only French labels for blend modes (standard Photoshop FR names).
+// Keyed by the stable BlendMode value, never translating the value itself.
+const BLEND_MODE_LABELS_FR: Partial<Record<BlendMode, string>> = {
+  normal: "Normal",
+  multiply: "Produit",
+  screen: "Superposition",
+  overlay: "Incrustation",
+  darken: "Obscurcir",
+  lighten: "Éclaircir",
+  "color-dodge": "Densité couleur -",
+  "color-burn": "Densité couleur +",
+  "hard-light": "Lumière crue",
+  "soft-light": "Lumière tamisée",
+  difference: "Différence",
+  exclusion: "Exclusion",
+};
+
+const getBlendModeLabelFr = (mode: BlendMode): string => BLEND_MODE_LABELS_FR[mode] ?? mode;
 
 export const BlendingSection: React.FC<BlendingSectionProps> = ({ clipId }) => {
   const {
@@ -72,7 +90,7 @@ export const BlendingSection: React.FC<BlendingSectionProps> = ({ clipId }) => {
         color="secondary"
         className="py-8 text-center text-xs"
       >
-        No clip selected
+        Aucun clip sélectionné
       </Text>
     );
   }
@@ -81,11 +99,11 @@ export const BlendingSection: React.FC<BlendingSectionProps> = ({ clipId }) => {
     <div className="space-y-3">
       <div className="flex items-center">
         <span className="w-[90px] flex-none text-[14px] font-semibold text-fg">
-          Blending
+          Fusion
         </span>
         <div className="relative flex-1">
           <select
-            aria-label="Blend mode"
+            aria-label="Mode de fusion"
             value={blendMode}
             onChange={(event) =>
               handleBlendModeChange(event.target.value as BlendMode)
@@ -94,7 +112,7 @@ export const BlendingSection: React.FC<BlendingSectionProps> = ({ clipId }) => {
           >
             {availableBlendModes.map((mode) => (
               <option key={mode} value={mode}>
-                {getBlendModeName(mode)}
+                {getBlendModeLabelFr(mode)}
               </option>
             ))}
           </select>
@@ -116,7 +134,7 @@ export const BlendingSection: React.FC<BlendingSectionProps> = ({ clipId }) => {
       {blendMode !== "normal" && (
         <div className="flex items-center">
           <span className="w-[90px] flex-none text-[13px] font-medium text-fg-3">
-            Blend Opacity
+            Opacité de fusion
           </span>
           <MockSlider
             className="flex-1"

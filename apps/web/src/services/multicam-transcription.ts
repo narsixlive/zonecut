@@ -53,7 +53,7 @@ export async function transcribeMulticamChannels(
             resolve({ chunks: (event.data.chunks as WorkerChunk[] | undefined) ?? [] });
           } else if (type === "error") {
             worker.removeEventListener("message", handleMessage);
-            reject(new Error(String(event.data.message ?? "Local transcription failed.")));
+            reject(new Error(String(event.data.message ?? "La transcription a échoué.")));
           }
         };
         worker.addEventListener("message", handleMessage);

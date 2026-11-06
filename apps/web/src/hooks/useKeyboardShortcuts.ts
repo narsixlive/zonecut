@@ -56,7 +56,7 @@ export function useKeyboardShortcuts() {
       try {
         await operation();
       } catch (error) {
-        toast.error(description + " failed", error instanceof Error ? error.message : "Please try again.");
+        toast.error(description + " : échec", error instanceof Error ? error.message : "Réessaie.");
       } finally {
         if (group) store.endHistoryGroup();
         editInFlight = false;
@@ -96,7 +96,7 @@ export function useKeyboardShortcuts() {
         !useProjectStore.getState().project.timeline.tracks.find((track) => track.id === item.trackId)?.locked,
       );
       if (!ids.length && !transitionItems.length) return;
-      await runEdit(cut ? "Cut clips" : "Delete selection", async () => {
+      await runEdit(cut ? "Couper les clips" : "Supprimer la sélection", async () => {
         if (cut) useProjectStore.getState().copyClips(ids);
         const removed = new Set<string>();
         for (const item of transitionItems) {
@@ -113,7 +113,7 @@ export function useKeyboardShortcuts() {
       const time = useTimelineStore.getState().playheadPosition;
       const ids = getSplittableTimelineItemIds(useProjectStore.getState().project, editableIds(), time);
       if (!ids.length) return;
-      void runEdit(trimStart === undefined ? "Split clips" : "Trim clips", async () => {
+      void runEdit(trimStart === undefined ? "Scinder les clips" : "Raccourcir les clips", async () => {
         for (const id of ids) {
           const store = useProjectStore.getState();
           if (trimStart === undefined) await splitTimelineItem(store, id, time);
@@ -173,7 +173,7 @@ export function useKeyboardShortcuts() {
           ?? store.project.timeline.tracks.find((track) => !track.locked);
         if (!destination) return;
         const time = useTimelineStore.getState().playheadPosition;
-        void runEdit("Paste clips", async () => {
+        void runEdit("Coller les clips", async () => {
           await useProjectStore.getState().pasteClips(destination.id, time);
           const state = useProjectStore.getState();
           const pasted = state.lastPastedClipIds
@@ -185,7 +185,7 @@ export function useKeyboardShortcuts() {
       ["editing.duplicate", () => {
         const ids = editableIds();
         if (!ids.length) return;
-        void runEdit("Duplicate clips", async () => {
+        void runEdit("Dupliquer les clips", async () => {
           for (const id of ids) await duplicateTimelineItem(useProjectStore.getState(), id);
         });
       }],
@@ -200,7 +200,7 @@ export function useKeyboardShortcuts() {
           .sort((a, b) => b.startTime - a.startTime)
           .map((item) => item.id);
         if (!ids.length) return;
-        void runEdit("Ripple delete clips", async () => {
+        void runEdit("Supprimer et resserrer", async () => {
           const removed = new Set<string>();
           for (const id of ids) {
             if ((await useProjectStore.getState().rippleDeleteClip(id)).success) removed.add(id);
@@ -225,15 +225,15 @@ export function useKeyboardShortcuts() {
         // Invoke the picker in the initiating key event to retain user activation.
         const project = useProjectStore.getState().getFullProject();
         void projectManager.saveProject(project).then((saved) => {
-          if (saved) toast.success("Project saved", project.name);
+          if (saved) toast.success("Projet enregistré", project.name);
         }).catch((error: unknown) => {
-          toast.error("Could not save project", error instanceof Error ? error.message : "Please try again.");
+          toast.error("Impossible d’enregistrer le projet", error instanceof Error ? error.message : "Réessaie.");
         }).finally(() => { saveInFlight = false; });
       }],
       ["file.export", () => useUIStore.getState().openModal("export")],
       ["tools.addText", () => {
         const time = useTimelineStore.getState().playheadPosition;
-        void runEdit("Add title", async () => {
+        void runEdit("Ajouter un titre", async () => {
           const created = await insertTimelineOverlay(time, 5, (trackId) =>
             useProjectStore.getState().createTextClip(trackId, time, "New Title", 5, {
               fontSize: 96, fontWeight: 800, letterSpacing: -1,

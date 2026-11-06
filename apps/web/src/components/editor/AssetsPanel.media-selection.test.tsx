@@ -42,7 +42,7 @@ describe("asset selection and insertion", () => {
     const beforeSelection = precedingBlocks();
 
     fireEvent.click(first, { detail: 1 });
-    const tools = view.getByRole("region", { name: `Preview performance for ${media[0].name}` });
+    const tools = view.getByRole("region", { name: `Fluidité de l’aperçu pour ${media[0].name}` });
     expect(precedingBlocks()).toEqual(beforeSelection);
     expect(mediaGallery.compareDocumentPosition(tools) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(view.getByRole("img", { name: media[0].name })).toBe(first);
@@ -52,7 +52,7 @@ describe("asset selection and insertion", () => {
     expect(insert).toHaveBeenCalledWith(media[0].id, 2);
 
     fireEvent.click(second);
-    const nextTools = view.getByRole("region", { name: `Preview performance for ${media[1].name}` });
+    const nextTools = view.getByRole("region", { name: `Fluidité de l’aperçu pour ${media[1].name}` });
     expect(precedingBlocks()).toEqual(beforeSelection);
     expect(mediaGallery.compareDocumentPosition(nextTools) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(view.getByRole("img", { name: media[1].name })).toBe(second);

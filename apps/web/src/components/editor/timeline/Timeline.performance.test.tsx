@@ -93,7 +93,7 @@ describe("timeline playback rendering", () => {
       return useClipContextMenuItems({ clip, track });
     });
     const splitAction = () => result.current.find(
-      (item) => "label" in item && item.label === "Split at Playhead",
+      (item) => "label" in item && item.label === "Couper à la tête de lecture",
     );
     renders.mockClear();
 
@@ -167,7 +167,7 @@ describe("timeline playback rendering", () => {
     expect(view.container.querySelectorAll(".bg-cover")).toHaveLength(0);
     expect(view.container.querySelectorAll('svg[height="28"] rect').length).toBeGreaterThan(0);
     const menu = renderHook(() => useClipContextMenuItems({ clip, track: audioTrack }));
-    expect(menu.result.current.some((item) => "label" in item && item.label === "Separate Audio")).toBe(false);
+    expect(menu.result.current.some((item) => "label" in item && item.label === "Séparer l'audio")).toBe(false);
   });
 
   it("preserves selected clip offsets across drag updates and leaves locked clips alone", async () => {
@@ -242,7 +242,7 @@ describe("timeline playback rendering", () => {
     const view = render(<DragHarness />);
 
     try {
-      fireEvent.mouseDown(view.getByRole("button", { name: /Select clip video/ }),
+      fireEvent.mouseDown(view.getByRole("button", { name: /Sélectionner le clip video/ }),
         { button: 0, clientX: 0, clientY: 20 });
       fireEvent.mouseMove(window, { clientX: 10, clientY: 20 });
       fireEvent.mouseMove(window, { clientX: 50, clientY: 20 });

@@ -196,9 +196,9 @@ describe("NoiseReductionSection persistence", () => {
     const firstRender = render(<NoiseReductionSection clipId={clipId} />);
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Hear Original" })).not.toBeDisabled();
-      expect(screen.getByRole("button", { name: "Hear Cleaned" })).not.toBeDisabled();
-      expect(screen.getByText(/Current mode:/)).toHaveTextContent("Speech Focus");
+      expect(screen.getByRole("button", { name: "Écouter l’original" })).not.toBeDisabled();
+      expect(screen.getByRole("button", { name: "Écouter le résultat" })).not.toBeDisabled();
+      expect(screen.getByText(/Mode actuel :/)).toHaveTextContent("Voix");
     });
 
     firstRender.unmount();
@@ -206,8 +206,8 @@ describe("NoiseReductionSection persistence", () => {
     render(<NoiseReductionSection clipId={clipId} />);
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Hear Original" })).not.toBeDisabled();
-      expect(screen.getByText(/Current mode:/)).toHaveTextContent("Speech Focus");
+      expect(screen.getByRole("button", { name: "Écouter l’original" })).not.toBeDisabled();
+      expect(screen.getByText(/Mode actuel :/)).toHaveTextContent("Voix");
     });
   });
 
@@ -229,27 +229,27 @@ describe("NoiseReductionSection persistence", () => {
 
     render(<NoiseReductionSection clipId={clipId} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Analyze & Recommend/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Analyser et recommander/i }));
 
     await waitFor(() => {
       expect(autoLearnNoiseProfile).toHaveBeenCalled();
     });
 
     await waitFor(() => {
-      expect(screen.getByText("Recommendation ready")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "Apply Recommended Cleanup" })).toBeInTheDocument();
+      expect(screen.getByText("Recommandation prête")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Appliquer le nettoyage recommandé" })).toBeInTheDocument();
     });
 
     expect(useProjectStore.getState().getAudioEffects(clipId)).toHaveLength(0);
 
-    fireEvent.click(screen.getByRole("button", { name: "Apply Recommended Cleanup" }));
+    fireEvent.click(screen.getByRole("button", { name: "Appliquer le nettoyage recommandé" }));
 
     await waitFor(() => {
       const effect = useProjectStore.getState().getAudioEffects(clipId)[0];
       expect(effect?.type).toBe("noiseReduction");
       expect(typeof (effect?.params as { focus?: unknown }).focus).toBe("string");
       expect((effect?.params as { profile?: unknown }).profile).toBeTruthy();
-      expect(screen.getByText(/applied to this clip/i)).toBeInTheDocument();
+      expect(screen.getByText(/appliqué à ce clip/i)).toBeInTheDocument();
     });
   });
 
@@ -259,7 +259,7 @@ describe("NoiseReductionSection persistence", () => {
 
     render(<NoiseReductionSection clipId={clipId} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /White Noise/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Bruit blanc/i }));
 
     await waitFor(() => {
       expect(autoLearnNoiseProfile).toHaveBeenCalled();
@@ -270,7 +270,7 @@ describe("NoiseReductionSection persistence", () => {
       expect(effect?.type).toBe("noiseReduction");
       expect(effect?.params).toMatchObject({ focus: "whiteNoise" });
       expect((effect?.params as { profile?: unknown }).profile).toBeTruthy();
-      expect(screen.getByText(/White Noise learned and applied to this clip/)).toBeInTheDocument();
+      expect(screen.getByText(/Bruit blanc appris et appliqué à ce clip/)).toBeInTheDocument();
     });
   });
 
@@ -280,16 +280,16 @@ describe("NoiseReductionSection persistence", () => {
 
     render(<NoiseReductionSection clipId={clipId} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Analyze & Recommend/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Analyser et recommander/i }));
 
     await waitFor(() => {
-      expect(screen.getByText("Recommendation ready")).toBeInTheDocument();
+      expect(screen.getByText("Recommandation prête")).toBeInTheDocument();
       expect(
-        screen.getByText(/custom profile could not be isolated/i),
+        screen.getByText(/profil personnalisé n.a pas pu être isolé/i),
       ).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Apply Recommended Cleanup" }));
+    fireEvent.click(screen.getByRole("button", { name: "Appliquer le nettoyage recommandé" }));
 
     await waitFor(() => {
       const effect = useProjectStore.getState().getAudioEffects(clipId)[0];

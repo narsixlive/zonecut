@@ -96,7 +96,7 @@ export const TransformTab: React.FC<TransformTabProps> = ({
       {showTransformControls && (
         <>
           <InspectorSection
-            title="Transform"
+            title="Transformation"
             sectionId="transform"
             defaultOpen
           >
@@ -126,14 +126,14 @@ export const TransformTab: React.FC<TransformTabProps> = ({
               />
               <div className="flex items-center gap-2">
                 <span className="w-[90px] flex-none text-[11px] font-medium text-fg-muted">
-                  {usesNormalizedPosition ? "Canvas pixels" : "Offset pixels"}
+                  {usesNormalizedPosition ? "Pixels du canevas" : "Pixels de décalage"}
                 </span>
-                <div className="grid flex-1 grid-cols-4 gap-1" role="group" aria-label="Nudge position by one pixel">
+                <div className="grid flex-1 grid-cols-4 gap-1" role="group" aria-label="Déplacer la position d'un pixel">
                   {([
-                    ["Nudge left 1 pixel", ArrowLeft, -1, 0],
-                    ["Nudge up 1 pixel", ArrowUp, 0, -1],
-                    ["Nudge down 1 pixel", ArrowDown, 0, 1],
-                    ["Nudge right 1 pixel", ArrowRight, 1, 0],
+                    ["Déplacer d'1 pixel à gauche", ArrowLeft, -1, 0],
+                    ["Déplacer d'1 pixel vers le haut", ArrowUp, 0, -1],
+                    ["Déplacer d'1 pixel vers le bas", ArrowDown, 0, 1],
+                    ["Déplacer d'1 pixel à droite", ArrowRight, 1, 0],
                   ] as const).map(([label, Icon, x, y]) => (
                     <button
                       key={label}
@@ -151,7 +151,7 @@ export const TransformTab: React.FC<TransformTabProps> = ({
 
               <div className="flex items-center">
                 <span className="w-[90px] flex-none text-[13px] font-medium text-fg-3">
-                  Scale
+                  Échelle
                 </span>
                 <MockSlider
                   className="flex-1"
@@ -190,7 +190,7 @@ export const TransformTab: React.FC<TransformTabProps> = ({
                   <div className="flex flex-none flex-col">
                     <button
                       type="button"
-                      aria-label="Increase rotation"
+                      aria-label="Augmenter la rotation"
                       onClick={() =>
                         handleTransformChange({
                           rotation: stepRotation(transform.rotation, 1),
@@ -211,7 +211,7 @@ export const TransformTab: React.FC<TransformTabProps> = ({
                     </button>
                     <button
                       type="button"
-                      aria-label="Decrease rotation"
+                      aria-label="Diminuer la rotation"
                       onClick={() =>
                         handleTransformChange({
                           rotation: stepRotation(transform.rotation, -1),
@@ -235,7 +235,7 @@ export const TransformTab: React.FC<TransformTabProps> = ({
               </div>
 
               <NumberField
-                label="Anchor Point"
+                label="Point d'ancrage"
                 fields={[
                   {
                     axis: "X",
@@ -266,7 +266,7 @@ export const TransformTab: React.FC<TransformTabProps> = ({
 
               <div className="flex items-center">
                 <span className="w-[90px] flex-none text-[13px] font-medium text-fg-3">
-                  Opacity
+                  Opacité
                 </span>
                 <MockSlider
                   className="flex-1"
@@ -283,7 +283,7 @@ export const TransformTab: React.FC<TransformTabProps> = ({
 
               <div className="flex items-center">
                 <span className="w-[90px] flex-none text-[13px] font-medium text-fg-3">
-                  Radius
+                  Arrondi
                 </span>
                 <MockSlider
                   className="flex-1"
@@ -305,7 +305,7 @@ export const TransformTab: React.FC<TransformTabProps> = ({
                     color="secondary"
                     className="text-[11px] text-fg-3"
                   >
-                    Fit Mode
+                    Mode d'ajustement
                   </Text>
                   <div className="grid grid-cols-3 gap-1.5">
                     {(["contain", "cover", "stretch"] as FitMode[]).map(
@@ -317,7 +317,7 @@ export const TransformTab: React.FC<TransformTabProps> = ({
                         return (
                           <ClickableCard
                             key={mode}
-                            label={`Set fit mode to ${mode}`}
+                            label={`Définir le mode d'ajustement sur ${mode}`}
                             onClick={() =>
                               handleTransformChange({ fitMode: mode })
                             }
@@ -328,10 +328,10 @@ export const TransformTab: React.FC<TransformTabProps> = ({
                             }`}
                           >
                             {mode === "contain"
-                              ? "Fit"
+                              ? "Ajuster"
                               : mode === "cover"
-                                ? "Fill"
-                                : mode}
+                                ? "Remplir"
+                                : "Étirer"}
                           </ClickableCard>
                         );
                       },
@@ -350,7 +350,7 @@ export const TransformTab: React.FC<TransformTabProps> = ({
         !selectedClip.mediaId.startsWith("shape-") &&
         !selectedClip.mediaId.startsWith("svg-") &&
         !selectedClip.mediaId.startsWith("sticker-") && (
-          <InspectorSection title="Crop" sectionId="crop" defaultOpen={false}>
+          <InspectorSection title="Recadrage" sectionId="crop" defaultOpen={false}>
             <CropSection clip={selectedClip as Clip} />
           </InspectorSection>
         )}
@@ -362,7 +362,7 @@ export const TransformTab: React.FC<TransformTabProps> = ({
         clipType === "svg" ||
         clipType === "sticker") && (
         <InspectorSection
-          title="Alignment"
+          title="Alignement"
           sectionId="alignment"
           defaultOpen={false}
         >

@@ -18,7 +18,7 @@ export const StyleTab: React.FC<StyleTabProps> = ({
   return (
     <>
       {showTextSection && (
-        <InspectorSection title="Text Properties" sectionId="text-properties">
+        <InspectorSection title="Propriétés du texte" sectionId="text-properties">
           <TextSection clipId={clipId} />
         </InspectorSection>
       )}

@@ -3,7 +3,8 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { ToolcraftText as Text, ToolcraftButton as Button } from "@openreel/ui";
 
 import { Toolbar } from "./Toolbar";
-import { EditorActionRail } from "./EditorActionRail";
+import { EditorActionRail as StudioRail } from "./EditorActionRail";
+import { EditorActionRail as FullRail } from "./EditorActionRailFull";
 import { AssetsPanel } from "./AssetsPanel";
 import { Preview } from "./Preview";
 import { InspectorPanel } from "./InspectorPanel";
@@ -19,6 +20,10 @@ import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts";
 import { useEditorInitialization } from "../../hooks/useEditorInitialization";
 import { useCompactEditor } from "../../hooks/useCompactEditor";
 import "./editor-responsive.css";
+
+import { STUDIO_AI_CHAT_ENABLED, STUDIO_FULL } from "../../zonescene/studio-scope";
+
+const EditorActionRail = STUDIO_FULL ? FullRail : StudioRail;
 
 const ChatPanel = React.lazy(() =>
   import("./chat/ChatPanel").then((module) => ({ default: module.ChatPanel })),
@@ -198,7 +203,7 @@ export const EditorInterface: React.FC = () => {
   const [chatWidth, setChatWidth] = useState(DEFAULT_CHAT_W);
   const [timelineVh, setTimelineVh] = useState(DEFAULT_TIMELINE_VH);
 
-  const chatVisible = panels.agentChat?.visible ?? false;
+  const chatVisible = STUDIO_AI_CHAT_ENABLED && (panels.agentChat?.visible ?? false);
   useEffect(() => {
     if (chatVisible) {
       setHasOpenedChat(true);
@@ -492,7 +497,7 @@ export const EditorInterface: React.FC = () => {
 
           {compact && selectedItems.length > 0 && (
             <button type="button" onClick={() => openCompactPanel("inspector")} className="shrink-0 text-xs text-accent bg-accent/10">
-              Edit selected clip · trim, captions, audio & effects
+              Régler le clip sélectionné · coupe, sous-titres, son et effets
             </button>
           )}
           <div className="flex-1 min-h-0 flex">
@@ -525,9 +530,10 @@ export const EditorInterface: React.FC = () => {
       </div>
 
       {compact && (
-        <nav aria-label="Editor workspace" className="editor-workspace-tabs">
+        <nav aria-label="Espace de travail" className="editor-workspace-tabs">
           {([
-            ["timeline", "Timeline"], ["media", "Media"], ["inspector", "Edit"], ["chat", "AI"],
+            ["timeline", "Timeline"], ["media", "Médias"], ["inspector", "Réglages"],
+            ...(STUDIO_AI_CHAT_ENABLED ? [["chat", "IA"]] as const : []),
           ] as const).map(([panel, label]) => (
             <button key={panel} type="button" aria-controls={`editor-panel-${panel}`} aria-pressed={compactPanel === panel}
               onClick={() => openCompactPanel(panel)} className={compactPanel === panel ? "text-accent bg-accent/10" : "text-fg-muted"}>

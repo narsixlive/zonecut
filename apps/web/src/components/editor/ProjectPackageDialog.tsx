@@ -83,8 +83,8 @@ export function ProjectPackageDialog({ onClose }: { onClose: () => void }) {
           await writable.close();
         } finally { await reader.cancel().catch(() => {}); reader.releaseLock(); }
       } else downloadPackage(blob, snapshot.name);
-      toast.success("Project backup ready", "Includes your edits and original media. Open it in another browser to continue editing.");
-      setStatus("Backup ready. Keep this file somewhere safe.");
+      toast.success("Sauvegarde du projet prête", "Contient ton montage et les médias d’origine. Ouvre-la dans un autre navigateur pour continuer.");
+      setStatus("Sauvegarde prête. Garde ce fichier en lieu sûr.");
     } catch (cause) {
       await writable?.abort().catch(() => {});
       if (cause instanceof Error && cause.name === "AbortError") setStatus("Backup cancelled.");
@@ -133,7 +133,7 @@ export function ProjectPackageDialog({ onClose }: { onClose: () => void }) {
       useProjectStore.getState().loadProject(copy);
       useTimelineStore.getState().zoomToFit(copy.timeline.duration || 5);
       committed = true;
-      toast.success("Project opened", `${copy.mediaLibrary.items.length} original media file${copy.mediaLibrary.items.length === 1 ? "" : "s"} restored. Your previous project is saved in Recent projects.`);
+      toast.success("Projet ouvert", `${copy.mediaLibrary.items.length} média${copy.mediaLibrary.items.length === 1 ? "" : "s"} d’origine restauré${copy.mediaLibrary.items.length === 1 ? "" : "s"}. Ton projet précédent est dans « Projets récents ».`);
       // Thumbnails are optional; restoring footage never waits for every video
       // decode. Refresh them sequentially in the background after opening.
       void (async () => {

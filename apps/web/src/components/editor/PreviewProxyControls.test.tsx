@@ -30,18 +30,18 @@ describe("visible proxy workflow", () => {
 
   it("creates the selected quality, shows dimensions and toggles preview without changing the project", async () => {
     render(<><PreviewProxyControls item={item} /><PreviewProxyBadge mediaId={item.id} /></>);
-    expect(screen.getByText(/Exports always use your original video/)).toBeInTheDocument();
-    fireEvent.change(screen.getByRole("combobox", { name: "Proxy quality" }), { target: { value: "high" } });
-    fireEvent.click(screen.getByRole("button", { name: "Create preview proxy" }));
-    await screen.findByText(/Proxy ready · 1280 × 720/);
+    expect(screen.getByText(/L’export utilise toujours ta vidéo d’origine/)).toBeInTheDocument();
+    fireEvent.change(screen.getByRole("combobox", { name: "Qualité de la copie allégée" }), { target: { value: "high" } });
+    fireEvent.click(screen.getByRole("button", { name: "Créer une copie allégée" }));
+    await screen.findByText(/Copie prête · 1280 × 720/);
     expect(generation.generate.mock.calls[0][1]).toBe("high");
-    expect(screen.getByRole("button", { name: "Proxy", pressed: true })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Original" }));
+    expect(screen.getByRole("button", { name: "Allégée", pressed: true })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Originale" }));
     expect(previewProxyCache.resolve(project.id, item).blob).toBe(item.blob);
-    expect(screen.getByText("Original preview")).toBeInTheDocument();
+    expect(screen.getByText("Aperçu original")).toBeInTheDocument();
     expect(project.mediaLibrary.items[0].blob).toBe(item.blob);
-    fireEvent.click(screen.getByRole("button", { name: "Remove cached proxy" }));
-    expect(screen.getByRole("button", { name: "Create preview proxy" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Supprimer la copie" }));
+    expect(screen.getByRole("button", { name: "Créer une copie allégée" })).toBeInTheDocument();
   });
 
   it("shows per-media progress and cancellation keeps the original after late completion", async () => {
@@ -51,10 +51,10 @@ describe("visible proxy workflow", () => {
       return new Promise<Blob>((resolve) => { complete = resolve; });
     });
     render(<><PreviewProxyControls item={item} /><PreviewProxyBadge mediaId={item.id} /></>);
-    fireEvent.click(screen.getByRole("button", { name: "Create preview proxy" }));
-    await screen.findByText("Proxy 50%");
-    expect(screen.getByRole("progressbar", { name: "Proxy progress for Camera.mp4" })).toHaveAttribute("value", "0.5");
-    fireEvent.click(screen.getByRole("button", { name: "Cancel proxy" }));
+    fireEvent.click(screen.getByRole("button", { name: "Créer une copie allégée" }));
+    await screen.findByText("Copie allégée 50%");
+    expect(screen.getByRole("progressbar", { name: "Progression de la copie pour Camera.mp4" })).toHaveAttribute("value", "0.5");
+    fireEvent.click(screen.getByRole("button", { name: "Annuler la copie" }));
     expect((generation.generate.mock.calls[0][3] as AbortSignal).aborted).toBe(true);
     await act(async () => { complete(new Blob(["late"])); });
     expect(previewProxyCache.resolve(project.id, item)).toBe(item);
@@ -64,10 +64,10 @@ describe("visible proxy workflow", () => {
   it("explains encoder errors and lets users retry", async () => {
     generation.generate.mockRejectedValueOnce(new Error("Browser encoder unavailable"));
     render(<PreviewProxyControls item={item} />);
-    fireEvent.click(screen.getByRole("button", { name: "Create preview proxy" }));
+    fireEvent.click(screen.getByRole("button", { name: "Créer une copie allégée" }));
     await screen.findByText("Browser encoder unavailable");
     expect(previewProxyCache.resolve(project.id, item)).toBe(item);
-    fireEvent.click(screen.getByRole("button", { name: "Create preview proxy" }));
-    await waitFor(() => expect(screen.getByRole("button", { name: "Proxy", pressed: true })).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: "Créer une copie allégée" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Allégée", pressed: true })).toBeInTheDocument());
   });
 });

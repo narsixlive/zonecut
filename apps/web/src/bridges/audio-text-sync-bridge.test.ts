@@ -53,7 +53,7 @@ describe("beat cut timeline workflow", () => {
   it("lets the user detect music, select video tracks, choose pacing, preview, and apply", async () => {
     vi.spyOn(bridgeModule, "getBeatSyncBridge").mockReturnValue(bridge);
     render(createElement(AudioTextSyncPanel, { clipId: "music" }));
-    fireEvent.click(screen.getByRole("button", { name: "Detect Beats" }));
+    fireEvent.click(screen.getByRole("button", { name: "Détecter le tempo" }));
     await waitFor(() => expect(screen.getByRole("button", { name: "Select Video" })).toBeInTheDocument());
     fireEvent.click(screen.getByRole("button", { name: "Select Video" }));
     fireEvent.click(screen.getByRole("button", { name: "2 beats" }));

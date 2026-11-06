@@ -71,7 +71,10 @@ export function createSubtitleSlice(_set: Set, get: Get): SubtitleSlice {
         metadata,
       );
       if (created) {
-        get().updateTextTransform(created.id, { position: { x: 0.5, y: style?.position === "top" ? 0.15 : style?.position === "center" ? 0.5 : 0.85 } });
+        // Vertical (reel) projects: bottom captions sit above y 1480/1920, where IG/TikTok overlay the caption bar.
+        const { width, height } = get().project.settings;
+        const bottomY = height > width ? 0.72 : 0.85;
+        get().updateTextTransform(created.id, { position: { x: 0.5, y: style?.position === "top" ? 0.15 : style?.position === "center" ? 0.5 : bottomY } });
       }
       if (typeof metadata?.captionSourceClipId === "string") {
         const sourceTrack = get().project.timeline.tracks.find((track) =>

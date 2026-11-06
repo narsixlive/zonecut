@@ -66,21 +66,21 @@ export const AlignmentSection: React.FC<AlignmentSectionProps> = ({
         </Text>
         <div className="flex gap-1">
           <IconButton
-            label="Align Left"
+            label="Aligner à gauche"
             icon={<AlignHorizontalJustifyStart size={14} aria-hidden />}
             size="sm"
             variant="ghost"
             onClick={() => handleAlign("x", 0)}
           />
           <IconButton
-            label="Center Horizontally"
+            label="Centrer horizontalement"
             icon={<AlignHorizontalJustifyCenter size={14} aria-hidden />}
             size="sm"
             variant="ghost"
             onClick={() => handleAlign("x", 0.5)}
           />
           <IconButton
-            label="Align Right"
+            label="Aligner à droite"
             icon={<AlignHorizontalJustifyEnd size={14} aria-hidden />}
             size="sm"
             variant="ghost"
@@ -94,21 +94,21 @@ export const AlignmentSection: React.FC<AlignmentSectionProps> = ({
         </Text>
         <div className="flex gap-1">
           <IconButton
-            label="Align Top"
+            label="Aligner en haut"
             icon={<AlignVerticalJustifyStart size={14} aria-hidden />}
             size="sm"
             variant="ghost"
             onClick={() => handleAlign("y", 0)}
           />
           <IconButton
-            label="Center Vertically"
+            label="Centrer verticalement"
             icon={<AlignVerticalJustifyCenter size={14} aria-hidden />}
             size="sm"
             variant="ghost"
             onClick={() => handleAlign("y", 0.5)}
           />
           <IconButton
-            label="Align Bottom"
+            label="Aligner en bas"
             icon={<AlignVerticalJustifyEnd size={14} aria-hidden />}
             size="sm"
             variant="ghost"
@@ -117,7 +117,7 @@ export const AlignmentSection: React.FC<AlignmentSectionProps> = ({
         </div>
       </div>
       <Button
-        label="Center on Canvas"
+        label="Centrer sur le canevas"
         variant="secondary"
         size="sm"
         onClick={handleCenterBoth}
@@ -125,8 +125,8 @@ export const AlignmentSection: React.FC<AlignmentSectionProps> = ({
       />
       <Text type="supporting" color="secondary" className="block text-center text-[9px] text-fg-muted">
         {usesNormalizedPosition
-          ? "Aligns the overlay anchor in canvas space"
-          : "Aligns the media anchor using pixel offsets from center"}
+          ? "Aligne le point d'ancrage de l'incrustation dans l'espace du canevas"
+          : "Aligne le point d'ancrage du média par décalage en pixels depuis le centre"}
       </Text>
     </div>
   );

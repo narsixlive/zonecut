@@ -63,8 +63,8 @@ const averageEnergyInRange = (
 export const NOISE_REDUCTION_PRESETS: ReadonlyArray<NoiseReductionPreset> = [
   {
     id: "balanced",
-    label: "Balanced",
-    description: "General cleanup for moderate room noise without pushing too hard.",
+    label: "Équilibré",
+    description: "Nettoyage général pour un bruit de pièce modéré, sans trop forcer.",
     config: {
       ...DEFAULT_NOISE_REDUCTION,
       threshold: -34,
@@ -76,8 +76,8 @@ export const NOISE_REDUCTION_PRESETS: ReadonlyArray<NoiseReductionPreset> = [
   },
   {
     id: "speech",
-    label: "Speech Focus",
-    description: "Preserve dialog presence while reducing hiss and ambient bed.",
+    label: "Voix",
+    description: "Préserve la présence des dialogues tout en réduisant le souffle et le bruit ambiant.",
     config: {
       ...DEFAULT_NOISE_REDUCTION,
       threshold: -36,
@@ -89,8 +89,8 @@ export const NOISE_REDUCTION_PRESETS: ReadonlyArray<NoiseReductionPreset> = [
   },
   {
     id: "whiteNoise",
-    label: "White Noise",
-    description: "Aggressive broadband hiss removal for fans, air, camera preamp noise, and room tone.",
+    label: "Bruit blanc",
+    description: "Suppression agressive du souffle large bande (ventilateurs, air, préampli caméra, bruit de pièce).",
     config: {
       ...DEFAULT_NOISE_REDUCTION,
       threshold: -56,
@@ -102,8 +102,8 @@ export const NOISE_REDUCTION_PRESETS: ReadonlyArray<NoiseReductionPreset> = [
   },
   {
     id: "music",
-    label: "Music Bed",
-    description: "Pushes background music down while keeping speech presence forward.",
+    label: "Musique de fond",
+    description: "Atténue la musique de fond tout en gardant la voix au premier plan.",
     config: {
       ...DEFAULT_NOISE_REDUCTION,
       threshold: -48,
@@ -115,8 +115,8 @@ export const NOISE_REDUCTION_PRESETS: ReadonlyArray<NoiseReductionPreset> = [
   },
   {
     id: "heavy",
-    label: "Heavy Noise",
-    description: "More aggressive broadband cleanup for loud air, fan, and street wash.",
+    label: "Bruit fort",
+    description: "Nettoyage large bande plus agressif pour l’air, les ventilateurs et le bruit de rue.",
     config: {
       ...DEFAULT_NOISE_REDUCTION,
       threshold: -42,
@@ -128,8 +128,8 @@ export const NOISE_REDUCTION_PRESETS: ReadonlyArray<NoiseReductionPreset> = [
   },
   {
     id: "wind",
-    label: "Wind & Rumble",
-    description: "Targets low-end rumble, handling noise, and outdoor wind pressure.",
+    label: "Vent et grondement",
+    description: "Cible le grondement grave, le bruit de manipulation et la pression du vent extérieur.",
     config: {
       ...DEFAULT_NOISE_REDUCTION,
       threshold: -40,
@@ -141,8 +141,8 @@ export const NOISE_REDUCTION_PRESETS: ReadonlyArray<NoiseReductionPreset> = [
   },
   {
     id: "hum",
-    label: "Hum & HVAC",
-    description: "Focused cleanup for tonal hum, AC drone, and power-line style noise.",
+    label: "Ronflement et clim",
+    description: "Nettoyage ciblé du ronflement tonal, du bruit de clim et des bruits de secteur.",
     config: {
       ...DEFAULT_NOISE_REDUCTION,
       threshold: -38,

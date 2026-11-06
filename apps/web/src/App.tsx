@@ -10,6 +10,7 @@ import { useProjectRecovery } from "./hooks/useProjectRecovery";
 import { useKieAIPoller } from "./hooks/useKieAIPoller";
 import { SOCIAL_MEDIA_PRESETS, type SocialMediaCategory } from "@openreel/core";
 import { ToolcraftText as Text } from "@openreel/ui";
+import { STUDIO_DEFAULT_SIZE } from "./zonescene/studio-scope";
 
 const EditorInterface = lazy(() =>
   import("./components/editor/EditorInterface").then((m) => ({
@@ -68,9 +69,9 @@ function App() {
     if (route === "new") {
       hasHandledInitialRoute.current = true;
 
-      let projectName = "New Project";
-      let width = 1920;
-      let height = 1080;
+      let projectName = "Nouveau projet";
+      let width: number = STUDIO_DEFAULT_SIZE.width;
+      let height: number = STUDIO_DEFAULT_SIZE.height;
       let frameRate = fps;
 
       if (params.preset) {
@@ -80,7 +81,7 @@ function App() {
           width = preset.width;
           height = preset.height;
           frameRate = params.fps ? fps : (preset.frameRate || fps);
-          projectName = `New ${presetKey.charAt(0).toUpperCase() + presetKey.slice(1).replace(/-/g, " ")} Project`;
+          projectName = `Nouveau projet ${presetKey.replace(/-/g, " ")}`;
         }
       } else if (parsedDimensions) {
         width = parsedDimensions.width;
@@ -95,11 +96,11 @@ function App() {
 
         const aspectRatio = width / height;
         if (aspectRatio < 1) {
-          projectName = "New Vertical Video";
+          projectName = "Nouvelle vidéo verticale";
         } else if (aspectRatio > 1) {
-          projectName = "New Horizontal Video";
+          projectName = "Nouvelle vidéo horizontale";
         } else {
-          projectName = "New Square Video";
+          projectName = "Nouvelle vidéo carrée";
         }
       }
 
@@ -127,7 +128,7 @@ function App() {
     // Recovery owns the choice until it settles. A bare editor URL still needs
     // a real project for autosave and preview-proxy lifecycle subscriptions.
     if (showWelcome || isSharePage || route === "new" || isChecking || showDialog || isRecovering || hasOpenProject) return;
-    createNewProject("New Project");
+    createNewProject("Nouveau projet", STUDIO_DEFAULT_SIZE);
   }, [showWelcome, isSharePage, route, isChecking, showDialog, isRecovering, hasOpenProject, createNewProject]);
 
   const handleKeyDown = useCallback(
@@ -165,9 +166,9 @@ function App() {
       ) : showWelcome ? (
         <WelcomeScreen initialTab={initialTab} />
       ) : !hasOpenProject || route === "new" ? (
-        <LoadingSpinner message={isChecking ? "Checking for saved projects..." : showDialog ? "Choose a saved project or start fresh..." : "Opening project..."} />
+        <LoadingSpinner message={isChecking ? "Recherche des projets enregistrés…" : showDialog ? "Choisis un projet enregistré ou repars à zéro…" : "Ouverture du projet…"} />
       ) : (
-        <Suspense fallback={<LoadingSpinner message="Loading editor..." />}>
+        <Suspense fallback={<LoadingSpinner message="Chargement de l’éditeur…" />}>
           <EditorInterface />
         </Suspense>
       )}

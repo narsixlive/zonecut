@@ -202,7 +202,7 @@ export const ProjectSwitcher: React.FC = () => {
                 <Text type="supporting" display="block" color="secondary" className="text-xs leading-4">Download or open a project with media</Text></div>
             </ClickableCard>
             <ClickableCard
-              label="New Project"
+              label="Nouveau projet"
               onClick={handleNewProject}
               padding={3}
               variant="transparent"

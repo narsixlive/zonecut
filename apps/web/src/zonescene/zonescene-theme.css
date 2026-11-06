@@ -1,0 +1,115 @@
+/* ZoneScene « console backstage » look (D:/CLAUDE/Content creator/zonescene/README.md):
+   dark stage, blue followspot accent, raised desk panels, LED green / amber. Never a light theme.
+   Unlayered on purpose: it beats index.css (@layer base) whatever the theme store says, and the
+   doubled attribute selector beats openreel-astryx-theme.css, which loads later. */
+
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("./fonts/BricolageGrotesque-Bold.ttf") format("truetype");
+  font-weight: 600 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("./fonts/InstrumentSans-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("./fonts/InstrumentSans-Bold.ttf") format("truetype");
+  font-weight: 500 800;
+  font-display: swap;
+}
+
+:root,
+[data-theme="light"],
+[data-theme="dark"],
+.dark {
+  color-scheme: dark;
+  font-family: "Instrument Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+
+  --bg: #1b1d22;
+  --bg-1: #24262c;
+  --bg-2: #17181c;
+  --bg-3: #2e3038;
+  --bg-elev: #2e3038;
+  --border: #0b0c0f;        /* desk panels: black edge */
+  --border-strong: #3a3c44;
+  --fg: #f2f0ec;
+  --fg-2: #b8b3a8;
+  --fg-3: #a29d95;
+  --fg-muted: #7d786f;
+  --hover: #2e3038;
+  --selected: rgba(76, 127, 255, 0.18);
+  --shadow-sm: 0 1px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-md: 0 1px 0 rgba(0, 0, 0, 0.6), 0 6px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 1px 0 rgba(0, 0, 0, 0.7), 0 24px 60px rgba(0, 0, 0, 0.55);
+  --track-bg: #17181c;
+  --tl-bg: #141519;
+  --waveform: rgba(112, 150, 255, 0.85);
+  --stage-bg: #040507;
+  --screen-bg: #000000;
+
+  --accent: #4c7fff;
+  --accent-strong: #3d6ae6;
+  --accent-soft: rgba(76, 127, 255, 0.18);
+  --accent-fg: #ffffff;
+  --accent-glow: rgba(76, 127, 255, 0.4);
+
+  --c-video: #7096ff;
+  --c-text: #d9a24b;
+  --c-audio: #34b37a;
+  --c-music: #34b37a;
+
+  /* legacy shadcn hsl tokens (index.css) */
+  --background: 225 11% 12%;
+  --foreground: 40 18% 94%;
+  --card: 228 9% 16%;
+  --card-foreground: 40 18% 94%;
+  --popover: 228 9% 16%;
+  --popover-foreground: 40 18% 94%;
+  --primary: 223 100% 65%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 228 10% 20%;
+  --secondary-foreground: 40 18% 94%;
+  --muted: 228 10% 20%;
+  --muted-foreground: 40 8% 68%;
+  --accent-hsl: 228 10% 22%;
+  --accent-foreground: 40 18% 94%;
+  --destructive: 0 62% 50%;
+  --destructive-foreground: 0 0% 95%;
+  --input: 228 10% 24%;
+  --ring: 223 100% 65%;
+}
+
+[data-astryx-theme="neutral"][data-astryx-theme="neutral"] {
+  color-scheme: dark;
+  --color-accent: #4c7fff;
+  --color-accent-muted: rgba(76, 127, 255, 0.2);
+  --color-text-accent: #7096ff;
+  --color-icon-accent: #7096ff;
+  --color-on-accent: #ffffff;
+  --color-background-surface: #24262c;
+  --color-text-primary: #f2f0ec;
+  --color-text-secondary: #b8b3a8;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --font-family-body: "Instrument Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-family-heading: "Bricolage Grotesque", "Instrument Sans", system-ui, sans-serif;
+}
+
+body {
+  font-family: "Instrument Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  background: var(--bg);
+}
+
+h1,
+h2,
+h3 {
+  font-family: "Bricolage Grotesque", "Instrument Sans", system-ui, sans-serif;
+}
+
+/* Raised desk panels lit from the top (README « Look »): a hairline highlight on panel surfaces. */
+.bg-bg-1 {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}

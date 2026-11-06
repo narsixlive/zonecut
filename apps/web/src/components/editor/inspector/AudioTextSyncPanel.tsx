@@ -14,6 +14,9 @@ import {
 import { useProjectStore } from "../../../stores/project-store";
 import type { SyncMode } from "@openreel/core";
 
+/** Below this detector confidence the tempo is flagged (bad results measured at 0.43, good 0.52–0.64). */
+const UNCERTAIN_TEMPO = 0.45;
+
 interface BeatSyncPanelProps {
   clipId: string;
 }
@@ -90,7 +93,7 @@ export const AudioTextSyncPanel: React.FC<BeatSyncPanelProps> = ({ clipId }) => 
       <div className="flex items-center gap-2 text-fg-2">
         <Music size={14} aria-hidden />
         <Text type="supporting" color="secondary" className="text-[10px]">
-          Trim and arrange video clips in order so each cut lands on a music beat.
+          Coupe et range les clips vidéo pour que chaque coupe tombe sur un temps de la musique.
         </Text>
       </div>
 
@@ -118,7 +121,7 @@ export const AudioTextSyncPanel: React.FC<BeatSyncPanelProps> = ({ clipId }) => 
                 </Text>
               </div>
               <ProgressBar
-                label="Beat detection progress"
+                label="Détection du tempo"
                 isLabelHidden
                 value={progress.percent}
                 max={100}
@@ -127,7 +130,7 @@ export const AudioTextSyncPanel: React.FC<BeatSyncPanelProps> = ({ clipId }) => 
             </div>
           ) : (
             <Button
-              label="Detect Beats"
+              label="Détecter le tempo"
               icon={<Music size={14} aria-hidden />}
               variant="primary"
               size="sm"
@@ -145,15 +148,19 @@ export const AudioTextSyncPanel: React.FC<BeatSyncPanelProps> = ({ clipId }) => 
           >
             <div>
               <Text type="supporting" color="secondary" className="block text-[10px]">
-                BPM Detected
+                BPM détecté
               </Text>
-              <Text type="body" color="primary" weight="bold" className="text-lg">
-                {beatAnalysis.bpm}
-              </Text>
+              <div className="flex items-center gap-1.5">
+                <Button label="÷2" aria-label="Diviser le tempo par deux" variant="secondary" size="sm" onClick={() => bridge.scaleTempo(0.5)} />
+                <Text type="body" color="primary" weight="bold" className="text-lg">
+                  {beatAnalysis.bpm}
+                </Text>
+                <Button label="×2" aria-label="Doubler le tempo" variant="secondary" size="sm" onClick={() => bridge.scaleTempo(2)} />
+              </div>
             </div>
             <div className="text-right">
               <Text type="supporting" color="secondary" className="block text-[10px]">
-                Beats
+                Temps
               </Text>
               <Text type="body" color="primary" weight="bold" className="text-sm">
                 {beatAnalysis.beats.length}
@@ -161,9 +168,17 @@ export const AudioTextSyncPanel: React.FC<BeatSyncPanelProps> = ({ clipId }) => 
             </div>
           </Card>
 
+          {beatAnalysis.confidence < UNCERTAIN_TEMPO && (
+            <Card variant="muted" padding={2} className="border border-amber-500/30">
+              <Text type="supporting" className="text-[10px] text-amber-400">
+                Tempo incertain : vérifie-le à l'écoute, ou corrige-le avec ÷2 / ×2.
+              </Text>
+            </Card>
+          )}
+
           <div className="space-y-2">
             <Text type="supporting" color="secondary" className="block text-[10px]">
-              Select tracks to sync to beats:
+              Pistes à caler sur les temps :
             </Text>
 
             {availableTracks.length === 0 ? (

@@ -52,7 +52,7 @@ export const AudioTab: React.FC<AudioTabProps> = ({
         </InspectorSection>
       )}
       {showAudioEffects && clip && (
-        <InspectorSection title="Clip Audio" sectionId="clip-audio" defaultOpen>
+        <InspectorSection title="Audio du clip" sectionId="clip-audio" defaultOpen>
           <div className="space-y-4">
             <PropertySlider
               label="Volume"
@@ -64,7 +64,7 @@ export const AudioTab: React.FC<AudioTabProps> = ({
               formatValue={(value) => `${Math.round(value)}%`}
             />
             <PropertySlider
-              label="Fade in"
+              label="Fondu d'entrée"
               value={clip.fade?.fadeIn ?? 0}
               onChange={(fadeIn) => updateAudio("audio/setFade", { fadeIn })}
               min={0}
@@ -73,7 +73,7 @@ export const AudioTab: React.FC<AudioTabProps> = ({
               formatValue={(value) => `${value.toFixed(1)}s`}
             />
             <PropertySlider
-              label="Fade out"
+              label="Fondu de sortie"
               value={clip.fade?.fadeOut ?? 0}
               onChange={(fadeOut) => updateAudio("audio/setFade", { fadeOut })}
               min={0}
@@ -86,7 +86,7 @@ export const AudioTab: React.FC<AudioTabProps> = ({
       )}
       {showAudioEffects && (
         <InspectorSection
-          title="Auto Cut Silence"
+          title="Couper les silences"
           sectionId="auto-cut-silence"
           defaultOpen={false}
         >
@@ -94,7 +94,7 @@ export const AudioTab: React.FC<AudioTabProps> = ({
         </InspectorSection>
       )}
       {clipType === "audio" && (
-        <InspectorSection title="Beat Sync" sectionId="beat-sync" defaultOpen={false}>
+        <InspectorSection title="Synchro au rythme" sectionId="beat-sync" defaultOpen={false}>
           <AudioTextSyncPanel clipId={clipId} />
         </InspectorSection>
       )}
@@ -110,7 +110,7 @@ export const AudioTab: React.FC<AudioTabProps> = ({
       {showAudioEffects && (
         <>
           <InspectorSection
-            title="Audio Effects"
+            title="Effets audio"
             sectionId="audio-effects"
             defaultOpen={false}
           >

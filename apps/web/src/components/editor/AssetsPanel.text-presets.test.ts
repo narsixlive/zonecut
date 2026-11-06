@@ -9,13 +9,13 @@ describe("editor text presets", () => {
 
   it("offers distinct title, editorial, outline, and utility treatments", () => {
     expect(TEXT_STYLE_PRESETS.map((preset) => preset.name)).toEqual([
-      "Heading",
-      "Subtitle",
-      "Lower Third",
-      "Caption",
-      "Hero",
-      "Quote",
-      "Outline",
+      "Titre",
+      "Sous-titre",
+      "Bandeau",
+      "Sous-titrage",
+      "Héro",
+      "Citation",
+      "Contour",
       "Badge",
     ]);
     expect(new Set(TEXT_STYLE_PRESETS.map((preset) => preset.style.fontSize)).size)

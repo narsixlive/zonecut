@@ -58,11 +58,11 @@ export const TransitionHandle: React.FC<TransitionHandleProps> = ({
       setOpen(false);
       if (transition) {
         await updateClipTransition(transition.id, { type });
-        toast.success("Transition updated", type);
+        toast.success("Transition mise à jour", type);
         return;
       }
       if (!bridge.isInitialized()) {
-        toast.error("Transition engine not ready", "Try again in a moment.");
+        toast.error("Moteur de transition pas prêt", "Réessaie dans un instant.");
         return;
       }
       const params = bridge.getDefaultParams(type);
@@ -73,13 +73,13 @@ export const TransitionHandle: React.FC<TransitionHandleProps> = ({
         const created = bridge.getTransition(result.transitionId);
         if (created) {
           await addClipTransition(created);
-          toast.success("Transition added", `${type} · 1.0s`);
+          toast.success("Transition ajoutée", `${type} · 1.0s`);
           return;
         }
       }
       toast.error(
-        "Transition failed",
-        result.error || "Could not create transition",
+        "Transition impossible",
+        result.error || "Impossible de créer la transition",
       );
     },
     [
@@ -97,19 +97,19 @@ export const TransitionHandle: React.FC<TransitionHandleProps> = ({
     setOpen(false);
     if (!transition) return;
     await removeClipTransition(transition.id);
-    toast.success("Transition removed", "Hard cut restored");
+    toast.success("Transition supprimée", "Coupure franche rétablie");
   }, [transition, removeClipTransition]);
 
   const label = transition
     ? `${transition.type} · ${transition.duration.toFixed(1)}s`
     : edge === "in"
-      ? "Add intro transition"
+      ? "Ajouter une transition d'intro"
       : edge === "out"
-        ? "Add outro transition"
-        : "Add transition";
+        ? "Ajouter une transition d'outro"
+        : "Ajouter une transition";
   const ariaLabel = edge
-    ? `Edit ${edge === "in" ? "intro" : "outro"} transition: ${label}`
-    : `Edit transition between clips: ${label}`;
+    ? `Modifier la transition d'${edge === "in" ? "intro" : "outro"} : ${label}`
+    : `Modifier la transition entre les clips : ${label}`;
   const isActive = Boolean(transition) || isSelected || open;
 
   const menu =
@@ -145,7 +145,7 @@ export const TransitionHandle: React.FC<TransitionHandleProps> = ({
                     onClick={handleRemove}
                     className="w-full flex items-center px-3 py-2 text-[12px] font-medium text-destructive hover:bg-hover transition-colors text-left"
                   >
-                    Remove transition
+                    Supprimer la transition
                   </button>
                 )}
                 {types.map((t) => (

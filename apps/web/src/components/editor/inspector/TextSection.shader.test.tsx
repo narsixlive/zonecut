@@ -85,10 +85,10 @@ describe("TextSection shader controls", () => {
     render(<TextSection clipId={CLIP_ID} />);
 
     expect(
-      screen.getByRole("button", { name: "Select text color" }),
+      screen.getByRole("button", { name: "Choisir : couleur du texte" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Select background" }),
+      screen.getByRole("button", { name: "Choisir : fond" }),
     ).toBeInTheDocument();
     expect(screen.queryByPlaceholderText(/#rrggbb/i)).not.toBeInTheDocument();
 

@@ -1,6 +1,10 @@
 import type { ExportProgress } from "../export/types";
 
-const FFMPEG_CORE_BASE_URL = "https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm";
+// Self-hosted next to the app (apps/web/scripts/build-studio.mjs copies @ffmpeg/core 0.12.6
+// into ffmpeg/): no runtime CDN, so the studio's CSP can keep connect-src to 'self'.
+const FFMPEG_CORE_BASE_URL = `${
+  (import.meta as { env?: { BASE_URL?: string } }).env?.BASE_URL ?? "/"
+}ffmpeg`;
 type FFmpegInstance = {
   load(options?: {
     coreURL?: string;

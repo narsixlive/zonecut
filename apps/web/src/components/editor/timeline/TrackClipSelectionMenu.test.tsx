@@ -132,7 +132,7 @@ describe("select all clips on track context menu", () => {
     const clip = track.clips[0];
     const { result } = renderHook(() => useClipContextMenuItems({ clip, track }));
 
-    act(() => menuAction(result.current, "Select All Clips on Track")());
+    act(() => menuAction(result.current, "Sélectionner tous les clips de la piste")());
 
     expect(useUIStore.getState().selectedItems).toEqual([
       { id: "video-a", trackId: MEDIA_TRACK_ID, type: "clip" },

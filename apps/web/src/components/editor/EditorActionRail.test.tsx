@@ -1,30 +1,15 @@
 import "../../test/install-local-storage-mock";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { useThemeStore } from "../../stores/theme-store";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
 import { EditorActionRail } from "./EditorActionRail";
 
-describe("EditorActionRail", () => {
-  beforeEach(() => {
-    useThemeStore.getState().setMode("light");
-  });
-
+describe("EditorActionRail (ZoneScene studio scope)", () => {
   afterEach(() => cleanup());
 
-  it("exposes theme switching as a visible rail action", () => {
+  it("keeps home, undo/redo, history and the audio mixer, and nothing else", () => {
     render(<EditorActionRail />);
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "Theme: Light. Switch to Dark",
-      }),
-    );
-
-    expect(useThemeStore.getState().mode).toBe("dark");
-    expect(
-      screen.getByRole("button", {
-        name: "Theme: Dark. Switch to System",
-      }),
-    ).toBeInTheDocument();
+    const labels = screen.getAllByRole("button").map((button) => button.getAttribute("aria-label") ?? button.textContent);
+    expect(labels).toEqual(["Accueil du studio", "Annuler", "Rétablir", "Historique", "Éditeur d'images clés", "Mixeur audio"]);
   });
 });

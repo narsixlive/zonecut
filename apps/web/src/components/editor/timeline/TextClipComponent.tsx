@@ -86,7 +86,7 @@ export const TextClipComponent: React.FC<TextClipComponentProps> = ({
     const clipStartX = textClip.startTime * pixelsPerSecond;
     setDragOffset(clickX - clipStartX);
     setIsDragging(true);
-    beginTimingGesture("Move text clip");
+    beginTimingGesture("Déplacer le clip de texte");
 
     onSelect(textClip.id, e.shiftKey || e.metaKey || e.ctrlKey);
   };
@@ -179,7 +179,7 @@ export const TextClipComponent: React.FC<TextClipComponentProps> = ({
     e.stopPropagation();
     e.preventDefault();
     setIsTrimming(edge);
-    beginTimingGesture("Trim text clip");
+    beginTimingGesture("Raccourcir le clip de texte");
     trimStartRef.current = {
       mouseX: e.clientX,
       startTime: textClip.startTime,
@@ -242,7 +242,7 @@ export const TextClipComponent: React.FC<TextClipComponentProps> = ({
           ref={clipRef}
           role="button"
           tabIndex={0}
-          aria-label={`Select text clip ${textClip.text || "Text"}`}
+          aria-label={`Sélectionner le clip de texte ${textClip.text || "Texte"}`}
           aria-pressed={isSelected}
           data-locked={locked}
           onClick={handleClick}
@@ -269,10 +269,10 @@ export const TextClipComponent: React.FC<TextClipComponentProps> = ({
             transition: isInteracting ? 'none' : 'opacity 150ms, box-shadow 150ms',
           }}
         >
-          {isSelected && !locked && <TimelineTouchMoveHandle label={`Move ${textClip.text || "Text"}`} onPointerDown={(event) => touchGesture.start(event, handleMouseDown)} />}
+          {isSelected && !locked && <TimelineTouchMoveHandle label={`Déplacer ${textClip.text || "Texte"}`} onPointerDown={(event) => touchGesture.start(event, handleMouseDown)} />}
           <div
             data-timeline-trim="left"
-            aria-label="Trim start"
+            aria-label="Raccourcir le début"
             onPointerDown={(event) => touchGesture.start(event, (e) => handleTrimStart(e, "left"))}
             className={`absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize z-20 flex items-center justify-center transition-opacity ${
               isSelected ? "opacity-100 bg-amber-400" : "opacity-0 group-hover:opacity-100 hover:bg-amber-400/50"
@@ -284,7 +284,7 @@ export const TextClipComponent: React.FC<TextClipComponentProps> = ({
           </div>
           <div
             data-timeline-trim="right"
-            aria-label="Trim end"
+            aria-label="Raccourcir la fin"
             onPointerDown={(event) => touchGesture.start(event, (e) => handleTrimStart(e, "right"))}
             className={`absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize z-20 flex items-center justify-center transition-opacity ${
               isSelected ? "opacity-100 bg-amber-400" : "opacity-0 group-hover:opacity-100 hover:bg-amber-400/50"
@@ -297,7 +297,7 @@ export const TextClipComponent: React.FC<TextClipComponentProps> = ({
           <div className="w-full h-full flex items-center gap-1 px-3">
             <Type size={12} className="text-fg-2 flex-shrink-0" />
             <span className="text-[10px] font-semibold text-fg truncate">
-              {textClip.text || "Text"}
+              {textClip.text || "Texte"}
             </span>
           </div>
           {isSelected && (

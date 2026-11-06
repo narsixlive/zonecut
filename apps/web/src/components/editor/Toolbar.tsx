@@ -1,4 +1,5 @@
 import React, { useCallback, useState, useEffect, useMemo } from "react";
+import { STUDIO_BACK_LABEL, STUDIO_BACK_URL, STUDIO_FULL } from "../../zonescene/studio-scope";
 import {
   X,
   Settings,
@@ -63,7 +64,6 @@ export const Toolbar: React.FC = () => {
     setIsExportOpen(false);
     useUIStore.getState().openModal("export");
   }, []);
-  const aiMode = useUIStore((s) => s.panels.agentChat?.visible ?? false);
   const [isCompressOpen, setIsCompressOpen] = useState(false);
   const importMedia = useProjectStore((state) => state.importMedia);
   const sourceMatch = useMemo(() => deriveSourceExportMatch(project), [project]);
@@ -270,8 +270,8 @@ export const Toolbar: React.FC = () => {
     async (screenBlob: Blob, webcamBlob?: Blob) => {
       if (!screenBlob || screenBlob.size === 0) {
         toast.error(
-          "Recording failed",
-          "No video data was captured. Please try again.",
+          "Échec de l'enregistrement",
+          "Aucune donnée vidéo n'a été capturée. Réessaie.",
         );
         return;
       }
@@ -291,7 +291,7 @@ export const Toolbar: React.FC = () => {
         importCount++;
       } else {
         errors.push(
-          screenResult.error?.message || "Failed to import screen recording",
+          screenResult.error?.message || "Échec de l'import de l'enregistrement d'écran",
         );
       }
 
@@ -304,20 +304,20 @@ export const Toolbar: React.FC = () => {
           importCount++;
         } else {
           errors.push(
-            webcamResult.error?.message || "Failed to import webcam recording",
+            webcamResult.error?.message || "Échec de l'import de l'enregistrement webcam",
           );
         }
       }
 
       if (importCount > 0) {
         toast.success(
-          `${importCount} recording${importCount > 1 ? "s" : ""} imported!`,
+          `${importCount} enregistrement${importCount > 1 ? "s" : ""} importé${importCount > 1 ? "s" : ""} !`,
           webcamBlob && webcamBlob.size > 0
-            ? "Screen and webcam added to assets. Use the timeline to composite them."
-            : "Screen recording added to assets.",
+            ? "Écran et webcam ajoutés aux médias. Utilise la timeline pour les composer."
+            : "Enregistrement d'écran ajouté aux médias.",
         );
       } else if (errors.length > 0) {
-        toast.error("Import failed", errors.join(". "));
+        toast.error("Échec de l'import", errors.join(". "));
       }
     },
     [importMedia],
@@ -336,9 +336,9 @@ export const Toolbar: React.FC = () => {
     separator?: boolean;
   }> = [
     {
-      label: "MP4 Standard",
+      label: "MP4 standard",
       iconName: "bolt",
-      desc: `${projectRes} H.264 - Web & social`,
+      desc: `${projectRes} H.264 - Web et réseaux sociaux`,
       type: "mp4",
       recommended: true,
     },
@@ -353,28 +353,28 @@ export const Toolbar: React.FC = () => {
       ? []
       : [
           {
-            label: "4K Standard",
+            label: "4K standard",
             iconName: "film",
             desc: "3840×2160 - YouTube 4K",
             type: "4k" as ExportType,
           },
         ]),
     {
-      label: "1080p High Quality",
+      label: "1080p haute qualité",
       iconName: "film",
-      desc: "1920×1080 30fps - High bitrate",
+      desc: "1920×1080 30fps - Débit élevé",
       type: "1080p-high",
     },
     {
       label: "1080p 60fps",
       iconName: "film",
-      desc: "1920×1080 - Smooth playback",
+      desc: "1920×1080 - Lecture fluide",
       type: "1080p-60",
     },
     {
-      label: "Audio Only (WAV)",
+      label: "Audio seul (WAV)",
       iconName: "music.note",
-      desc: "Uncompressed audio",
+      desc: "Audio non compressé",
       type: "wav",
     },
   ];
@@ -382,16 +382,17 @@ export const Toolbar: React.FC = () => {
   return (
     <header className="h-[60px] flex items-center gap-2 px-2 sm:gap-[18px] sm:px-[18px] bg-bg-1 border-b border-border shrink-0 z-30 relative">
 
-      <div role="group" aria-label="Editing mode" className="flex shrink-0 rounded-lg bg-bg-3 p-1 text-xs">
-        <button type="button" aria-pressed={!aiMode} className={`rounded-md px-3 py-1.5 ${!aiMode ? "bg-bg-1 text-fg" : "text-fg-muted"}`} onClick={() => useUIStore.getState().setPanelVisible("agentChat", false)}>Manual</button>
-        <button type="button" aria-pressed={aiMode} className={`rounded-md px-3 py-1.5 ${aiMode ? "bg-accent-soft text-accent" : "text-fg-muted"}`} onClick={() => useUIStore.getState().setPanelVisible("agentChat", true)}>AI editing</button>
-      </div>
+
+      <a href={STUDIO_BACK_URL} className="shrink-0 rounded-md px-3 py-1.5 text-xs text-fg-muted hover:text-fg">
+        {STUDIO_BACK_LABEL}
+      </a>
+      {STUDIO_FULL && <EditingModeToggle />}
 
       {/* ─── Center: project name ─────────────────────────────── */}
       <div className="flex flex-1 min-w-0 items-center justify-center gap-1.5">
         <div className="hidden sm:block min-w-0">
         <ToolcraftTextInputControl
-          label="Project name"
+          label="Nom du projet"
           isLabelHidden
           value={projectNameDraft}
           onChange={setProjectNameDraft}
@@ -440,7 +441,7 @@ export const Toolbar: React.FC = () => {
             className="flex items-center gap-1.5 rounded-[8px] bg-bg-3 px-[18px] py-[9px] text-[13px] font-semibold text-fg-2"
           >
             <Icon name="checkmark" size={13} ariaHidden />
-            Saved!
+            Enregistré !
           </button>
         ) : (
           <div className="flex items-stretch">
@@ -448,17 +449,17 @@ export const Toolbar: React.FC = () => {
               type="button"
               onClick={openExportDialog}
               disabled={!hasTimelineContent}
-              title={hasTimelineContent ? "Choose export settings" : "Add media or text to the timeline to export"}
+              title={hasTimelineContent ? "Choisir les réglages d'export" : "Ajoute des médias ou du texte à la timeline pour exporter"}
               className="rounded-l-[8px] rounded-r-none bg-accent px-[18px] py-[9px] text-[13px] font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Export
+              Exporter
             </button>
             <DropdownMenu
               isMenuOpen={isExportOpen}
               onOpenChange={setIsExportOpen}
               hasChevron={false}
               button={{
-                label: "Export options",
+                label: "Options d'export",
                 variant: "primary",
                 size: "sm",
                 isIconOnly: true,
@@ -506,7 +507,7 @@ export const Toolbar: React.FC = () => {
                           </Text>
                           {option.recommended && (
                             <Text type="supporting" className="rounded bg-accent-soft px-1.5 py-0.5 text-[10px] text-accent">
-                              Best match
+                              Meilleur choix
                             </Text>
                           )}
                         </div>
@@ -532,15 +533,15 @@ export const Toolbar: React.FC = () => {
                 <div className="my-1 border-t border-border" />
                 <DropdownMenuItem
                   icon={<Settings size={18} aria-hidden />}
-                  label="Custom export..."
-                  description="Full settings with AI upscaling"
+                  label="Export personnalisé..."
+                  description="Réglages complets avec upscaling IA"
                   endContent={<MoreHorizontal size={14} className="text-fg-muted" aria-hidden />}
                   onClick={openExportDialog}
                 />
                 <DropdownMenuItem
                   icon={<Video size={18} aria-hidden />}
-                  label="Compress video..."
-                  description="Shrink any video to a target size"
+                  label="Compresser la vidéo..."
+                  description="Réduis n'importe quelle vidéo à une taille cible"
                   onClick={() => setIsCompressOpen(true)}
                 />
               </div>
@@ -588,10 +589,10 @@ export const Toolbar: React.FC = () => {
           <div className="fixed top-topbar right-0 bottom-0 w-80 bg-bg-1 border-l border-border z-50 shadow-lg animate-in slide-in-from-right duration-200">
             <div className="flex items-center justify-between p-3 border-b border-border">
               <Text type="body" weight="bold" className="text-sm text-fg">
-                Action history
+                Historique des actions
               </Text>
               <ToolcraftIconButton
-                label="Close action history"
+                label="Fermer l'historique des actions"
                 icon={<X size={14} aria-hidden />}
                 size="sm"
                 variant="ghost"
@@ -610,3 +611,14 @@ export const Toolbar: React.FC = () => {
 };
 
 export default Toolbar;
+
+/** Upstream « Manual / AI editing » switch, full build only (zonescene/studio-scope.ts). */
+const EditingModeToggle: React.FC = () => {
+  const aiMode = useUIStore((s) => s.panels.agentChat?.visible ?? false);
+  return (
+    <div role="group" aria-label="Mode d'édition" className="flex shrink-0 rounded-lg bg-bg-3 p-1 text-xs">
+      <button type="button" aria-pressed={!aiMode} className={`rounded-md px-3 py-1.5 ${!aiMode ? "bg-bg-1 text-fg" : "text-fg-muted"}`} onClick={() => useUIStore.getState().setPanelVisible("agentChat", false)}>Manuel</button>
+      <button type="button" aria-pressed={aiMode} className={`rounded-md px-3 py-1.5 ${aiMode ? "bg-accent-soft text-accent" : "text-fg-muted"}`} onClick={() => useUIStore.getState().setPanelVisible("agentChat", true)}>Édition IA</button>
+    </div>
+  );
+};

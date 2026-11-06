@@ -80,7 +80,7 @@ export const AutoReframeSection: React.FC<AutoReframeSectionProps> = ({
       });
       setIsInitialized(true);
     } catch (error) {
-      console.error("Failed to initialize auto-reframe:", error);
+      console.error("Échec de l’initialisation du recadrage auto :", error);
     } finally {
       setIsInitializing(false);
     }
@@ -120,26 +120,26 @@ export const AutoReframeSection: React.FC<AutoReframeSectionProps> = ({
   const handleAnalyze = useCallback(async () => {
     setIsProcessing(true);
     setProgress(0);
-    setProgressMessage("Initializing...");
+    setProgressMessage("Initialisation...");
 
     try {
       if (!isInitialized) {
-        setProgressMessage("Loading AI engine...");
+        setProgressMessage("Chargement du moteur IA...");
         setProgress(10);
         await handleInitialize();
       }
 
       const engine = getAutoReframeEngine();
       if (!engine) {
-        throw new Error("Engine not available");
+        throw new Error("Moteur indisponible");
       }
 
-      setProgressMessage("Configuring reframe settings...");
+      setProgressMessage("Configuration du recadrage...");
       setProgress(30);
 
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      setProgressMessage("Applying smart crop configuration...");
+      setProgressMessage("Application du recadrage intelligent...");
       setProgress(60);
 
       const targetConfig =
@@ -147,7 +147,7 @@ export const AutoReframeSection: React.FC<AutoReframeSectionProps> = ({
 
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      setProgressMessage("Updating project settings...");
+      setProgressMessage("Mise à jour des réglages du projet...");
       setProgress(80);
 
       await updateProjectDimensions({
@@ -155,13 +155,13 @@ export const AutoReframeSection: React.FC<AutoReframeSectionProps> = ({
         height: targetConfig.height,
       });
 
-      setProgressMessage("Finalizing...");
+      setProgressMessage("Finalisation...");
       setProgress(90);
 
       await new Promise((resolve) => setTimeout(resolve, 200));
 
       setProgress(100);
-      setProgressMessage("Complete!");
+      setProgressMessage("Terminé !");
       setIsApplied(true);
 
       const result: ReframeResult = {
@@ -178,14 +178,14 @@ export const AutoReframeSection: React.FC<AutoReframeSectionProps> = ({
         ? PLATFORM_PRESETS[selectedPlatform].name
         : reframeSettings.targetAspectRatio;
       toast.success(
-        "Auto Reframe Applied",
-        `Project resized to ${platformName} (${targetConfig.width}x${targetConfig.height})`,
+        "Recadrage auto appliqué",
+        `Projet redimensionné en ${platformName} (${targetConfig.width}x${targetConfig.height})`,
       );
     } catch (error) {
-      console.error("Auto-reframe failed:", error);
+      console.error("Échec du recadrage auto :", error);
       toast.error(
-        "Auto Reframe Failed",
-        error instanceof Error ? error.message : "Unknown error",
+        "Échec du recadrage auto",
+        error instanceof Error ? error.message : "Erreur inconnue",
       );
       setIsApplied(false);
     } finally {
@@ -205,7 +205,7 @@ export const AutoReframeSection: React.FC<AutoReframeSectionProps> = ({
       <div className="space-y-3">
         <div>
           <Text type="supporting" color="secondary" className="mb-2 block text-[10px]">
-            Platform Presets
+            Préréglages plateforme
           </Text>
             <div className="grid grid-cols-3 gap-1">
               {(Object.keys(PLATFORM_PRESETS) as PlatformPreset[]).map(
@@ -235,7 +235,7 @@ export const AutoReframeSection: React.FC<AutoReframeSectionProps> = ({
 
         <div>
           <Text type="supporting" color="secondary" className="mb-2 block text-[10px]">
-            Aspect Ratio
+            Format d’image
           </Text>
           <div className="grid grid-cols-3 gap-1">
             {(Object.keys(ASPECT_RATIO_PRESETS) as AspectRatioPreset[])
@@ -259,7 +259,7 @@ export const AutoReframeSection: React.FC<AutoReframeSectionProps> = ({
         </div>
 
         <PropertySlider
-          label="Tracking Speed"
+          label="Vitesse de suivi"
           min={0}
           max={100}
           step={1}
@@ -273,7 +273,7 @@ export const AutoReframeSection: React.FC<AutoReframeSectionProps> = ({
         />
 
         <PropertySlider
-          label="Smoothing"
+          label="Lissage"
           min={0}
           max={100}
           step={1}
@@ -283,7 +283,7 @@ export const AutoReframeSection: React.FC<AutoReframeSectionProps> = ({
         />
 
         <PropertySlider
-          label="Center Bias"
+          label="Biais central"
           min={0}
           max={100}
           step={1}
@@ -298,10 +298,10 @@ export const AutoReframeSection: React.FC<AutoReframeSectionProps> = ({
 
         <div className="flex items-center justify-between">
           <Text type="supporting" color="secondary" className="text-[10px]">
-            Follow Subject
+            Suivre le sujet
           </Text>
           <MockToggle
-            ariaLabel="Follow Subject"
+            ariaLabel="Suivre le sujet"
             checked={reframeSettings.followSubject}
             onChange={() =>
               updateLocalSettings({
@@ -334,11 +334,11 @@ export const AutoReframeSection: React.FC<AutoReframeSectionProps> = ({
           label={
             isInitializing || isProcessing
               ? isInitializing
-                ? "Initializing..."
-                : "Analyzing..."
+                ? "Initialisation..."
+                : "Analyse..."
               : isApplied
-                ? "Applied - Click to Reanalyze"
-                : "Analyze & Reframe"
+                ? "Appliqué - Clique pour réanalyser"
+                : "Analyser et recadrer"
           }
           icon={
             isInitializing || isProcessing ? (
@@ -357,7 +357,7 @@ export const AutoReframeSection: React.FC<AutoReframeSectionProps> = ({
         />
 
         <Text type="supporting" color="secondary" className="text-center text-[9px]">
-          Output:{" "}
+          Sortie :{" "}
           {ASPECT_RATIO_PRESETS[reframeSettings.targetAspectRatio].width} x{" "}
           {ASPECT_RATIO_PRESETS[reframeSettings.targetAspectRatio].height}
         </Text>

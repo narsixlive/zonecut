@@ -125,14 +125,14 @@ describe("InspectorPanel multi-clip workflow", () => {
     render(<InspectorPanel />);
 
     expect(screen.getAllByText("2 clips selected").length).toBeGreaterThan(0);
-    expect(screen.getByText("Batch Transform")).toBeInTheDocument();
+    expect(screen.getByText("Transformation groupée")).toBeInTheDocument();
     expect(screen.queryByText("No selection")).toBeNull();
   });
 
   it("nudges every selected visual clip", async () => {
     render(<InspectorPanel />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Nudge clips right" }));
+    fireEvent.click(screen.getByRole("button", { name: "Décaler les clips à droite" }));
 
     await waitFor(() => {
       expect(storedClips().map((entry) => entry.transform.position.x)).toEqual([
@@ -145,7 +145,7 @@ describe("InspectorPanel multi-clip workflow", () => {
     render(<InspectorPanel />);
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Align positions center" }),
+      screen.getByRole("button", { name: "Aligner au centre" }),
     );
 
     await waitFor(() => {
@@ -166,7 +166,7 @@ describe("InspectorPanel multi-clip workflow", () => {
     );
     render(<InspectorPanel />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Nudge clips right" }));
+    fireEvent.click(screen.getByRole("button", { name: "Décaler les clips à droite" }));
 
     await waitFor(() => {
       const titleEngine = useEngineStore.getState().getTitleEngine();
@@ -191,7 +191,7 @@ describe("InspectorPanel multi-clip workflow", () => {
     render(<InspectorPanel />);
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Align positions left" }),
+      screen.getByRole("button", { name: "Aligner à gauche" }),
     );
 
     await waitFor(() => {
@@ -224,17 +224,17 @@ describe("InspectorPanel multi-clip workflow", () => {
     );
     render(<InspectorPanel />);
 
-    expect(screen.getByText("Batch Text")).toBeInTheDocument();
-    expect(screen.queryByLabelText("Text Content")).toBeNull();
-    expect(screen.getByText("Text Material")).toBeInTheDocument();
-    expect(screen.getByText("3D Text")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Bold" }));
-    fireEvent.click(screen.getByRole("button", { name: "Left" }));
+    expect(screen.getByText("Texte groupé")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Contenu du texte")).toBeNull();
+    expect(screen.getByText("Matériau du texte")).toBeInTheDocument();
+    expect(screen.getByText("Texte 3D")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Gras" }));
+    fireEvent.click(screen.getByRole("button", { name: "Gauche" }));
     fireEvent.click(
       screen.getByRole("button", { name: "Preview and select Glyph Dissolve" }),
     );
-    fireEvent.click(screen.getByRole("switch", { name: "3D Text" }));
-    fireEvent.change(screen.getByRole("spinbutton", { name: "Size" }), {
+    fireEvent.click(screen.getByRole("switch", { name: "Texte 3D" }));
+    fireEvent.change(screen.getByRole("spinbutton", { name: "Taille" }), {
       target: { value: "36" },
     });
 
@@ -277,7 +277,7 @@ describe("InspectorPanel multi-clip workflow", () => {
 
     expect(screen.queryByText("Compound Clip")).toBeNull();
     fireEvent.click(
-      screen.getByRole("button", { name: "Duplicate 2 selected clips" }),
+      screen.getByRole("button", { name: "Dupliquer 2 clips sélectionnés" }),
     );
 
     await waitFor(() => {
@@ -301,13 +301,13 @@ describe("InspectorPanel multi-clip workflow", () => {
   it("queues rapid shared opacity edits and keeps the final value", async () => {
     render(<InspectorPanel />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Edit Opacity value" }));
-    let input = screen.getByRole("textbox", { name: "Opacity value" });
+    fireEvent.click(screen.getByRole("button", { name: "Edit Opacité value" }));
+    let input = screen.getByRole("textbox", { name: "Opacité value" });
     fireEvent.change(input, { target: { value: "70%" } });
     fireEvent.blur(input);
 
-    fireEvent.click(screen.getByRole("button", { name: "Edit Opacity value" }));
-    input = screen.getByRole("textbox", { name: "Opacity value" });
+    fireEvent.click(screen.getByRole("button", { name: "Edit Opacité value" }));
+    input = screen.getByRole("textbox", { name: "Opacité value" });
     fireEvent.change(input, { target: { value: "35%" } });
     fireEvent.blur(input);
 
@@ -344,10 +344,10 @@ describe("InspectorPanel multi-clip workflow", () => {
     render(<InspectorPanel />);
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Copy first effect stack" }),
+      screen.getByRole("button", { name: "Copier la pile d’effets du premier" }),
     );
     fireEvent.click(
-      screen.getByRole("button", { name: "Replace effects on selection" }),
+      screen.getByRole("button", { name: "Remplacer les effets de la sélection" }),
     );
 
     await waitFor(() => {
@@ -370,7 +370,7 @@ describe("InspectorPanel multi-clip workflow", () => {
     render(<InspectorPanel />);
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Delete selected clips" }),
+      screen.getByRole("button", { name: "Supprimer les clips sélectionnés" }),
     );
 
     await waitFor(() => {

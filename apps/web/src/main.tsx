@@ -5,8 +5,8 @@ import "@astryxdesign/core/reset.css";
 import "@astryxdesign/core/astryx.css";
 import "@astryxdesign/theme-neutral/theme.css";
 import "./index.css";
+import "./zonescene/zonescene-theme.css";
 import { AstryxProvider } from "./components/astryx/AstryxProvider";
-import { registerServiceWorker } from "./services/service-worker";
 import { initCustomFonts } from "./components/editor/inspector/font-options";
 import { setEncoderBackendFactory } from "@openreel/core";
 import { NativeFFmpegBackend } from "./services/native-ffmpeg-backend";
@@ -30,11 +30,6 @@ if (isDesktop) {
       ),
   );
 }
-
-registerServiceWorker().then((registration) => {
-  if (registration) {
-  }
-});
 
 void initCustomFonts();
 

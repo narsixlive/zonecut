@@ -1,4 +1,5 @@
 import {
+  getBeatDetectionEngine,
   getBeatSyncEngine,
   type ClipTiming,
   type ClipInfo,
@@ -179,6 +180,28 @@ export class BeatSyncBridge {
         error: "The music clip changed. Detect beats again." });
     }
     this.updateClipsToSync();
+    this.updatePreview();
+  }
+
+  /**
+   * Halve or double the detected tempo. Octave errors (86 ↔ 172) are the detector's known
+   * limit (docs/ZONESCENE.md); the first detected beat stays the grid anchor.
+   */
+  scaleTempo(factor: number): void {
+    const analysis = this.state.beatAnalysis;
+    if (!analysis) return;
+    const bpm = Math.round(analysis.bpm * factor * 100) / 100;
+    const anchor = analysis.beats[0]?.time ?? 0;
+    const beats = getBeatDetectionEngine().generateBeatMarkersAtInterval(bpm, analysis.duration, anchor);
+    this.setState({
+      beatAnalysis: {
+        ...analysis,
+        bpm,
+        confidence: 1,
+        beats,
+        downbeats: beats.filter((beat) => beat.index % 4 === 0).map((beat) => beat.time),
+      },
+    });
     this.updatePreview();
   }
 

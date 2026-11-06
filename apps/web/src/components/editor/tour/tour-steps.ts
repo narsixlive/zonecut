@@ -7,26 +7,26 @@ export interface TourStep {
   position: "center" | "top" | "bottom" | "left" | "right";
 }
 
+// ZoneScene studio: steps describe only what the studio shows (zonescene/studio-scope.ts).
 export const TOUR_STEPS: TourStep[] = [
   {
     id: "welcome",
     target: null,
-    title: "Welcome to OpenReel",
+    title: "Bienvenue dans le studio",
     description:
-      "A quick map of the current editor layout: tools on the left, playback in the center, timeline below, and properties on the right.",
+      "Petit tour de l’écran : tes fichiers à gauche, le lecteur au centre, la timeline en bas, les réglages à droite.",
     position: "center",
   },
   {
     id: "assets",
     target: "[data-tour='assets']",
-    title: "Media and Creative Tools",
+    title: "Médias et texte",
     description:
-      "This left panel changes with the tool rail: import media, add text, graphics, effects, and transitions from here.",
+      "Importe tes vidéos, ta musique et tes images ici, ou ajoute un texte. Glisse-les ensuite sur la timeline.",
     tips: [
-      "Media holds imported videos, audio, and images",
-      "Use the left rail to switch to Text, Graphics, Effects, or Transitions",
-      "Drag assets from this panel onto the timeline",
-      "The import and record controls live at the top of this panel",
+      "Médias : vidéos, sons et images importés",
+      "Texte : titres et sous-titres",
+      "Glisse un élément sur la timeline pour l’utiliser",
     ],
     position: "right",
   },
@@ -35,46 +35,40 @@ export const TOUR_STEPS: TourStep[] = [
     target: "[data-tour='timeline']",
     title: "Timeline",
     description:
-      "Arrange clips on tracks, trim edges, split selections, and use the zoom controls on the right side of the timeline bar.",
+      "Place tes clips sur les pistes, raccourcis-les par les bords, coupe-les et zoome avec les commandes à droite.",
     tips: [
-      "Press S to split the selected clip",
-      "Drag clip edges to trim",
-      "Use Add track when you need another video or audio lane",
+      "S coupe le clip sélectionné",
+      "Tire le bord d’un clip pour le raccourcir",
+      "Ajoute une piste quand il te faut une couche de plus",
     ],
     position: "top",
   },
   {
     id: "preview",
     target: "[data-tour='preview']",
-    title: "Player",
+    title: "Lecteur",
     description:
-      "The center player shows the current frame and playback controls. Crop, fit, and review changes here before export.",
+      "Le lecteur montre l’image en cours. Le cadre rouge, c’est la zone que les boutons de Reels et TikTok ne cachent pas : garde ton texte dedans.",
     tips: [
-      "Use playback controls under the canvas",
-      "The green dot means live preview is active",
-      "Fullscreen and fit tools are in the player controls",
+      "Lecture et pause sous l’image",
+      "Le bouton des marges affiche ou cache le cadre rouge",
     ],
     position: "left",
   },
   {
     id: "inspector",
     target: "[data-tour='inspector']",
-    title: "Inspector",
+    title: "Réglages",
     description:
-      "Select a clip to edit its properties. Transform, color, effects, speed, and animation controls appear here.",
-    tips: [
-      "Use the top tabs to switch between property groups",
-      "Color grading and effects are clip-specific",
-      "Keyframe-capable controls show animation options when a clip is selected",
-    ],
+      "Sélectionne un clip pour régler sa taille, sa position, son volume, ses sous-titres ou le calage sur le tempo de la musique.",
     position: "left",
   },
   {
     id: "complete",
     target: null,
-    title: "You're Ready",
+    title: "C’est parti",
     description:
-      "You now know where the main tools live. Use the action rail on the far left to reopen tours, settings, and project utilities.",
+      "Quand c’est prêt, clique sur Exporter en haut à droite : tu récupères un MP4 prêt à poster.",
     position: "center",
   },
 ];

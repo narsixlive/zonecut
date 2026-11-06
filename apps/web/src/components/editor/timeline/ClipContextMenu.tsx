@@ -12,6 +12,8 @@ import {
   Image,
   ArrowLeftToLine,
   ListChecks,
+  Blend,
+  Moon,
 } from "@/icons/lucide-compat";
 import type { Clip, Track } from "@openreel/core";
 import { useProjectStore } from "../../../stores/project-store";
@@ -19,6 +21,7 @@ import { useTimelineStore } from "../../../stores/timeline-store";
 import { useUIStore } from "../../../stores/ui-store";
 import { getTimelineTrackSelection } from "../../../utils/timeline-item-actions";
 import { toast } from "../../../stores/notification-store";
+import { applyClipTransition } from "./apply-clip-transition";
 
 interface ClipContextMenuProps {
   clip: Clip;
@@ -120,7 +123,7 @@ export function useClipContextMenuItems({
     onClose?.();
     const result = await separateAudio(clip.id);
     if (!result.success) {
-      toast.error("Could not separate audio", result.error?.message);
+      toast.error("Impossible de séparer l'audio", result.error?.message);
     }
   };
 
@@ -135,9 +138,9 @@ export function useClipContextMenuItems({
   };
 
   const getClipTypeLabel = () => {
-    if (isVideo) return "Video Clip";
-    if (isAudio) return "Audio Clip";
-    if (isImage) return "Image Clip";
+    if (isVideo) return "Clip vidéo";
+    if (isAudio) return "Clip audio";
+    if (isImage) return "Clip image";
     return "Clip";
   };
 
@@ -162,29 +165,29 @@ export function useClipContextMenuItems({
     },
     { type: "divider" },
     {
-      label: "Copy Clip",
+      label: "Copier le clip",
       icon: <Copy size={14} aria-hidden />,
       onClick: handleCopy,
     },
     {
-      label: "Duplicate",
+      label: "Dupliquer",
       icon: <Layers size={14} aria-hidden />,
       onClick: handleDuplicate,
     },
     {
-      label: "Select All Clips on Track",
+      label: "Sélectionner tous les clips de la piste",
       icon: <ListChecks size={14} aria-hidden />,
       onClick: handleSelectTrackClips,
     },
     { type: "divider" },
     {
-      label: "Split at Playhead",
+      label: "Couper à la tête de lecture",
       icon: <Scissors size={14} aria-hidden />,
       isDisabled: !isPlayheadOnClip,
       onClick: handleSplit,
     },
     {
-      label: "Close Gap to Previous",
+      label: "Fermer le trou précédent",
       icon: <ArrowLeftToLine size={14} aria-hidden />,
       isDisabled: !hasGapBeforeClip,
       onClick: handleCloseGap,
@@ -192,18 +195,37 @@ export function useClipContextMenuItems({
   ];
 
   if (isVideo || isImage) {
+    // Transitions from the timeline itself (owner, 2026-11-05): the Transitions tab needs
+    // drag-and-drop, impossible in the compact layout. Change the type afterwards in Réglages.
+    const sameTrack = [...track.clips].sort((x, y) => x.startTime - y.startTime);
+    const at = sameTrack.findIndex((c) => c.id === clip.id);
+    const withPrevious = at > 0 ? "avec le clip précédent" : "entrée du clip";
+    const withNext = at < sameTrack.length - 1 ? "avec le clip suivant" : "sortie du clip";
     items.push({
       type: "section",
-      title: "Effects",
+      title: "Transitions",
+      items: [
+        { label: "Fondu enchaîné au début", description: withPrevious, icon: <Blend size={14} aria-hidden />, onClick: () => applyClipTransition(clip.id, "crossfade", "left") },
+        { label: "Fondu enchaîné à la fin", description: withNext, icon: <Blend size={14} aria-hidden />, onClick: () => applyClipTransition(clip.id, "crossfade", "right") },
+        { label: "Fondu au noir au début", description: withPrevious, icon: <Moon size={14} aria-hidden />, onClick: () => applyClipTransition(clip.id, "dipToBlack", "left") },
+        { label: "Fondu au noir à la fin", description: withNext, icon: <Moon size={14} aria-hidden />, onClick: () => applyClipTransition(clip.id, "dipToBlack", "right") },
+      ],
+    });
+  }
+
+  if (isVideo || isImage) {
+    items.push({
+      type: "section",
+      title: "Effets",
       items: [
         {
-          label: "Copy Effects",
+          label: "Copier les effets",
           icon: <Sparkles size={14} aria-hidden />,
           isDisabled: !hasEffects,
           onClick: handleCopyEffects,
         },
         {
-          label: "Paste Effects",
+          label: "Coller les effets",
           icon: <Sparkles size={14} aria-hidden />,
           isDisabled: !hasCopiedEffects,
           onClick: handlePasteEffects,
@@ -214,7 +236,7 @@ export function useClipContextMenuItems({
 
   if (isVideoWithAudio) {
     items.push({
-      label: "Separate Audio",
+      label: "Séparer l'audio",
       icon: <Music size={14} aria-hidden />,
       onClick: handleSeparateAudio,
     });
@@ -226,13 +248,13 @@ export function useClipContextMenuItems({
       title: "Audio",
       items: [
         {
-          label: "Copy Audio Effects",
+          label: "Copier les effets audio",
           icon: <Volume2 size={14} aria-hidden />,
           isDisabled: !hasEffects,
           onClick: handleCopyEffects,
         },
         {
-          label: "Paste Audio Effects",
+          label: "Coller les effets audio",
           icon: <Volume2 size={14} aria-hidden />,
           isDisabled: !hasCopiedEffects,
           onClick: handlePasteEffects,
@@ -244,12 +266,12 @@ export function useClipContextMenuItems({
   items.push(
     { type: "divider" },
     {
-      label: "Ripple Delete",
+      label: "Suppression en cascade",
       icon: <Trash2 size={14} aria-hidden />,
       onClick: handleRippleDelete,
     },
     {
-      label: "Delete",
+      label: "Supprimer",
       icon: <Trash2 size={14} aria-hidden />,
       onClick: handleDelete,
     },

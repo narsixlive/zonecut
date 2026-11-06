@@ -393,10 +393,10 @@ export function MultiClipInspector({ clipIds }: MultiClipInspectorProps): JSX.El
           </span>
           <span className="min-w-0">
             <Text type="body" weight="bold" display="block" className="text-fg">
-              {clipIds.length} clip{clipIds.length === 1 ? "" : "s"} selected
+              {clipIds.length} clip{clipIds.length === 1 ? "" : "s"} sélectionné{clipIds.length === 1 ? "" : "s"}
             </Text>
             <Text type="supporting" display="block" className="text-[10px] text-fg-3">
-              Batch changes stay synchronized with the timeline
+              Les changements groupés restent synchronisés avec la timeline
             </Text>
           </span>
         </div>
@@ -404,46 +404,46 @@ export function MultiClipInspector({ clipIds }: MultiClipInspectorProps): JSX.El
 
       {visualEntries.length > 0 ? (
         <InspectorSection
-          title="Batch Transform"
+          title="Transformation groupée"
           sectionId="batch-transform"
           defaultOpen
         >
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <span className="w-[74px] text-[12px] font-medium text-fg-3">
-                Nudge
+                Décaler
               </span>
               <div className="grid flex-1 grid-cols-4 gap-1.5">
-                <BatchIconButton label="Nudge clips left" icon={ArrowLeft} onClick={() => nudgeSelection(-10, 0)} disabled={isBusy} />
-                <BatchIconButton label="Nudge clips up" icon={ArrowUp} onClick={() => nudgeSelection(0, -10)} disabled={isBusy} />
-                <BatchIconButton label="Nudge clips down" icon={ArrowDown} onClick={() => nudgeSelection(0, 10)} disabled={isBusy} />
-                <BatchIconButton label="Nudge clips right" icon={ArrowRight} onClick={() => nudgeSelection(10, 0)} disabled={isBusy} />
+                <BatchIconButton label="Décaler les clips à gauche" icon={ArrowLeft} onClick={() => nudgeSelection(-10, 0)} disabled={isBusy} />
+                <BatchIconButton label="Décaler les clips vers le haut" icon={ArrowUp} onClick={() => nudgeSelection(0, -10)} disabled={isBusy} />
+                <BatchIconButton label="Décaler les clips vers le bas" icon={ArrowDown} onClick={() => nudgeSelection(0, 10)} disabled={isBusy} />
+                <BatchIconButton label="Décaler les clips à droite" icon={ArrowRight} onClick={() => nudgeSelection(10, 0)} disabled={isBusy} />
               </div>
             </div>
 
             <div className="flex items-center gap-3">
               <span className="w-[74px] text-[12px] font-medium text-fg-3">
-                Align
+                Aligner
               </span>
               <div className="grid flex-1 grid-cols-3 gap-1.5">
-                <BatchIconButton label="Align positions left" icon={ArrowLeft} onClick={() => alignSelection("x", 0, "Align clips left")} disabled={isBusy} />
-                <BatchIconButton label="Align positions center" icon={Layers} onClick={() => alignSelection("x", project.settings.width / 2, "Align clips horizontally")} disabled={isBusy} />
-                <BatchIconButton label="Align positions right" icon={ArrowRight} onClick={() => alignSelection("x", project.settings.width, "Align clips right")} disabled={isBusy} />
-                <BatchIconButton label="Align positions top" icon={ArrowUp} onClick={() => alignSelection("y", 0, "Align clips top")} disabled={isBusy} />
-                <BatchIconButton label="Align positions middle" icon={Layers} onClick={() => alignSelection("y", project.settings.height / 2, "Align clips vertically")} disabled={isBusy} />
-                <BatchIconButton label="Align positions bottom" icon={ArrowDown} onClick={() => alignSelection("y", project.settings.height, "Align clips bottom")} disabled={isBusy} />
+                <BatchIconButton label="Aligner à gauche" icon={ArrowLeft} onClick={() => alignSelection("x", 0, "Aligner les clips à gauche")} disabled={isBusy} />
+                <BatchIconButton label="Aligner au centre" icon={Layers} onClick={() => alignSelection("x", project.settings.width / 2, "Aligner les clips horizontalement")} disabled={isBusy} />
+                <BatchIconButton label="Aligner à droite" icon={ArrowRight} onClick={() => alignSelection("x", project.settings.width, "Aligner les clips à droite")} disabled={isBusy} />
+                <BatchIconButton label="Aligner en haut" icon={ArrowUp} onClick={() => alignSelection("y", 0, "Aligner les clips en haut")} disabled={isBusy} />
+                <BatchIconButton label="Aligner au milieu" icon={Layers} onClick={() => alignSelection("y", project.settings.height / 2, "Aligner les clips verticalement")} disabled={isBusy} />
+                <BatchIconButton label="Aligner en bas" icon={ArrowDown} onClick={() => alignSelection("y", project.settings.height, "Aligner les clips en bas")} disabled={isBusy} />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               <Button
-                label="Distribute horizontally"
+                label="Répartir horizontalement"
                 variant="outline"
                 disabled={isBusy || visualEntries.length < 3}
                 onClick={() => void distributeSelection("x")}
               />
               <Button
-                label="Distribute vertically"
+                label="Répartir verticalement"
                 variant="outline"
                 disabled={isBusy || visualEntries.length < 3}
                 onClick={() => void distributeSelection("y")}
@@ -451,7 +451,7 @@ export function MultiClipInspector({ clipIds }: MultiClipInspectorProps): JSX.El
             </div>
 
             <BatchSlider
-              label="Scale"
+              label="Échelle"
               mixed={mixedScale}
               value={averageScale * 100}
               max={300}
@@ -469,7 +469,7 @@ export function MultiClipInspector({ clipIds }: MultiClipInspectorProps): JSX.El
               </span>
               <div className="min-w-0 flex-1">
                 <ToolcraftNumberInputControl
-                  label="Selected clips rotation"
+                  label="Rotation des clips sélectionnés"
                   isLabelHidden
                   value={averageRotation}
                   min={-180}
@@ -487,7 +487,7 @@ export function MultiClipInspector({ clipIds }: MultiClipInspectorProps): JSX.El
               {mixedRotation ? <MixedBadge /> : null}
             </div>
             <BatchSlider
-              label="Opacity"
+              label="Opacité"
               mixed={mixedOpacity}
               value={averageOpacity * 100}
               max={100}
@@ -505,7 +505,7 @@ export function MultiClipInspector({ clipIds }: MultiClipInspectorProps): JSX.El
 
       {selectedTextClipIds.length > 0 ? (
         <InspectorSection
-          title="Batch Text"
+          title="Texte groupé"
           sectionId="batch-text"
           defaultOpen
         >
@@ -518,7 +518,7 @@ export function MultiClipInspector({ clipIds }: MultiClipInspectorProps): JSX.El
 
       {visualEntries.length > 0 ? (
         <InspectorSection
-          title="Batch Effects"
+          title="Effets groupés"
           sectionId="batch-effects"
           defaultOpen
         >
@@ -528,33 +528,33 @@ export function MultiClipInspector({ clipIds }: MultiClipInspectorProps): JSX.El
               display="block"
               className="text-[10px] text-fg-3"
             >
-              Copy from the first selected visual layer, then apply the stack to
-              all {visualEntries.length} selected visual layers.
+              Copie depuis le premier calque visuel sélectionné, puis applique la pile à
+              l’ensemble des {visualEntries.length} calques visuels sélectionnés.
             </Text>
             <div className="grid grid-cols-2 gap-2">
               <Button
-                label="Copy first effect stack"
+                label="Copier la pile d’effets du premier"
                 icon={<Copy size={14} aria-hidden />}
                 variant="outline"
                 disabled={isBusy || sourceEffects.length === 0}
                 onClick={copyFirstEffectStack}
               />
               <Button
-                label="Append effects to selection"
+                label="Ajouter les effets à la sélection"
                 icon={<ClipboardPaste size={14} aria-hidden />}
                 variant="outline"
                 disabled={isBusy || !hasEffectClipboard}
                 onClick={() => void pasteEffectsToSelection("append")}
               />
               <Button
-                label="Replace effects on selection"
+                label="Remplacer les effets de la sélection"
                 icon={<ClipboardPaste size={14} aria-hidden />}
                 variant="outline"
                 disabled={isBusy || !hasEffectClipboard}
                 onClick={() => void pasteEffectsToSelection("replace")}
               />
               <Button
-                label="Clear effects from selection"
+                label="Effacer les effets de la sélection"
                 icon={<Trash2 size={14} aria-hidden />}
                 variant="outline"
                 disabled={
@@ -571,13 +571,13 @@ export function MultiClipInspector({ clipIds }: MultiClipInspectorProps): JSX.El
       ) : null}
 
       <InspectorSection
-        title="Selection Actions"
+        title="Actions sur la sélection"
         sectionId="batch-actions"
         defaultOpen
       >
         <div className="grid grid-cols-2 gap-2">
           <Button
-            label="Reset transforms"
+            label="Réinitialiser les transformations"
             icon={<RotateCcw size={14} aria-hidden />}
             variant="outline"
             disabled={isBusy || visualEntries.length === 0}
@@ -594,28 +594,28 @@ export function MultiClipInspector({ clipIds }: MultiClipInspectorProps): JSX.El
             }
           />
           <Button
-            label={`Copy ${selectedEntries.length} selected clips`}
+            label={`Copier ${selectedEntries.length} clips sélectionnés`}
             icon={<Copy size={14} aria-hidden />}
             variant="outline"
             disabled={isBusy || selectedEntries.length === 0}
             onClick={copySelection}
           />
           <Button
-            label={`Paste clipboard at ${playheadPosition.toFixed(2)}s`}
+            label={`Coller à ${playheadPosition.toFixed(2)} s`}
             icon={<ClipboardPaste size={14} aria-hidden />}
             variant="outline"
             disabled={isBusy || clipboardSize === 0}
             onClick={() => void pasteClipboard()}
           />
           <Button
-            label={`Duplicate ${selectedEntries.length} selected clips`}
+            label={`Dupliquer ${selectedEntries.length} clips sélectionnés`}
             icon={<Copy size={14} aria-hidden />}
             variant="outline"
             disabled={isBusy || selectedEntries.length === 0}
             onClick={() => void duplicateSelection()}
           />
           <Button
-            label="Delete selected clips"
+            label="Supprimer les clips sélectionnés"
             icon={<Trash2 size={14} aria-hidden />}
             variant="destructive"
             disabled={false}
@@ -627,7 +627,7 @@ export function MultiClipInspector({ clipIds }: MultiClipInspectorProps): JSX.El
 
       {timelineEntryCount >= 2 ? (
         <InspectorSection
-          title="Compound Clip"
+          title="Clip composé"
           sectionId="batch-compound"
           defaultOpen
         >
@@ -678,7 +678,7 @@ function BatchSlider({
 function MixedBadge(): JSX.Element {
   return (
     <span className="rounded bg-bg-3 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-fg-muted">
-      Mixed
+      Mixte
     </span>
   );
 }

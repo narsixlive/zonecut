@@ -140,6 +140,9 @@ export class SilenceCutBridge {
     }
 
     const clipStartTime = initialClip.startTime;
+    // Cut only on the selected clip's track: searching every track hit the first track's clip
+    // (a 9:16 video above a voice track got the voice's silences cut out of it).
+    const trackId = initialClip.trackId;
     const sortedRegions = [...silentRegions].sort((a, b) => b.start - a.start);
 
     onProgress?.(0, "Preparing cuts...");
@@ -156,7 +159,7 @@ export class SilenceCutBridge {
         const absoluteStart = clipStartTime + region.start;
         const absoluteEnd = clipStartTime + region.end;
 
-        const currentClip = this.findClipContainingTime(absoluteStart);
+        const currentClip = this.findClipContainingTime(trackId, absoluteStart);
         if (!currentClip) {
           continue;
         }
@@ -173,7 +176,7 @@ export class SilenceCutBridge {
           }
         }
 
-        const clipAfterFirstSplit = this.findClipContainingTime(absoluteStart);
+        const clipAfterFirstSplit = this.findClipContainingTime(trackId, absoluteStart);
         if (!clipAfterFirstSplit) {
           continue;
         }
@@ -191,6 +194,7 @@ export class SilenceCutBridge {
         }
 
         const silentClip = this.findClipInTimeRange(
+          trackId,
           absoluteStart,
           absoluteEnd,
         );
@@ -210,11 +214,11 @@ export class SilenceCutBridge {
     }
   }
 
-  private findClipContainingTime(time: number) {
+  private findClipContainingTime(trackId: string, time: number) {
     const store = useProjectStore.getState();
     const { project } = store;
 
-    for (const track of project.timeline.tracks) {
+    for (const track of project.timeline.tracks.filter((t) => t.id === trackId)) {
       for (const clip of track.clips) {
         const clipEnd = clip.startTime + clip.duration;
         if (time >= clip.startTime && time < clipEnd) {
@@ -225,11 +229,11 @@ export class SilenceCutBridge {
     return null;
   }
 
-  private findClipInTimeRange(start: number, end: number) {
+  private findClipInTimeRange(trackId: string, start: number, end: number) {
     const store = useProjectStore.getState();
     const { project } = store;
 
-    for (const track of project.timeline.tracks) {
+    for (const track of project.timeline.tracks.filter((t) => t.id === trackId)) {
       for (const clip of track.clips) {
         const clipMidpoint = clip.startTime + clip.duration / 2;
         if (clipMidpoint >= start && clipMidpoint < end) {

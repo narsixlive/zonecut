@@ -28,35 +28,35 @@ describe("editor effect and transition catalogs", () => {
 
     expect(
       screen.getByRole("button", {
-        name: /^Wipe Left\. Drag onto a clip edge/i,
+        name: /^Balayage gauche\. Glisse sur une coupe/i,
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", {
-        name: /^Slide Down\. Drag onto a clip edge/i,
+        name: /^Glissement bas\. Glisse sur une coupe/i,
       }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Whip Pan")).toBeInTheDocument();
-    expect(screen.getByText("Soft Wipe Left")).toBeInTheDocument();
-    expect(screen.getByText("Push Down")).toBeInTheDocument();
-    expect(screen.getByText("Punch Zoom")).toBeInTheDocument();
-    expect(screen.getByText("Pixelate")).toBeInTheDocument();
-    expect(screen.getByText("Glitch Cut")).toBeInTheDocument();
-    expect(screen.getByText("Venetian Blinds")).toBeInTheDocument();
-    expect(screen.getByText("Diamond Reveal")).toBeInTheDocument();
-    expect(screen.getByText("Spin Clockwise")).toBeInTheDocument();
-    expect(screen.getByText("Flip Vertical")).toBeInTheDocument();
-    expect(screen.getByText("Split Horizontal")).toBeInTheDocument();
-    expect(screen.getByText("Flash Cut")).toBeInTheDocument();
+    expect(screen.getByText("Panoramique fouetté")).toBeInTheDocument();
+    expect(screen.getByText("Balayage doux gauche")).toBeInTheDocument();
+    expect(screen.getByText("Poussée bas")).toBeInTheDocument();
+    expect(screen.getByText("Zoom percutant")).toBeInTheDocument();
+    expect(screen.getByText("Pixellisation")).toBeInTheDocument();
+    expect(screen.getByText("Coupe glitch")).toBeInTheDocument();
+    expect(screen.getByText("Stores vénitiens")).toBeInTheDocument();
+    expect(screen.getByText("Révélation losange")).toBeInTheDocument();
+    expect(screen.getByText("Rotation horaire")).toBeInTheDocument();
+    expect(screen.getByText("Retournement vertical")).toBeInTheDocument();
+    expect(screen.getByText("Scission horizontale")).toBeInTheDocument();
+    expect(screen.getByText("Coupe flash")).toBeInTheDocument();
     expect(screen.getByText("Film Burn")).toBeInTheDocument();
-    expect(screen.getByText("Red Film Burn")).toBeInTheDocument();
-    expect(screen.getByText("Cool Light Leak")).toBeInTheDocument();
-    expect(screen.getByText("Mosaic Reveal")).toBeInTheDocument();
-    expect(screen.getByText("Ripple")).toBeInTheDocument();
-    expect(screen.getByText("Page Turn Left")).toBeInTheDocument();
-    expect(screen.getByText("Page Turn Right")).toBeInTheDocument();
-    expect(screen.getByText("Color Split")).toBeInTheDocument();
-    for (const category of ["Dissolves", "Wipes", "Movement", "Stylized"]) {
+    expect(screen.getByText("Film Burn rouge")).toBeInTheDocument();
+    expect(screen.getByText("Fuite de lumière froide")).toBeInTheDocument();
+    expect(screen.getByText("Révélation mosaïque")).toBeInTheDocument();
+    expect(screen.getByText("Ondulation")).toBeInTheDocument();
+    expect(screen.getByText("Page tournée gauche")).toBeInTheDocument();
+    expect(screen.getByText("Page tournée droite")).toBeInTheDocument();
+    expect(screen.getByText("Scission chromatique")).toBeInTheDocument();
+    for (const category of ["Fondus", "Balayages", "Mouvement", "Stylisé"]) {
       expect(screen.getByText(category)).toBeInTheDocument();
     }
   });
@@ -64,16 +64,16 @@ describe("editor effect and transition catalogs", () => {
   it("filters the expanded transition library by production category", () => {
     render(<TransitionsPanel />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Stylized 13" }));
+    fireEvent.click(screen.getByRole("button", { name: "Stylisé 13" }));
 
-    expect(screen.getByRole("button", { name: "Stylized 13" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Stylisé 13" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
     expect(screen.getByText("Film Burn")).toBeInTheDocument();
-    expect(screen.getByText("Punch Zoom")).toBeInTheDocument();
-    expect(screen.queryByText("Wipe Left")).not.toBeInTheDocument();
-    expect(screen.queryByText("Push Down")).not.toBeInTheDocument();
+    expect(screen.getByText("Zoom percutant")).toBeInTheDocument();
+    expect(screen.queryByText("Balayage gauche")).not.toBeInTheDocument();
+    expect(screen.queryByText("Poussée bas")).not.toBeInTheDocument();
   });
 
   it("includes tonal balance and chroma key in the effect browser", () => {
@@ -238,7 +238,7 @@ describe("editor effect and transition catalogs", () => {
     render(<TransitionsPanel />);
 
     fireEvent.doubleClick(
-      screen.getByRole("button", { name: /Page Turn Right\. Drag onto/i }),
+      screen.getByRole("button", { name: /Page tournée droite\. Glisse sur/i }),
     );
 
     await waitFor(() => {

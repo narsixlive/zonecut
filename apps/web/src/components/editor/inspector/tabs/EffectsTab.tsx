@@ -391,7 +391,7 @@ export const EffectsTab: React.FC<EffectsTabProps> = ({
       {/* Picture-in-Picture Section */}
       {showVideoControls && (
         <InspectorSection
-          title="Picture-in-Picture"
+          title="Image dans l’image"
           sectionId="pip"
           defaultOpen={false}
         >

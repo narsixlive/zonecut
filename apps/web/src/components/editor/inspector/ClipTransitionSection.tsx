@@ -67,27 +67,27 @@ const PRESETS: {
   label: string;
   icon: JSX.Element | null;
 }[] = [
-  { id: "none", label: "None", icon: null },
-  { id: "fade", label: "Fade", icon: <Eye size={12} /> },
-  { id: "slide-left", label: "Slide Left", icon: <ArrowLeft size={12} /> },
-  { id: "slide-right", label: "Slide Right", icon: <ArrowRight size={12} /> },
-  { id: "slide-up", label: "Slide Up", icon: <ArrowUp size={12} /> },
-  { id: "slide-down", label: "Slide Down", icon: <ArrowDown size={12} /> },
-  { id: "zoom-in", label: "Zoom In", icon: <ZoomIn size={12} /> },
-  { id: "zoom-out", label: "Zoom Out", icon: <ZoomOut size={12} /> },
-  { id: "rotate", label: "Rotate", icon: <RotateCw size={12} /> },
-  { id: "blur", label: "Blur", icon: <Droplets size={12} /> },
-  { id: "iris-circle", label: "Iris Circle", icon: <Circle size={12} /> },
-  { id: "iris-rectangle", label: "Iris Rect", icon: <Square size={12} /> },
-  { id: "iris-diamond", label: "Iris Diamond", icon: <Diamond size={12} /> },
-  { id: "iris-star", label: "Iris Star", icon: <Star size={12} /> },
+  { id: "none", label: "Aucune", icon: null },
+  { id: "fade", label: "Fondu", icon: <Eye size={12} /> },
+  { id: "slide-left", label: "Glissement gauche", icon: <ArrowLeft size={12} /> },
+  { id: "slide-right", label: "Glissement droite", icon: <ArrowRight size={12} /> },
+  { id: "slide-up", label: "Glissement haut", icon: <ArrowUp size={12} /> },
+  { id: "slide-down", label: "Glissement bas", icon: <ArrowDown size={12} /> },
+  { id: "zoom-in", label: "Zoom avant", icon: <ZoomIn size={12} /> },
+  { id: "zoom-out", label: "Zoom arrière", icon: <ZoomOut size={12} /> },
+  { id: "rotate", label: "Rotation", icon: <RotateCw size={12} /> },
+  { id: "blur", label: "Flou", icon: <Droplets size={12} /> },
+  { id: "iris-circle", label: "Iris cercle", icon: <Circle size={12} /> },
+  { id: "iris-rectangle", label: "Iris rectangle", icon: <Square size={12} /> },
+  { id: "iris-diamond", label: "Iris losange", icon: <Diamond size={12} /> },
+  { id: "iris-star", label: "Iris étoile", icon: <Star size={12} /> },
 ];
 
 const EASINGS: { id: EasingType; label: string }[] = [
-  { id: "linear", label: "Linear" },
-  { id: "ease-in", label: "Ease In" },
-  { id: "ease-out", label: "Ease Out" },
-  { id: "ease-in-out", label: "Ease In Out" },
+  { id: "linear", label: "Linéaire" },
+  { id: "ease-in", label: "Accélération" },
+  { id: "ease-out", label: "Décélération" },
+  { id: "ease-in-out", label: "Accélération-décélération" },
 ];
 
 interface ClipTransitionSectionProps {
@@ -1036,8 +1036,8 @@ export const ClipTransitionSection: React.FC<ClipTransitionSectionProps> = ({
     if (timelineClipContext.previousClip) {
       transitions.push({
         key: "incoming",
-        title: "Incoming Transition",
-        description: "From the previous clip into this clip",
+        title: "Transition entrante",
+        description: "Du clip précédent vers ce clip",
         clipA: timelineClipContext.previousClip,
         clipB: timelineClipContext.currentClip,
         transition: timelineClipContext.incomingTransition,
@@ -1047,8 +1047,8 @@ export const ClipTransitionSection: React.FC<ClipTransitionSectionProps> = ({
     if (timelineClipContext.nextClip) {
       transitions.push({
         key: "outgoing",
-        title: "Outgoing Transition",
-        description: "From this clip into the next clip",
+        title: "Transition sortante",
+        description: "De ce clip vers le clip suivant",
         clipA: timelineClipContext.currentClip,
         clipB: timelineClipContext.nextClip,
         transition: timelineClipContext.outgoingTransition,
@@ -1066,15 +1066,15 @@ export const ClipTransitionSection: React.FC<ClipTransitionSectionProps> = ({
     return [
       {
         key: "intro",
-        title: "Intro Transition",
-        description: "From the project background into this clip",
+        title: "Transition d’entrée",
+        description: "De l’arrière-plan du projet vers ce clip",
         edge: "in",
         transition: timelineClipContext.introTransition,
       },
       {
         key: "outro",
-        title: "Outro Transition",
-        description: "From this clip into the project background",
+        title: "Transition de sortie",
+        description: "De ce clip vers l’arrière-plan du projet",
         edge: "out",
         transition: timelineClipContext.outroTransition,
       },
@@ -1184,15 +1184,15 @@ export const ClipTransitionSection: React.FC<ClipTransitionSectionProps> = ({
 
     const parts: string[] = [];
     if (entryPreset !== "none") {
-      parts.push(`Entry: ${entryPreset}`);
+      parts.push(`Entrée : ${PRESETS.find((p) => p.id === entryPreset)?.label ?? entryPreset}`);
     }
     if (exitPreset !== "none") {
-      parts.push(`Exit: ${exitPreset}`);
+      parts.push(`Sortie : ${PRESETS.find((p) => p.id === exitPreset)?.label ?? exitPreset}`);
     }
     if (parts.length > 0) {
-      toast.success("Clip Animation Applied", parts.join(", "));
+      toast.success("Animation du clip appliquée", parts.join(", "));
     } else {
-      toast.info("Animations Cleared");
+      toast.info("Animations effacées");
     }
   }, [
     clip,
@@ -1219,13 +1219,13 @@ export const ClipTransitionSection: React.FC<ClipTransitionSectionProps> = ({
           color="secondary"
           className="text-[10px] font-medium uppercase tracking-wider"
         >
-          Entry Animation
+          Animation d’entrée
         </Text>
         <div className="grid grid-cols-3 gap-1">
           {PRESETS.map((preset) => (
             <ClickableCard
               key={`entry-${preset.id}`}
-              label={`Set entry animation to ${preset.label}`}
+              label={`Définir l’animation d’entrée sur ${preset.label}`}
               onClick={() => setEntryPreset(preset.id)}
               padding={2}
               variant={entryPreset === preset.id ? "green" : "muted"}
@@ -1249,7 +1249,7 @@ export const ClipTransitionSection: React.FC<ClipTransitionSectionProps> = ({
         {entryPreset !== "none" && (
           <div className="flex gap-2 mt-2">
             <ToolcraftNumberInputControl
-              label="Duration"
+              label="Durée"
               size="sm"
               width="100%"
               step={0.1}
@@ -1281,13 +1281,13 @@ export const ClipTransitionSection: React.FC<ClipTransitionSectionProps> = ({
           color="secondary"
           className="text-[10px] font-medium uppercase tracking-wider"
         >
-          Exit Animation
+          Animation de sortie
         </Text>
         <div className="grid grid-cols-3 gap-1">
           {PRESETS.map((preset) => (
             <ClickableCard
               key={`exit-${preset.id}`}
-              label={`Set exit animation to ${preset.label}`}
+              label={`Définir l’animation de sortie sur ${preset.label}`}
               onClick={() => setExitPreset(preset.id)}
               padding={2}
               variant={exitPreset === preset.id ? "green" : "muted"}
@@ -1311,7 +1311,7 @@ export const ClipTransitionSection: React.FC<ClipTransitionSectionProps> = ({
         {exitPreset !== "none" && (
           <div className="flex gap-2 mt-2">
             <ToolcraftNumberInputControl
-              label="Duration"
+              label="Durée"
               size="sm"
               width="100%"
               step={0.1}
@@ -1338,7 +1338,7 @@ export const ClipTransitionSection: React.FC<ClipTransitionSectionProps> = ({
 
       {/* Apply Button */}
       <Button
-        label="Apply Entry/Exit Animations"
+        label="Appliquer les animations d’entrée/sortie"
         onClick={applyTransitions}
         variant="primary"
         size="sm"
@@ -1351,7 +1351,7 @@ export const ClipTransitionSection: React.FC<ClipTransitionSectionProps> = ({
           color="secondary"
           className="text-[10px] font-medium uppercase tracking-wider"
         >
-          Single-Clip Transitions
+          Transitions clip unique
         </Text>
 
         {edgeTransitions.length > 0 ? (
@@ -1393,7 +1393,7 @@ export const ClipTransitionSection: React.FC<ClipTransitionSectionProps> = ({
           ))
         ) : (
           <Text type="supporting" color="secondary" className="text-[10px]">
-            Single-clip transitions are available for video and image clips.
+            Les transitions clip unique sont disponibles pour les clips vidéo et image.
           </Text>
         )}
       </div>
@@ -1404,7 +1404,7 @@ export const ClipTransitionSection: React.FC<ClipTransitionSectionProps> = ({
           color="secondary"
           className="text-[10px] font-medium uppercase tracking-wider"
         >
-          Clip-to-Clip Transitions
+          Transitions clip à clip
         </Text>
 
         {timelineClipContext ? (
@@ -1445,12 +1445,12 @@ export const ClipTransitionSection: React.FC<ClipTransitionSectionProps> = ({
             ))
           ) : (
             <Text type="supporting" color="secondary" className="text-[10px]">
-              No adjacent clips are available on this track.
+              Aucun clip adjacent disponible sur cette piste.
             </Text>
           )
         ) : (
           <Text type="supporting" color="secondary" className="text-[10px]">
-            Clip-to-clip transitions are available for timeline media clips.
+            Les transitions clip à clip sont disponibles pour les clips de la timeline.
           </Text>
         )}
       </div>

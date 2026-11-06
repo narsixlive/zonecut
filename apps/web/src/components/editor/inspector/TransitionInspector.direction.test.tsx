@@ -53,7 +53,7 @@ describe("TransitionInspector directional transitions", () => {
         />,
       );
 
-      fireEvent.click(screen.getByRole("button", { name: "Right" }));
+      fireEvent.click(screen.getByRole("button", { name: "Droite" }));
 
       expect(onTransitionUpdate).toHaveBeenCalledWith(transition.id, {
         params: { direction: "right" },
@@ -80,7 +80,7 @@ describe("TransitionInspector directional transitions", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("switch", { name: "Clockwise" }));
+    fireEvent.click(screen.getByRole("switch", { name: "Horaire" }));
     expect(onTransitionUpdate).toHaveBeenCalledWith(transition.id, {
       params: { startAngle: -90, clockwise: false },
     });
@@ -93,7 +93,7 @@ describe("TransitionInspector directional transitions", () => {
         onTransitionUpdate={onTransitionUpdate}
       />,
     );
-    expect(screen.getByText("Blur Strength")).toBeInTheDocument();
+    expect(screen.getByText("Intensité du flou")).toBeInTheDocument();
   });
 
   it.each(["zoom", "circleReveal", "diamondReveal"] as const)(
@@ -120,8 +120,8 @@ describe("TransitionInspector directional transitions", () => {
         />,
       );
 
-      fireEvent.click(screen.getByRole("button", { name: "Edit Center X value" }));
-      const input = screen.getByRole("textbox", { name: "Center X value" });
+      fireEvent.click(screen.getByRole("button", { name: "Edit Centre X value" }));
+      const input = screen.getByRole("textbox", { name: "Centre X value" });
       fireEvent.change(input, { target: { value: "25" } });
       fireEvent.blur(input);
 
@@ -153,8 +153,8 @@ describe("TransitionInspector directional transitions", () => {
     expect(
       screen.getByRole("button", { name: "Film Burn" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Burn Intensity")).toBeInTheDocument();
-    expect(screen.getByText("Warmth")).toBeInTheDocument();
+    expect(screen.getByText("Intensité de la brûlure")).toBeInTheDocument();
+    expect(screen.getByText("Chaleur")).toBeInTheDocument();
     const preview = screen
       .getByRole("button", { name: "Flash Cut" })
       .querySelector('[data-transition-preview="flash"]');
@@ -181,7 +181,7 @@ describe("TransitionInspector directional transitions", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("switch", { name: "Smooth transition audio" }),
+      screen.getByRole("switch", { name: "Lisser l’audio de la transition" }),
     );
     expect(onTransitionUpdate).toHaveBeenCalledWith(transition.id, {
       params: { curve: "ease", audioFade: true },

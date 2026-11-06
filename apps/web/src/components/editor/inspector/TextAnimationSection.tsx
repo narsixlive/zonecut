@@ -53,7 +53,7 @@ const PresetSelector: React.FC<{
 }> = ({ value, onChange }) => (
   <div className="space-y-2">
     <Selector
-      label="Animation Preset"
+      label="Préréglage d'animation"
       size="sm"
       width="100%"
       value={value}
@@ -107,7 +107,7 @@ const TextAnimationPresetCard: React.FC<{
   return (
     <button
       type="button"
-      aria-label={`Preview and apply ${preset.label}`}
+      aria-label={`Aperçu et application : ${preset.label}`}
       aria-pressed={selected}
       onClick={onSelect}
       onMouseEnter={() => setHovered(true)}
@@ -128,7 +128,7 @@ const TextAnimationPresetCard: React.FC<{
           className="text-[13px] font-black tracking-tight text-white"
           style={textAnimationPreviewStyle(preset.value, progress)}
         >
-          OpenReel
+          Texte
         </span>
       </span>
       <span className="block truncate text-[9px] font-semibold text-fg">
@@ -231,16 +231,16 @@ const EasingSelector: React.FC<{
   onChange: (easing: string) => void;
 }> = ({ value, onChange }) => {
   const easingOptions = [
-    { value: "linear", label: "Linear" },
-    { value: "ease-in", label: "Ease In" },
-    { value: "ease-out", label: "Ease Out" },
-    { value: "ease-in-out", label: "Ease In Out" },
+    { value: "linear", label: "Linéaire" },
+    { value: "ease-in", label: "Accélération" },
+    { value: "ease-out", label: "Décélération" },
+    { value: "ease-in-out", label: "Accélération-décélération" },
   ];
 
   return (
     <div className="space-y-1">
       <Selector
-        label="Easing"
+        label="Transition"
         size="sm"
         width="100%"
         value={value}
@@ -317,7 +317,7 @@ export const TextAnimationSection: React.FC<TextAnimationSectionProps> = ({
       <div className="p-4 text-center">
         <Type size={24} className="mx-auto mb-2 text-fg-3" />
         <Text type="supporting" color="secondary" className="text-[10px]">
-          No text clip selected
+          Aucun clip texte sélectionné
         </Text>
       </div>
     );
@@ -338,7 +338,7 @@ export const TextAnimationSection: React.FC<TextAnimationSectionProps> = ({
             </div>
 
             <ParamSlider
-              label="In Duration"
+              label="Durée d'entrée"
               value={inDuration}
               onChange={handleInDurationChange}
               min={0}
@@ -348,7 +348,7 @@ export const TextAnimationSection: React.FC<TextAnimationSectionProps> = ({
             />
 
             <ParamSlider
-              label="Out Duration"
+              label="Durée de sortie"
               value={outDuration}
               onChange={handleOutDurationChange}
               min={0}
@@ -366,12 +366,12 @@ export const TextAnimationSection: React.FC<TextAnimationSectionProps> = ({
             <div className="flex items-center gap-2 mb-2">
               <Play size={12} className="text-fg-3" />
               <Text type="supporting" color="secondary" className="text-[10px] font-medium">
-                Preview
+                Aperçu
               </Text>
             </div>
             <Text type="supporting" color="secondary" className="text-[9px]">
-              Animation will play during preview and export. Total animation
-              time: {(inDuration + outDuration).toFixed(1)}s
+              L'animation jouera pendant l'aperçu et l'export. Durée totale de
+              l'animation : {(inDuration + outDuration).toFixed(1)}s
             </Text>
           </Card>
         </>
@@ -443,10 +443,10 @@ const FadeParams: React.FC<{
   return (
     <Card variant="muted" padding={3} className="space-y-2">
       <Text type="supporting" color="secondary" className="text-[10px] font-medium">
-        Fade Settings
+        Réglages du fondu
       </Text>
       <ParamSlider
-        label="Start Opacity"
+        label="Opacité de départ"
         value={startOpacity}
         onChange={(v) => handleChange(v, endOpacity)}
         min={0}
@@ -455,7 +455,7 @@ const FadeParams: React.FC<{
         unit=""
       />
       <ParamSlider
-        label="End Opacity"
+        label="Opacité finale"
         value={endOpacity}
         onChange={(v) => handleChange(startOpacity, v)}
         min={0}
@@ -490,7 +490,7 @@ const SlideParams: React.FC<{
   return (
     <Card variant="muted" padding={3} className="space-y-2">
       <Text type="supporting" color="secondary" className="text-[10px] font-medium">
-        Slide Settings
+        Réglages du glissement
       </Text>
       <ParamSlider
         label="Distance"
@@ -529,10 +529,10 @@ const ScaleParams: React.FC<{
   return (
     <Card variant="muted" padding={3} className="space-y-2">
       <Text type="supporting" color="secondary" className="text-[10px] font-medium">
-        Scale Settings
+        Réglages de l'échelle
       </Text>
       <ParamSlider
-        label="Scale From"
+        label="Échelle de départ"
         value={scaleFrom}
         onChange={(v) => handleChange(v, scaleTo)}
         min={0}
@@ -541,7 +541,7 @@ const ScaleParams: React.FC<{
         unit="x"
       />
       <ParamSlider
-        label="Scale To"
+        label="Échelle finale"
         value={scaleTo}
         onChange={(v) => handleChange(scaleFrom, v)}
         min={0}
@@ -577,10 +577,10 @@ const BounceParams: React.FC<{
   return (
     <Card variant="muted" padding={3} className="space-y-2">
       <Text type="supporting" color="secondary" className="text-[10px] font-medium">
-        Bounce Settings
+        Réglages du rebond
       </Text>
       <ParamSlider
-        label="Height"
+        label="Hauteur"
         value={bounceHeight}
         onChange={(v) => handleChange(v, bounceCount)}
         min={0.01}
@@ -589,7 +589,7 @@ const BounceParams: React.FC<{
         unit=""
       />
       <ParamSlider
-        label="Bounces"
+        label="Rebonds"
         value={bounceCount}
         onChange={(v) => handleChange(bounceHeight, Math.round(v))}
         min={1}
@@ -624,7 +624,7 @@ const RotateParams: React.FC<{
   return (
     <Card variant="muted" padding={3} className="space-y-2">
       <Text type="supporting" color="secondary" className="text-[10px] font-medium">
-        Rotate Settings
+        Réglages de la rotation
       </Text>
       <ParamSlider
         label="Angle"
@@ -663,7 +663,7 @@ const WaveParams: React.FC<{
   return (
     <Card variant="muted" padding={3} className="space-y-2">
       <Text type="supporting" color="secondary" className="text-[10px] font-medium">
-        Wave Settings
+        Réglages de l'onde
       </Text>
       <ParamSlider
         label="Amplitude"
@@ -675,7 +675,7 @@ const WaveParams: React.FC<{
         unit=""
       />
       <ParamSlider
-        label="Frequency"
+        label="Fréquence"
         value={waveFrequency}
         onChange={(v) => handleChange(waveAmplitude, v)}
         min={0.5}
@@ -711,10 +711,10 @@ const ShakeParams: React.FC<{
   return (
     <Card variant="muted" padding={3} className="space-y-2">
       <Text type="supporting" color="secondary" className="text-[10px] font-medium">
-        Shake Settings
+        Réglages du tremblement
       </Text>
       <ParamSlider
-        label="Intensity"
+        label="Intensité"
         value={shakeIntensity}
         onChange={(v) => handleChange(v, shakeSpeed)}
         min={0.001}
@@ -723,7 +723,7 @@ const ShakeParams: React.FC<{
         unit=""
       />
       <ParamSlider
-        label="Speed"
+        label="Vitesse"
         value={shakeSpeed}
         onChange={(v) => handleChange(shakeIntensity, v)}
         min={5}
@@ -758,10 +758,10 @@ const PopParams: React.FC<{
   return (
     <Card variant="muted" padding={3} className="space-y-2">
       <Text type="supporting" color="secondary" className="text-[10px] font-medium">
-        Pop Settings
+        Réglages du pop
       </Text>
       <ParamSlider
-        label="Overshoot"
+        label="Dépassement"
         value={popOvershoot}
         onChange={handleChange}
         min={1}
@@ -797,10 +797,10 @@ const GlitchParams: React.FC<{
   return (
     <Card variant="muted" padding={3} className="space-y-2">
       <Text type="supporting" color="secondary" className="text-[10px] font-medium">
-        Glitch Settings
+        Réglages du glitch
       </Text>
       <ParamSlider
-        label="Intensity"
+        label="Intensité"
         value={glitchIntensity}
         onChange={(v) => handleChange(v, glitchSpeed)}
         min={0.005}
@@ -809,7 +809,7 @@ const GlitchParams: React.FC<{
         unit=""
       />
       <ParamSlider
-        label="Speed"
+        label="Vitesse"
         value={glitchSpeed}
         onChange={(v) => handleChange(glitchIntensity, v)}
         min={1}

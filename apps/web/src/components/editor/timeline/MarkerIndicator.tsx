@@ -86,7 +86,7 @@ export const MarkerIndicator: React.FC<MarkerIndicatorProps> = ({
         <Flag size={10} />
         {isEditing ? (
           <ToolcraftTextInputControl
-            label="Marker label"
+            label="Nom du repère"
             isLabelHidden
             size="sm"
             width={92}
@@ -105,7 +105,7 @@ export const MarkerIndicator: React.FC<MarkerIndicatorProps> = ({
         )}
         {isHovered && onRemove && (
           <IconButton
-            label="Remove marker"
+            label="Supprimer le repère"
             icon={<X size={10} aria-hidden />}
             size="sm"
             variant="ghost"

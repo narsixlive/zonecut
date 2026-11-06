@@ -2,6 +2,7 @@ import React from "react";
 import { ToolcraftPanelSection } from "@openreel/ui";
 import { useInspectorNavigationStore } from "../../../../stores/inspector-navigation-store";
 import { useUIStore } from "../../../../stores/ui-store";
+import { isStudioSectionHidden } from "../../../../zonescene/studio-scope";
 
 export interface InspectorSectionProps {
   title: string;
@@ -34,6 +35,8 @@ export const InspectorSection: React.FC<InspectorSectionProps> = ({
     });
     return () => cancelAnimationFrame(frame);
   }, [request, requestIsSelected]);
+
+  if (isStudioSectionHidden(sectionId, title)) return null;
 
   return (
     <div ref={sectionRef}>

@@ -28,7 +28,7 @@ describe("RecentProjects", () => {
   it("shows loading state initially", () => {
     mockCheckForRecovery.mockReturnValue(new Promise(() => {}));
     render(<RecentProjects />);
-    expect(screen.getByText("Loading recent projects...")).toBeInTheDocument();
+    expect(screen.getByText("Chargement des projets récents...")).toBeInTheDocument();
   });
 
   it("shows empty state when no projects", async () => {
@@ -36,7 +36,7 @@ describe("RecentProjects", () => {
     render(<RecentProjects />);
 
     await waitFor(() => {
-      expect(screen.getByText("No Recent Projects")).toBeInTheDocument();
+      expect(screen.getByText("Aucun projet récent")).toBeInTheDocument();
     });
   });
 
@@ -91,7 +91,7 @@ describe("RecentProjects", () => {
     render(<RecentProjects />);
 
     await waitFor(() => {
-      expect(screen.getByText("Recent Projects (1)")).toBeInTheDocument();
+      expect(screen.getByText("Projets récents (1)")).toBeInTheDocument();
       expect(screen.getByText("Project v2")).toBeInTheDocument();
       expect(screen.queryByText("Project v1")).not.toBeInTheDocument();
     });
@@ -143,12 +143,12 @@ describe("RecentProjects", () => {
       expect(screen.getByText("Project to Remove")).toBeInTheDocument();
     });
 
-    const removeButton = screen.getByTitle("Remove from recent");
+    const removeButton = screen.getByTitle("Retirer des récents");
     fireEvent.click(removeButton);
 
     await waitFor(() => {
       expect(screen.queryByText("Project to Remove")).not.toBeInTheDocument();
-      expect(screen.getByText("No Recent Projects")).toBeInTheDocument();
+      expect(screen.getByText("Aucun projet récent")).toBeInTheDocument();
     });
   });
 
@@ -167,7 +167,7 @@ describe("RecentProjects", () => {
     render(<RecentProjects />);
 
     await waitFor(() => {
-      expect(screen.getByText("Today")).toBeInTheDocument();
+      expect(screen.getByText("Aujourd'hui")).toBeInTheDocument();
     });
   });
 });

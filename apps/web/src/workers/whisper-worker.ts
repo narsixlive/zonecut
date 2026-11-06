@@ -4,17 +4,20 @@ import { env, pipeline } from "@huggingface/transformers";
 import {
   DEFAULT_WHISPER_MODEL,
   WHISPER_MODELS,
+  WHISPER_MODELS_BASE_URL,
   isWhisperModelKey,
   type WhisperModelKey,
 } from "./whisper-models";
 
-const MODEL_HOST = "https://media.openreel.video/models/";
-
-env.allowLocalModels = false;
-env.allowRemoteModels = true;
-env.remoteHost = MODEL_HOST;
-env.remotePathTemplate = "{model}/resolve/{revision}/";
+// The ONNX runtime is served by the studio itself; the model by the studio too, or by the host's
+// own storage when VITE_STUDIO_MODELS_URL is set (scripts/build-studio.mjs) — never Hugging Face.
+env.allowLocalModels = true;
+env.allowRemoteModels = false;
+env.localModelPath = WHISPER_MODELS_BASE_URL;
 env.useBrowserCache = true;
+if (env.backends.onnx.wasm) {
+  env.backends.onnx.wasm.wasmPaths = `${import.meta.env.BASE_URL}ort/`;
+}
 
 interface WhisperOutput {
   text: string;
@@ -151,7 +154,7 @@ self.onmessage = async (
   } catch (error) {
     post(requestId, {
       type: "error",
-      message: error instanceof Error ? error.message : "Local transcription failed.",
+      message: error instanceof Error ? error.message : "La transcription a échoué.",
     });
   }
 };

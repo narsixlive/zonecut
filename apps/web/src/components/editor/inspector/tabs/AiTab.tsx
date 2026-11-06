@@ -1,3 +1,4 @@
+import { STUDIO_FULL } from "../../../../zonescene/studio-scope";
 import React from "react";
 import { Zap, Loader2, Upload } from "@/icons/lucide-compat";
 import { ToolcraftButton as Button } from "@openreel/ui";
@@ -52,7 +53,7 @@ export const AiTab: React.FC<AiTabProps> = ({
       {(clipType === "video" || clipType === "audio") && showAudioEffects && (
         <>
           <InspectorSection
-            title="Local Auto-Captions"
+            title="Sous-titres auto (local)"
             sectionId="auto-captions"
             defaultOpen={false}
           >
@@ -64,13 +65,13 @@ export const AiTab: React.FC<AiTabProps> = ({
               <input
                 ref={srtInputRef}
                 type="file"
-                aria-label="Import SRT or VTT file"
+                aria-label="Importer un fichier SRT ou VTT"
                 accept=".srt,.vtt,text/srt,text/vtt,text/plain"
                 onChange={(event) => { void handleSRTImport(event); }}
                 className="hidden"
               />
               <Button
-                label="Import SRT / VTT as Text"
+                label="Importer un SRT / VTT en texte"
                 onClick={() => srtInputRef.current?.click()}
                 variant="secondary"
                 size="sm"
@@ -84,7 +85,7 @@ export const AiTab: React.FC<AiTabProps> = ({
 
       {(clipType === "video" || clipType === "audio") && showAudioEffects && (
         <InspectorSection
-          title="Editable Captions"
+          title="Sous-titres modifiables"
           sectionId="editable-captions"
           defaultOpen={false}
         >
@@ -97,7 +98,7 @@ export const AiTab: React.FC<AiTabProps> = ({
 
       {clipType === "video" && (
         <InspectorSection
-          title="Auto Reframe"
+          title="Recadrage auto"
           sectionId="auto-reframe"
           defaultOpen={false}
         >
@@ -125,7 +126,9 @@ export const AiTab: React.FC<AiTabProps> = ({
         </InspectorSection>
       )}
 
-      {(showVideoControls || showAudioEffects || showVideoEffects) && (
+      {/* ZoneScene: only dialogue cleanup; background removal (MediaPipe CDN) and auto-colour
+          (colour grading, off scope) come back in the full build. */}
+      {(STUDIO_FULL ? showVideoControls || showAudioEffects || showVideoEffects : showAudioEffects) && (
         <Card
           variant="green"
           padding={4}
@@ -134,13 +137,13 @@ export const AiTab: React.FC<AiTabProps> = ({
           <div className="flex items-center gap-2 text-primary mb-3">
             <Zap size={14} />
             <Text type="supporting" color="active" className="text-xs font-bold">
-              Quick Actions
+              Actions rapides
             </Text>
           </div>
           <div className="space-y-2">
-            {showVideoControls && (
+            {showVideoControls && STUDIO_FULL && (
               <Button
-                label="Remove Background"
+                label="Supprimer l’arrière-plan"
                 onClick={handleRemoveBackground}
                 isDisabled={isApplyingSelectedClipEffect}
                 variant="secondary"
@@ -156,10 +159,10 @@ export const AiTab: React.FC<AiTabProps> = ({
               <Button
                 label={
                   isEnhancingAudio
-                    ? "Cleaning up..."
+                    ? "Nettoyage..."
                     : audioEnhanced
-                      ? "Noise Reduced"
-                      : "Quick Dialogue Cleanup"
+                      ? "Bruit réduit"
+                      : "Nettoyer les dialogues"
                 }
                 onClick={handleEnhanceAudio}
                 isDisabled={isEnhancingAudio || isApplyingSelectedClipEffect}
@@ -175,9 +178,9 @@ export const AiTab: React.FC<AiTabProps> = ({
                 }`}
               />
             )}
-            {showVideoEffects && (
+            {showVideoEffects && STUDIO_FULL && (
               <Button
-                label={isApplyingSelectedClipEffect ? "Applying..." : "Auto-Color"}
+                label={isApplyingSelectedClipEffect ? "Application..." : "Correction auto"}
                 onClick={handleAutoColor}
                 isDisabled={isApplyingSelectedClipEffect}
                 variant="secondary"

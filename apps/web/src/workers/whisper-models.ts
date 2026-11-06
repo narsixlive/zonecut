@@ -9,12 +9,14 @@ export interface WhisperModelDefinition {
 }
 
 export const WHISPER_MODELS: Record<WhisperModelKey, WhisperModelDefinition> = {
+  // ZoneScene ships one model: whisper-small q4 ≈ faster-whisper large-v3 on French speech
+  // (docs/ZONESCENE.md). Large V3 Turbo (760 MB, WebGPU) was too heavy for most laptops.
   accurate: {
-    id: "onnx-community/whisper-large-v3-turbo_timestamped",
-    label: "Accurate · Large V3 Turbo",
-    shortLabel: "Large V3 Turbo",
-    downloadSize: "About 760 MB",
-    description: "Best local accuracy; WebGPU recommended",
+    id: "onnx-community/whisper-small",
+    label: "Whisper Small",
+    shortLabel: "Sous-titres automatiques",
+    downloadSize: "Environ 300 Mo",
+    description: "Sous-titres en local, sur votre ordinateur",
   },
   fast: {
     id: "onnx-community/whisper-tiny",
@@ -26,6 +28,10 @@ export const WHISPER_MODELS: Record<WhisperModelKey, WhisperModelDefinition> = {
 };
 
 export const DEFAULT_WHISPER_MODEL: WhisperModelKey = "accurate";
+
+/** Where the model files are fetched from (scripts/build-studio.mjs): the host's storage or /studio/models/. */
+export const WHISPER_MODELS_BASE_URL =
+  import.meta.env.VITE_STUDIO_MODELS_URL || `${import.meta.env.BASE_URL}models/`;
 
 export function isWhisperModelKey(value: unknown): value is WhisperModelKey {
   return value === "accurate" || value === "fast";

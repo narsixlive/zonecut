@@ -14,7 +14,7 @@ import {
 } from "./utils";
 import { useClipContextMenuItems } from "./ClipContextMenu";
 import { toast } from "../../../stores/notification-store";
-import { getTransitionBridge } from "../../../bridges/transition-bridge";
+import { applyClipTransition } from "./apply-clip-transition";
 import {
   EFFECT_DRAG_MIME,
   TRANSITION_DRAG_MIME,
@@ -264,69 +264,7 @@ export const ClipComponent: React.FC<ClipComponentProps> = ({
       transitionType: TransitionType,
       edge: "left" | "right",
       transitionParams?: Record<string, unknown>,
-    ) => {
-      const projectState = useProjectStore.getState();
-      const tracks = projectState.project.timeline.tracks;
-      const owningTrack = tracks.find((t) =>
-        t.clips.some((c) => c.id === clip.id),
-      );
-      if (!owningTrack) return;
-      const sortedClips = [...owningTrack.clips].sort((a, b) => {
-        if (a.startTime !== b.startTime) return a.startTime - b.startTime;
-        return a.id.localeCompare(b.id);
-      });
-      const idx = sortedClips.findIndex((c) => c.id === clip.id);
-      const previousClip = idx > 0 ? sortedClips[idx - 1] : undefined;
-      const nextClip =
-        idx < sortedClips.length - 1 ? sortedClips[idx + 1] : undefined;
-      const clipA = edge === "left" ? previousClip : sortedClips[idx];
-      const clipB = edge === "left" ? sortedClips[idx] : nextClip;
-
-      const bridge = getTransitionBridge();
-      if (!bridge.isInitialized()) {
-        toast.error("Transition engine not ready", "Try again in a moment.");
-        return;
-      }
-      const defaultParams = {
-        ...bridge.getDefaultParams(transitionType),
-        ...transitionParams,
-      };
-      const result =
-        clipA && clipB
-          ? bridge.createTransition(
-              clipA,
-              clipB,
-              transitionType,
-              1.0,
-              defaultParams,
-            )
-          : bridge.createClipEdgeTransition(
-              sortedClips[idx],
-              edge === "left" ? "in" : "out",
-              transitionType,
-              1.0,
-              defaultParams,
-            );
-      if (result.success && result.transitionId) {
-        const transition = bridge.getTransition(result.transitionId);
-        if (transition) {
-          projectState.addClipTransition(transition);
-          toast.success(
-            transition.edge === "in"
-              ? "Intro transition applied"
-              : transition.edge === "out"
-                ? "Outro transition applied"
-                : "Transition applied",
-            `${transitionType} • ${transition.duration.toFixed(1)}s`,
-          );
-          return;
-        }
-      }
-      toast.error(
-        "Transition failed",
-        result.error || "Could not create transition",
-      );
-    },
+    ) => applyClipTransition(clip.id, transitionType, edge, transitionParams),
     [clip.id],
   );
 
@@ -374,12 +312,12 @@ export const ClipComponent: React.FC<ClipComponentProps> = ({
           .getState()
           .addVideoEffect(clip.id, effectType, effectPayload?.effectParams);
         if (result) {
-          toast.success("Effect applied", `${effectType} added`);
+          toast.success("Effet appliqué", `${effectType} ajouté`);
           // Auto-select the clip so the user sees the new effect in
           // the inspector.
           useUIStore.getState().select({ id: clip.id, type: "clip" });
         } else {
-          toast.error("Effect failed", "Could not apply effect");
+          toast.error("Effet impossible", "Impossible d'appliquer l'effet");
         }
         return;
       }
@@ -449,7 +387,7 @@ export const ClipComponent: React.FC<ClipComponentProps> = ({
     // all the per-frame moves (and any companion clips) into one step.
     const projectStore = useProjectStore.getState();
     projectStore.beginHistoryGroup(
-      multiDragSnapshotRef.current.length > 0 ? "Move clips" : "Move clip",
+      multiDragSnapshotRef.current.length > 0 ? "Déplacer les clips" : "Déplacer le clip",
     );
 
     let animationFrameId: number | null = null;
@@ -781,7 +719,7 @@ export const ClipComponent: React.FC<ClipComponentProps> = ({
           ref={clipRef}
           role="button"
           tabIndex={track.locked ? -1 : 0}
-          aria-label={`Select clip ${clipName}`}
+          aria-label={`Sélectionner le clip ${clipName}`}
           aria-pressed={isSelected}
           onClick={handleClick}
           data-timeline-clip
@@ -819,13 +757,13 @@ export const ClipComponent: React.FC<ClipComponentProps> = ({
             pointerEvents: isDragging ? 'none' : 'auto',
           }}
         >
-      {isSelected && !track.locked && <TimelineTouchMoveHandle label={`Move ${clipName}`} onPointerDown={(event) => touchGesture.start(event, handleMouseDown)} />}
+      {isSelected && !track.locked && <TimelineTouchMoveHandle label={`Déplacer ${clipName}`} onPointerDown={(event) => touchGesture.start(event, handleMouseDown)} />}
       {isApplyingEffect && (
         <>
           <div className="absolute -inset-px rounded-lg border border-amber-300/80 shadow-[0_0_18px_rgba(251,191,36,0.55)] pointer-events-none animate-pulse" />
           <div className="absolute inset-0 bg-[linear-gradient(110deg,transparent_0%,rgba(255,255,255,0.08)_28%,rgba(251,191,36,0.28)_50%,rgba(255,255,255,0.08)_72%,transparent_100%)] pointer-events-none animate-pulse" />
           <div className="absolute top-1 right-1 rounded-full bg-black/70 px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.12em] text-amber-200 pointer-events-none">
-            {effectApplicationLabel ?? "Applying effect"}
+            {effectApplicationLabel ?? "Application de l'effet"}
           </div>
         </>
       )}
@@ -988,7 +926,7 @@ export const ClipComponent: React.FC<ClipComponentProps> = ({
         <>
           <div
             data-timeline-trim="left"
-            aria-label={`Trim start of ${clipName}`}
+            aria-label={`Raccourcir le début de ${clipName}`}
             onPointerDown={(event) => touchGesture.start(event, handleTrimMouseDown("left"))}
             onMouseDown={handleTrimMouseDown("left")}
             className={`absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize z-20 flex items-center justify-center transition-opacity ${
@@ -1003,7 +941,7 @@ export const ClipComponent: React.FC<ClipComponentProps> = ({
           </div>
           <div
             data-timeline-trim="right"
-            aria-label={`Trim end of ${clipName}`}
+            aria-label={`Raccourcir la fin de ${clipName}`}
             onPointerDown={(event) => touchGesture.start(event, handleTrimMouseDown("right"))}
             onMouseDown={handleTrimMouseDown("right")}
             className={`absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize z-20 flex items-center justify-center transition-opacity ${

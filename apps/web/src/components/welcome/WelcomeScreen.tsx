@@ -18,6 +18,7 @@ import { SOCIAL_MEDIA_PRESETS, type SocialMediaCategory } from "@openreel/core";
 import { useRouter } from "../../hooks/use-router";
 import { useEditorPreload } from "../../hooks/useEditorPreload";
 import { useAnalytics, AnalyticsEvents } from "../../hooks/useAnalytics";
+import { STUDIO_FULL, STUDIO_TEMPLATES_ENABLED } from "../../zonescene/studio-scope";
 
 const TemplateGallery = lazy(() =>
   import("./TemplateGallery").then((module) => ({ default: module.TemplateGallery })),
@@ -26,7 +27,7 @@ const RecentProjects = lazy(() =>
   import("./RecentProjects").then((module) => ({ default: module.RecentProjects })),
 );
 
-const LoadingView = () => <div role="status" className="p-6 text-center text-text-secondary">Loading…</div>;
+const LoadingView = () => <div role="status" className="p-6 text-center text-text-secondary">Chargement…</div>;
 
 interface FormatOption {
   id: string;
@@ -42,7 +43,7 @@ const FORMAT_OPTIONS: FormatOption[] = [
   {
     id: "vertical",
     preset: "tiktok",
-    label: "Vertical",
+    label: "Verticale",
     description: "TikTok, Reels, Shorts",
     dimensions: "1080 × 1920",
     icon: Smartphone,
@@ -51,7 +52,7 @@ const FORMAT_OPTIONS: FormatOption[] = [
   {
     id: "horizontal",
     preset: "youtube-video",
-    label: "Horizontal",
+    label: "Horizontale",
     description: "YouTube, Vimeo, Web",
     dimensions: "1920 × 1080",
     icon: Monitor,
@@ -60,82 +61,13 @@ const FORMAT_OPTIONS: FormatOption[] = [
   {
     id: "square",
     preset: "instagram-post",
-    label: "Square",
+    label: "Carrée",
     description: "Instagram, Facebook",
     dimensions: "1080 × 1080",
     icon: Square,
     gradient: "from-orange-500/20 to-rose-500/20",
   },
 ];
-
-const OpenReelLogo: React.FC<{ className?: string }> = ({ className = "" }) => (
-  <svg
-    viewBox="0 0 490 490"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-  >
-    <path
-      d="M245 24.5C123.223 24.5 24.5 123.223 24.5 245s98.723 220.5 220.5 220.5 220.5-98.723 220.5-220.5S366.777 24.5 245 24.5Z"
-      stroke="currentColor"
-      strokeWidth="30.625"
-    />
-    <g>
-      <path
-        d="M245 98v73.5"
-        stroke="currentColor"
-        strokeWidth="24.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M392 245h-73.5"
-        stroke="currentColor"
-        strokeWidth="24.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M245 392v-73.5"
-        stroke="currentColor"
-        strokeWidth="24.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M98 245h73.5"
-        stroke="currentColor"
-        strokeWidth="24.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="m348.941 141.059-51.965 51.965"
-        stroke="currentColor"
-        strokeWidth="24.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="m348.941 348.941-51.965-51.965"
-        stroke="currentColor"
-        strokeWidth="24.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="m141.059 348.941 51.965-51.965"
-        stroke="currentColor"
-        strokeWidth="24.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="m141.059 141.059 51.965 51.965"
-        stroke="currentColor"
-        strokeWidth="24.5"
-        strokeLinecap="round"
-      />
-    </g>
-    <path
-      d="M294 245a49 49 0 0 1-49 49 49 49 0 0 1-49-49 49 49 0 0 1 98 0"
-      fill="currentColor"
-    />
-  </svg>
-);
 
 type ViewMode = "home" | "templates" | "recent";
 
@@ -160,7 +92,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ initialTab }) => {
   const handleCreateProject = useCallback(
     (option: FormatOption) => {
       const preset = SOCIAL_MEDIA_PRESETS[option.preset];
-      createNewProject(`New ${option.label} Video`, {
+      createNewProject("Nouveau projet", {
         width: preset.width,
         height: preset.height,
         frameRate: preset.frameRate,
@@ -210,13 +142,13 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ initialTab }) => {
       <div className="fixed inset-0 z-50 bg-background flex flex-col">
         <header className="flex items-center justify-between px-6 py-4 border-b border-border">
           <Button
-            label="Back"
+            label="Retour"
             variant="ghost"
             size="sm"
             icon={<ArrowRight className="rotate-180" size={16} aria-hidden />}
             onClick={() => setViewMode("home")}
           />
-          <Text type="label" color="primary" weight="medium" className="text-sm text-text-primary">Templates</Text>
+          <Text type="label" color="primary" weight="medium" className="text-sm text-text-primary">Modèles</Text>
           <div className="w-16" />
         </header>
         <div className="flex-1 overflow-y-auto p-6">
@@ -233,14 +165,14 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ initialTab }) => {
       <div className="fixed inset-0 z-50 bg-background flex flex-col">
         <header className="flex items-center justify-between px-6 py-4 border-b border-border">
           <Button
-            label="Back"
+            label="Retour"
             variant="ghost"
             size="sm"
             icon={<ArrowRight className="rotate-180" size={16} aria-hidden />}
             onClick={() => setViewMode("home")}
           />
           <Text type="label" color="primary" weight="medium" className="text-sm text-text-primary">
-            Recent Projects
+            Projets récents
           </Text>
           <div className="w-16" />
         </header>
@@ -255,41 +187,39 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ initialTab }) => {
 
   return (
     <div className="fixed inset-0 z-50 bg-background overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(34,197,94,0.05),transparent_60%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(34,197,94,0.03),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(76,127,255,0.14),transparent_60%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(4,5,7,0.6),transparent_50%)]" />
 
       <div className="relative h-full flex flex-col items-center justify-center px-6">
         <div className="w-full max-w-3xl">
           <div className="flex flex-col items-center text-center mb-12">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 text-primary">
-                <OpenReelLogo className="w-full h-full" />
-              </div>
               <Text type="body" color="primary" weight="semibold" className="text-xl text-text-primary tracking-tight">
-                Open Reel Video
+                Studio
               </Text>
             </div>
 
             <Text type="body" color="primary" weight="bold" className="text-4xl sm:text-5xl text-text-primary tracking-tight mb-3">
-              From idea to export.
+              De l'idée à l'export.
             </Text>
             <Text type="supporting" color="secondary" className="text-xl text-text-secondary mb-8">
-              In your browser.
+              Dans ton navigateur.
             </Text>
             <Text type="supporting" color="secondary" className="text-base text-text-muted max-w-md">
-              Pick a format and start creating. You can change this anytime.
+              Choisis un format et lance-toi. Tu peux changer ça à tout moment.
             </Text>
           </div>
 
           <div className="grid grid-cols-3 gap-4 mb-10">
-            {FORMAT_OPTIONS.map((option) => {
+            {/* ZoneScene studio: 9:16 only (zonescene/studio-scope.ts). */}
+            {FORMAT_OPTIONS.filter((option) => STUDIO_FULL || option.id === "vertical").map((option) => {
               const Icon = option.icon;
               const isHovered = hoveredFormat === option.id;
 
               return (
                 <ClickableCard
                   key={option.id}
-                  label={`Create ${option.label} project`}
+                  label={`Créer un projet ${option.label}`}
                   onClick={() => handleCreateProject(option)}
                   onMouseEnter={() => setHoveredFormat(option.id)}
                   onMouseLeave={() => setHoveredFormat(null)}
@@ -343,7 +273,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ initialTab }) => {
                     transition-all duration-200
                   `}
                   >
-                    Start creating
+                    Commencer
                     <ArrowRight size={14} />
                   </div>
                 </ClickableCard>
@@ -352,22 +282,24 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ initialTab }) => {
           </div>
 
           <div className="flex items-center justify-center gap-3">
+            {STUDIO_TEMPLATES_ENABLED && (
+              <Button
+                label="Parcourir les modèles"
+                variant="secondary"
+                icon={<Layers size={16} aria-hidden />}
+                onClick={() => setViewMode("templates")}
+                className="rounded-xl"
+              />
+            )}
             <Button
-              label="Browse templates"
-              variant="secondary"
-              icon={<Layers size={16} aria-hidden />}
-              onClick={() => setViewMode("templates")}
-              className="rounded-xl"
-            />
-            <Button
-              label="Recent projects"
+              label="Projets récents"
               variant="secondary"
               icon={<Clock size={16} aria-hidden />}
               onClick={() => setViewMode("recent")}
               className="rounded-xl"
             />
             <Button
-              label="Open editor"
+              label="Ouvrir l'éditeur"
               variant="secondary"
               icon={<FolderOpen size={16} aria-hidden />}
               onClick={() => navigate("editor")}
@@ -379,7 +311,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ initialTab }) => {
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4">
           <div className="flex items-center gap-2">
             <ToolcraftSwitchControl
-              label="Skip on startup"
+              label="Ignorer au démarrage"
               checked={skipWelcomeScreen}
               onCheckedChange={setSkipWelcomeScreen}
             />
@@ -388,12 +320,32 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ initialTab }) => {
           <span className="text-text-muted/30">·</span>
 
           <Text type="supporting" color="secondary" className="text-xs text-text-muted/60">
-            Press{" "}
+            Appuie sur{" "}
             <kbd className="px-1.5 py-0.5 bg-background-tertiary border border-border rounded text-text-muted font-mono text-[10px]">
-              Esc
+              Échap
             </kbd>{" "}
-            to skip
+            pour ignorer
           </Text>
+
+          <span className="text-text-muted/30">·</span>
+
+          {/* GDPR: no media leaves the machine, but the legal pages stay one click away. */}
+          <a href="/mentions-legales" className="whitespace-nowrap text-xs text-text-muted/60 hover:text-text-primary">
+            Mentions légales
+          </a>
+          <a href="/confidentialite" className="whitespace-nowrap text-xs text-text-muted/60 hover:text-text-primary">
+            Confidentialité
+          </a>
+          {/* GPL: /studio/ffmpeg/ serves @ffmpeg/core 0.12.6 (GPL build); its source lives here. */}
+          <a
+            href="https://github.com/narsixlive/ffmpeg-wasm-source"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Ce studio utilise FFmpeg (licence GPL) — code source"
+            className="whitespace-nowrap text-xs text-text-muted/60 hover:text-text-primary"
+          >
+            Licences
+          </a>
         </div>
       </div>
     </div>

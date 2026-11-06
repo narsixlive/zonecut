@@ -60,7 +60,7 @@ describe("touch timeline editing", () => {
 
   it("leaves clip-body swipes to native scrolling and selects with a tap", () => {
     const view = render(<div><ClipComponent {...props} isSelected={false} /></div>);
-    const body = view.getByRole("button", { name: /Select clip media/ });
+    const body = view.getByRole("button", { name: /Sélectionner le clip media/ });
     const down = new TestPointerEvent("pointerdown", { bubbles: true, cancelable: true, clientX: 50 });
     fireEvent(body, down);
     expect(down.defaultPrevented).toBe(false);
@@ -76,7 +76,7 @@ describe("touch timeline editing", () => {
 
   it("moves through the selected grip, ignores other fingers and stops after release", async () => {
     const view = render(<div ref={(element) => { viewport.current = element; }}><ClipComponent {...props} /></div>);
-    const grip = view.getByRole("button", { name: "Move media" });
+    const grip = view.getByRole("button", { name: "Déplacer media" });
     fireEvent.pointerDown(grip, { pointerId: 8, pointerType: "touch", button: 0, clientX: 0, clientY: 20 });
     fireEvent.pointerMove(window, { pointerId: 9, pointerType: "touch", clientX: 200, clientY: 20 });
     expect(props.onMoveClip).not.toHaveBeenCalled();
@@ -95,7 +95,7 @@ describe("touch timeline editing", () => {
   it("trims using touch edges and finishes on pointer cancellation", async () => {
     const trim = vi.fn();
     const view = render(<div><ClipComponent {...props} onTrimClip={trim} /></div>);
-    fireEvent.pointerDown(view.getByLabelText("Trim end of media"), {
+    fireEvent.pointerDown(view.getByLabelText("Raccourcir la fin de media"), {
       pointerId: 4, pointerType: "touch", button: 0, clientX: 500,
     });
     fireEvent.pointerMove(window, { pointerId: 4, pointerType: "touch", clientX: 450 });
@@ -108,7 +108,7 @@ describe("touch timeline editing", () => {
 
   it("discards a queued move and final track transfer when the operating system cancels the gesture", async () => {
     const view = render(<div><ClipComponent {...props} /></div>);
-    const grip = view.getByRole("button", { name: "Move media" });
+    const grip = view.getByRole("button", { name: "Déplacer media" });
     fireEvent.pointerDown(grip, { pointerId: 5, pointerType: "touch", button: 0, clientX: 0, clientY: 20 });
     fireEvent.pointerMove(window, { pointerId: 5, pointerType: "touch", clientX: 10, clientY: 20 });
     fireEvent.pointerMove(window, { pointerId: 5, pointerType: "touch", clientX: 100, clientY: 20 });
@@ -122,7 +122,7 @@ describe("touch timeline editing", () => {
   it("releases pointer capture and editing cursor when an active trim unmounts", () => {
     const trim = vi.fn();
     const view = render(<div><ClipComponent {...props} onTrimClip={trim} /></div>);
-    const handle = view.getByLabelText("Trim end of media");
+    const handle = view.getByLabelText("Raccourcir la fin de media");
     const capture = vi.fn(); const release = vi.fn();
     Object.assign(handle, { setPointerCapture: capture, releasePointerCapture: release });
     fireEvent.pointerDown(handle, { pointerId: 6, pointerType: "touch", button: 0, clientX: 500 });
@@ -143,11 +143,11 @@ describe("touch timeline editing", () => {
     const view = render(<div><TextClipComponent textClip={caption} pixelsPerSecond={50} isSelected
       onSelect={select} onTrim={trim} onMoveClip={props.onMoveClip} allTracks={[{ ...track, locked: true }]}
       trackHeights={heights} timelineRef={viewport} /></div>);
-    const body = view.getByRole("button", { name: /Select text clip Hello/ });
+    const body = view.getByRole("button", { name: /Sélectionner le clip de texte Hello/ });
     fireEvent.pointerDown(body, { pointerType: "touch", pointerId: 3 }); fireEvent.click(body);
     expect(select).toHaveBeenCalledWith(caption.id, false);
-    expect(view.queryByRole("button", { name: "Move Hello" })).toBeNull();
-    fireEvent.pointerDown(view.getByLabelText("Trim end"), { pointerType: "touch", pointerId: 3, clientX: 250 });
+    expect(view.queryByRole("button", { name: "Déplacer Hello" })).toBeNull();
+    fireEvent.pointerDown(view.getByLabelText("Raccourcir la fin"), { pointerType: "touch", pointerId: 3, clientX: 250 });
     fireEvent.pointerMove(window, { pointerType: "touch", pointerId: 3, clientX: 200 });
     expect(trim).not.toHaveBeenCalled();
   });

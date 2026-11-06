@@ -76,7 +76,7 @@ describe("TransitionHandle", () => {
       />,
     );
     fireEvent.click(screen.getByRole("button", { name: /crossfade/i }));
-    expect(screen.getByText("Remove transition")).toBeTruthy();
+    expect(screen.getByText("Supprimer la transition")).toBeTruthy();
     expect(screen.getByText("Dip to Black")).toBeTruthy();
     expect(screen.getByText("Wipe")).toBeTruthy();
   });
@@ -91,7 +91,7 @@ describe("TransitionHandle", () => {
       />,
     );
     expect(
-      screen.getByRole("button", { name: /outro transition/i }),
+      screen.getByRole("button", { name: /transition d'outro/i }),
     ).toBeTruthy();
   });
 });

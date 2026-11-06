@@ -16,6 +16,11 @@ import {
 } from "../../../bridges/audio-bridge-effects";
 import { useProjectStore } from "../../../stores/project-store";
 
+
+// The preview only rebuilds a clip's effect chain when it reschedules the clip: tell it to, or an
+// effect changed during playback stays silent until pause/play (EQ « doesn't work », 2026-11-05).
+const invalidatePreview = () =>
+  window.dispatchEvent(new CustomEvent("openreel:preview-invalidate"));
 const SubSection: React.FC<{
   title: string;
   enabled?: boolean;
@@ -35,7 +40,7 @@ const SubSection: React.FC<{
     >
       <div className="flex items-center gap-2 p-2 bg-bg-2">
         <IconButton
-          label={`${isOpen ? "Collapse" : "Expand"} ${title}`}
+          label={`${isOpen ? "Réduire" : "Déplier"} ${title}`}
           icon={
             <ChevronDown
               size={12}
@@ -54,7 +59,7 @@ const SubSection: React.FC<{
         </Text>
         {onToggle && (
           <MockToggle
-            ariaLabel={`${title} enabled`}
+            ariaLabel={`${title} activé`}
             checked={enabled}
             onChange={onToggle}
           />
@@ -248,6 +253,7 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
         }));
 
         const result = bridge.applyEQ(clipId, bands);
+        invalidatePreview();
 
         if (result.success && result.effectId) {
           setEqEffectId(result.effectId);
@@ -256,6 +262,7 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
         // Toggle existing effect
 
         toggleAudioEffect(clipId, eqEffectId, enabled);
+        invalidatePreview();
       }
 
       setEqEnabled(enabled);
@@ -274,7 +281,7 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
         );
 
         // Update effect if it exists
-        if (eqEffectId && eqEnabled) {
+        if (eqEffectId) {
           const eqBandConfigs: EQBandConfig[] = newBands.map((b, i) => ({
             type: DEFAULT_EQ_BANDS[i].type,
             frequency: parseFrequency(b.frequency),
@@ -282,12 +289,13 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
             q: DEFAULT_EQ_BANDS[i].q,
           }));
           bridge.updateEQ(clipId, eqEffectId, eqBandConfigs);
+          invalidatePreview();
         }
 
         return newBands;
       });
     },
-    [clipId, eqEffectId, eqEnabled],
+    [clipId, eqEffectId],
   );
 
   // Handle compressor toggle
@@ -297,11 +305,13 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
 
       if (enabled && !compressorEffectId) {
         const result = bridge.applyCompressor(clipId, compressor);
+        invalidatePreview();
         if (result.success && result.effectId) {
           setCompressorEffectId(result.effectId);
         }
       } else if (compressorEffectId) {
         toggleAudioEffect(clipId, compressorEffectId, enabled);
+        invalidatePreview();
       }
 
       setCompressorEnabled(enabled);
@@ -317,14 +327,15 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
       setCompressor((prev) => {
         const newCompressor = { ...prev, [key]: value };
 
-        if (compressorEffectId && compressorEnabled) {
+        if (compressorEffectId) {
           bridge.updateCompressor(clipId, compressorEffectId, newCompressor);
+          invalidatePreview();
         }
 
         return newCompressor;
       });
     },
-    [clipId, compressorEffectId, compressorEnabled],
+    [clipId, compressorEffectId],
   );
 
   // Handle reverb toggle
@@ -334,12 +345,14 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
 
       if (enabled && !reverbEffectId) {
         const result = bridge.applyReverb(clipId, reverb);
+        invalidatePreview();
 
         if (result.success && result.effectId) {
           setReverbEffectId(result.effectId);
         }
       } else if (reverbEffectId) {
         toggleAudioEffect(clipId, reverbEffectId, enabled);
+        invalidatePreview();
       }
 
       setReverbEnabled(enabled);
@@ -355,14 +368,15 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
       setReverb((prev) => {
         const newReverb = { ...prev, [key]: value };
 
-        if (reverbEffectId && reverbEnabled) {
+        if (reverbEffectId) {
           bridge.updateReverb(clipId, reverbEffectId, newReverb);
+          invalidatePreview();
         }
 
         return newReverb;
       });
     },
-    [clipId, reverbEffectId, reverbEnabled],
+    [clipId, reverbEffectId],
   );
 
   // Handle delay toggle
@@ -372,12 +386,14 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
 
       if (enabled && !delayEffectId) {
         const result = bridge.applyDelay(clipId, delay);
+        invalidatePreview();
 
         if (result.success && result.effectId) {
           setDelayEffectId(result.effectId);
         }
       } else if (delayEffectId) {
         toggleAudioEffect(clipId, delayEffectId, enabled);
+        invalidatePreview();
       }
 
       setDelayEnabled(enabled);
@@ -393,14 +409,15 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
       setDelay((prev) => {
         const newDelay = { ...prev, [key]: value };
 
-        if (delayEffectId && delayEnabled) {
+        if (delayEffectId) {
           bridge.updateDelay(clipId, delayEffectId, newDelay);
+          invalidatePreview();
         }
 
         return newDelay;
       });
     },
-    [clipId, delayEffectId, delayEnabled],
+    [clipId, delayEffectId],
   );
 
   return (
@@ -408,12 +425,12 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
       <Card variant="muted" padding={2} className="flex items-center gap-2">
         <Volume2 size={14} className="text-fg-2" />
         <Text type="supporting" color="secondary" className="text-[10px]">
-          Audio clip: {clipId.substring(0, 8)}...
+          Clip audio : {clipId.substring(0, 8)}...
         </Text>
       </Card>
 
       <SubSection
-        title="Equalizer"
+        title="Égaliseur"
         enabled={eqEnabled}
         onToggle={handleEqToggle}
         defaultOpen
@@ -431,13 +448,13 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
       </SubSection>
 
       <SubSection
-        title="Compressor"
+        title="Compresseur"
         enabled={compressorEnabled}
         onToggle={handleCompressorToggle}
       >
         <div className="space-y-2">
           <EffectSlider
-            label="Threshold"
+            label="Seuil"
             value={compressor.threshold}
             onChange={(v) => handleCompressorChange("threshold", v)}
             min={-60}
@@ -454,7 +471,7 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
             unit=":1"
           />
           <EffectSlider
-            label="Attack"
+            label="Attaque"
             value={compressor.attack * 1000}
             onChange={(v) => handleCompressorChange("attack", v / 1000)}
             min={1}
@@ -463,7 +480,7 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
             unit="ms"
           />
           <EffectSlider
-            label="Release"
+            label="Relâchement"
             value={compressor.release * 1000}
             onChange={(v) => handleCompressorChange("release", v / 1000)}
             min={10}
@@ -474,13 +491,13 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
       </SubSection>
 
       <SubSection
-        title="Reverb"
+        title="Réverbération"
         enabled={reverbEnabled}
         onToggle={handleReverbToggle}
       >
         <div className="space-y-2">
           <EffectSlider
-            label="Room Size"
+            label="Taille de la pièce"
             value={reverb.roomSize * 100}
             onChange={(v) => handleReverbChange("roomSize", v / 100)}
             min={0}
@@ -488,7 +505,7 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
             unit="%"
           />
           <EffectSlider
-            label="Damping"
+            label="Amortissement"
             value={reverb.damping * 100}
             onChange={(v) => handleReverbChange("damping", v / 100)}
             min={0}
@@ -496,7 +513,7 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
             unit="%"
           />
           <EffectSlider
-            label="Wet/Dry"
+            label="Mix sec/mouillé"
             value={reverb.wetLevel * 100}
             onChange={(v) => handleReverbChange("wetLevel", v / 100)}
             min={0}
@@ -507,13 +524,13 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
       </SubSection>
 
       <SubSection
-        title="Delay"
+        title="Délai"
         enabled={delayEnabled}
         onToggle={handleDelayToggle}
       >
         <div className="space-y-2">
           <EffectSlider
-            label="Time"
+            label="Temps"
             value={delay.time * 1000}
             onChange={(v) => handleDelayChange("time", v / 1000)}
             min={1}
@@ -521,7 +538,7 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
             unit="ms"
           />
           <EffectSlider
-            label="Feedback"
+            label="Réinjection"
             value={delay.feedback * 100}
             onChange={(v) => handleDelayChange("feedback", v / 100)}
             min={0}
@@ -529,7 +546,7 @@ export const AudioEffectsSection: React.FC<AudioEffectsSectionProps> = ({
             unit="%"
           />
           <EffectSlider
-            label="Wet Level"
+            label="Niveau mouillé"
             value={delay.wetLevel * 100}
             onChange={(v) => handleDelayChange("wetLevel", v / 100)}
             min={0}
