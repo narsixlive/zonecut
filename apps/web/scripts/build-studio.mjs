@@ -87,7 +87,8 @@ console.log(`studio build ready: ${DIST}${modelsUrl ? ` (model from ${modelsUrl}
 // --pack: release tarball for the host's deploy (content at the archive root) + its SHA-256.
 if (process.argv.includes("--pack")) {
   const archive = path.join(WEB, "studio-dist.tar.gz");
-  execSync(`tar -czf "${archive}" -C "${DIST}" .`, { stdio: "inherit" });
+  // Relative paths from WEB: GNU tar (Git Bash) reads « C: » in an absolute Windows path as a remote host.
+  execSync(`tar -czf "${path.relative(WEB, archive)}" -C "${path.relative(WEB, DIST)}" .`, { stdio: "inherit", cwd: WEB });
   const sha256 = createHash("sha256").update(await readFile(archive)).digest("hex");
   console.log(`packed ${archive}\nsha256 ${sha256}`);
 }
