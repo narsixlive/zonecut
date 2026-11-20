@@ -1,5 +1,5 @@
 // ZoneScene studio scope (owner, 2026-11-05): cut, captions (Whisper + caption editor), text,
-// music + Beat Sync, 9:16 export; added the same day: picture-in-picture, speed curves, keyframes,
+// music + Beat Sync, 9:16 export (16:9 added 2026-11-20); added the same day: picture-in-picture, speed curves, keyframes,
 // auto-reframe, audio effects, noise reduction, auto-cut silence, transitions.
 // Stabilization stays hidden: it downloads a vidstab ffmpeg build from mediashares.openreel.video.
 // Everything else stays in the code but is not shown.

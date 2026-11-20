@@ -18,7 +18,12 @@ import { SOCIAL_MEDIA_PRESETS, type SocialMediaCategory } from "@openreel/core";
 import { useRouter } from "../../hooks/use-router";
 import { useEditorPreload } from "../../hooks/useEditorPreload";
 import { useAnalytics, AnalyticsEvents } from "../../hooks/useAnalytics";
-import { STUDIO_FULL, STUDIO_TEMPLATES_ENABLED } from "../../zonescene/studio-scope";
+import {
+  STUDIO_BACK_LABEL,
+  STUDIO_BACK_URL,
+  STUDIO_FULL,
+  STUDIO_TEMPLATES_ENABLED,
+} from "../../zonescene/studio-scope";
 
 const TemplateGallery = lazy(() =>
   import("./TemplateGallery").then((module) => ({ default: module.TemplateGallery })),
@@ -44,7 +49,7 @@ const FORMAT_OPTIONS: FormatOption[] = [
     id: "vertical",
     preset: "tiktok",
     label: "Verticale",
-    description: "TikTok, Reels, Shorts",
+    description: "Reels, TikTok, Shorts",
     dimensions: "1080 × 1920",
     icon: Smartphone,
     gradient: "from-emerald-500/20 to-teal-500/20",
@@ -52,8 +57,8 @@ const FORMAT_OPTIONS: FormatOption[] = [
   {
     id: "horizontal",
     preset: "youtube-video",
-    label: "Horizontale",
-    description: "YouTube, Vimeo, Web",
+    label: "Paysage",
+    description: "YouTube",
     dimensions: "1920 × 1080",
     icon: Monitor,
     gradient: "from-blue-500/20 to-cyan-500/20",
@@ -190,6 +195,13 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ initialTab }) => {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(76,127,255,0.14),transparent_60%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(4,5,7,0.6),transparent_50%)]" />
 
+      <a
+        href={STUDIO_BACK_URL}
+        className="absolute left-6 top-6 z-10 rounded-md px-3 py-1.5 text-xs text-text-muted hover:text-text-primary"
+      >
+        {STUDIO_BACK_LABEL}
+      </a>
+
       <div className="relative h-full flex flex-col items-center justify-center px-6">
         <div className="w-full max-w-3xl">
           <div className="flex flex-col items-center text-center mb-12">
@@ -210,9 +222,11 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ initialTab }) => {
             </Text>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 mb-10">
-            {/* ZoneScene studio: 9:16 only (zonescene/studio-scope.ts). */}
-            {FORMAT_OPTIONS.filter((option) => STUDIO_FULL || option.id === "vertical").map((option) => {
+          <div className={`grid ${STUDIO_FULL ? "grid-cols-3" : "grid-cols-2"} gap-4 mb-10`}>
+            {/* ZoneScene studio: 9:16 and 16:9 (owner, 2026-11-20); square stays full-build only. */}
+            {FORMAT_OPTIONS.filter(
+              (option) => STUDIO_FULL || option.id === "vertical" || option.id === "horizontal",
+            ).map((option) => {
               const Icon = option.icon;
               const isHovered = hoveredFormat === option.id;
 

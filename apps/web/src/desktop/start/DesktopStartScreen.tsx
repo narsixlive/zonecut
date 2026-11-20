@@ -18,11 +18,19 @@ import {
   type RecentEntry,
 } from "./desktop-project-actions";
 import { useUIStore } from "../../stores/ui-store";
+import { STUDIO_BACK_LABEL, STUDIO_BACK_URL } from "../../zonescene/studio-scope";
 
 const FORMAT_ICONS: Record<string, React.ElementType> = {
   vertical: Smartphone,
   horizontal: Monitor,
   square: Square,
+};
+
+/** Display-only French labels/hints for `DESKTOP_FORMATS` (ids are the logic keys). */
+const FORMAT_DISPLAY: Record<string, { label: string; hint: string }> = {
+  vertical: { label: "Vertical 9:16", hint: "Reels, TikTok, Shorts" },
+  horizontal: { label: "Paysage 16:9", hint: "YouTube" },
+  square: { label: "Carré 1:1", hint: "Instagram" },
 };
 
 function formatDimensions(format: NewProjectFormat): string {
@@ -32,9 +40,9 @@ function formatDimensions(format: NewProjectFormat): string {
 function formatSavedAt(savedAt: number): string {
   const date = new Date(savedAt);
   const diffDays = Math.floor((Date.now() - savedAt) / (1000 * 60 * 60 * 24));
-  if (diffDays <= 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays <= 0) return "Aujourd'hui";
+  if (diffDays === 1) return "Hier";
+  if (diffDays < 7) return `Il y a ${diffDays} jours`;
   return date.toLocaleDateString();
 }
 
@@ -76,26 +84,33 @@ export function DesktopStartScreen(): JSX.Element {
     startNewProject(format);
   }, [setDesktopPage]);
 
-  const formatModeLabel = "Video Editor";
+  const formatModeLabel = "Éditeur vidéo";
 
   return (
     <div className="h-full overflow-y-auto bg-bg text-fg">
+      <a
+        href={STUDIO_BACK_URL}
+        className="shrink-0 rounded-md px-3 py-1.5 text-xs text-fg-muted hover:text-fg"
+      >
+        {STUDIO_BACK_LABEL}
+      </a>
       <div className="mx-auto flex max-w-4xl flex-col gap-10 px-8 py-12">
         <section>
           <div className="flex items-center gap-3">
             <OpenReelMark size={28} className="text-accent" />
-            <Heading level={1}>New Project</Heading>
+            <Heading level={1}>Nouveau projet</Heading>
           </div>
           <Text type="supporting" display="block" className="mt-1">
-            Choose a format. You can change this later.
+            Choisis un format. Tu pourras le changer après.
           </Text>
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
             {DESKTOP_FORMATS.map((format) => {
               const FormatIcon = FORMAT_ICONS[format.id] ?? Film;
+              const display = FORMAT_DISPLAY[format.id] ?? { label: format.label, hint: "" };
               return (
                 <ClickableCard
                   key={format.id}
-                  label={`${format.label} ${formatModeLabel}`}
+                  label={`${display.label} ${formatModeLabel}`}
                   onClick={() => handleStartProject(format)}
                   padding={5}
                 >
@@ -110,7 +125,10 @@ export function DesktopStartScreen(): JSX.Element {
                       <FormatIcon size={22} aria-hidden />
                     </span>
                     <Text type="large" weight="bold" display="block">
-                      {format.label}
+                      {display.label}
+                    </Text>
+                    <Text type="code" color="secondary" display="block">
+                      {display.hint}
                     </Text>
                     <Text type="code" color="secondary" display="block">
                       {formatDimensions(format)}
@@ -124,22 +142,22 @@ export function DesktopStartScreen(): JSX.Element {
         </section>
 
         <section>
-          <Heading level={2} color="secondary">Recent</Heading>
+          <Heading level={2} color="secondary">Récents</Heading>
           <Card className="mt-3" padding={0}>
             {loadingRecents ? (
               <Text type="supporting" display="block" className="px-4 py-6">
-                Loading recent projects...
+                Chargement des projets récents...
               </Text>
             ) : recents.length === 0 ? (
               <Text type="supporting" display="block" className="px-4 py-6">
-                No recent projects yet. Start a new project above.
+                Aucun projet récent. Démarre un nouveau projet ci-dessus.
               </Text>
             ) : (
               <ul className="divide-y divide-border">
                 {recents.map((entry) => (
                   <li key={entry.id} className="p-1.5">
                     <ClickableCard
-                      label={`Open ${entry.name}`}
+                      label={`Ouvrir ${entry.name}`}
                       isDisabled={openingId === entry.id}
                       onClick={() => handleOpenRecent(entry.id)}
                       padding={2}

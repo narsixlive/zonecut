@@ -42,9 +42,9 @@ describe("DesktopStartScreen", () => {
 
   it("starts a Video Editor project from the default mode", async () => {
     render(<DesktopStartScreen />);
-    await screen.findByText("No recent projects yet. Start a new project above.");
+    await screen.findByText("Aucun projet récent. Démarre un nouveau projet ci-dessus.");
 
-    fireEvent.click(screen.getByRole("button", { name: /Horizontal/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Paysage 16:9/ }));
 
     expect(actionMocks.startNewProject).toHaveBeenCalledWith(DESKTOP_FORMATS[1]);
     expect(useUIStore.getState().desktopPage).toBe("edit");
@@ -52,9 +52,19 @@ describe("DesktopStartScreen", () => {
 
   it("does not offer a Motion Creator project mode", async () => {
     render(<DesktopStartScreen />);
-    await screen.findByText("No recent projects yet. Start a new project above.");
+    await screen.findByText("Aucun projet récent. Démarre un nouveau projet ci-dessus.");
 
     expect(screen.queryByText("Motion Creator")).toBeNull();
     expect(screen.queryByRole("checkbox")).toBeNull();
+  });
+
+  it("renders the French format labels and a back link to ZoneScene", async () => {
+    render(<DesktopStartScreen />);
+    await screen.findByText("Aucun projet récent. Démarre un nouveau projet ci-dessus.");
+
+    expect(screen.getByText("Paysage 16:9")).toBeDefined();
+
+    const backLink = screen.getByRole("link", { name: /Retour/ });
+    expect(backLink.getAttribute("href")).toBe("/socials");
   });
 });
